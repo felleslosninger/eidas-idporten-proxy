@@ -22,6 +22,6 @@ jobs:
   call-container-scan:
     uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-container-scan.yml@main
     with:
-      image-name: maskinporten-oauth2-server
+      image-name: redis-proxy
       java-version: 21
     secrets: inherit
