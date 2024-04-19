@@ -1,0 +1,35 @@
+name: eidas
+networks:
+  eidas:
+    name: eidas
+
+services:
+#  redis:
+#    image: redis:alpine
+#    restart: always
+#    ports:
+#      - "6400:6379"
+#      - "5544:5006"
+#    networks:
+#      - eidas
+#    command: redis-server --maxmemory-policy allkeys-lru
+  eidas-proxy:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+      args:
+        GIT_PACKAGE_TOKEN: ${GIT_PACKAGE_TOKEN}
+        GIT_PACKAGE_USERNAME: ${GIT_PACKAGE_USERNAME}
+    environment:
+      spring_profiles_active: local-docker
+      OTEL_SDK_DISABLED: "true"
+    ports:
+      - "8080:8080"
+      - "5088:5006"
+    networks:
+      - eidas
+    entrypoint: "/bin/bash -c"
+    command:
+      - |
+        cd /usr/local/webapps
+        java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006 -jar application.jar
