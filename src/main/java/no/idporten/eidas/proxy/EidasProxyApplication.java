@@ -1,4 +1,4 @@
-package no.idporten.eidas.demo;
+package no.idporten.eidas.proxy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
