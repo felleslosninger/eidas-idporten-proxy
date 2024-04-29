@@ -103,15 +103,11 @@
             <groupId>eu.eidas</groupId>
             <artifactId>eidas-commons</artifactId>
             <version>2.7.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/eidas-commons-2.7.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>eu.eidas</groupId>
             <artifactId>eidas-light-commons</artifactId>
             <version>2.7.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/eidas-light-commons-2.7.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>

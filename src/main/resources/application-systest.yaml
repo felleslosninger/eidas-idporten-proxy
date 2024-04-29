@@ -12,12 +12,11 @@ spring:
     log-startup-info: true
   data:
     redis:
-      port: 6400
-      host: redis
-digdir:
-  event:
-    logging:
-      feature-enabled: false
+      password: ${REDIS_PASSWORD}
+      sentinel:
+        master: mymaster
+        nodes: eidas-redis-sentinel-headless:26379
+        password: ${REDIS_PASSWORD}
 eidas:
   oidc-integration:
     connect-timeout-millis: 5000
@@ -27,5 +26,9 @@ eidas:
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
-    client-secret: 3aee797c-3fd4-46f2-8faf-ebff1a131055
+    client-secret: ${EIDAS_CLIENT_SECRET}
     redirect-uri: http://localhost:8080/idpcallback
+digdir:
+  event:
+    logging:
+      feature-enabled: false

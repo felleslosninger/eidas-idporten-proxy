@@ -45,3 +45,14 @@ digdir:
       feature-enabled: false
       environment-name: ${spring.application.environment}
 
+eidas:
+  oidc-integration:
+    connect-timeout-millis: 5000
+    read-timeout-millis: 5000
+    jwks-cache-lifetime-minutes: 60
+    jwks-cache-refresh-minutes: 5
+    issuer: https://idporten.dev
+    client-id: eidas-proxy-client-junit
+    client-auth-method: client_secret_basic
+    client-secret: junit
+    redirect-uri: http://localhost:8080/idpcallback
