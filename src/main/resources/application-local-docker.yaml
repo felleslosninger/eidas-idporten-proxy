@@ -10,14 +10,17 @@ spring:
     environment: local-docker
   main:
     log-startup-info: true
+
   data:
     redis:
       port: 6400
       host: redis
+
 digdir:
   event:
     logging:
       feature-enabled: false
+
 eidas:
   oidc-integration:
     connect-timeout-millis: 5000
