@@ -10,12 +10,15 @@ spring:
     environment: local-docker
   main:
     log-startup-info: true
-
   data:
     redis:
       port: 6400
-      host: redis
+      host: localhost
 
+
+  devtools:
+    restart:
+      enabled: false
 digdir:
   event:
     logging:

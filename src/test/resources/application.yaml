@@ -1,0 +1,60 @@
+---
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+  error:
+    whitelabel:
+      enabled: true
+# Spring Boot Actuator
+management:
+  server:
+    port:
+  endpoints:
+    web:
+      exposure:
+        include: info,version,prometheus,health
+      base-path: /
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.application.environment}
+  endpoint:
+    health:
+      probes:
+        enabled: false
+
+spring:
+  application:
+    name: junit
+    environment: junit
+digdir:
+  audit:
+    application-name: ${spring.application.name}
+    application-environment: ${spring.application.environment}
+    log-dir:
+    filters:
+      bearer-token: false
+
+  event:
+    logging:
+      feature-enabled: false
+      environment-name: ${spring.application.environment}
+
+eidas:
+  eu-proxy:
+    redirect-uri: http://junit.no/SpecificProxyServiceResponse
+  oidc-integration:
+    connect-timeout-millis: 5000
+    read-timeout-millis: 5000
+    jwks-cache-lifetime-minutes: 60
+    jwks-cache-refresh-minutes: 5
+    issuer: https://idporten.dev
+    client-id: eidas-proxy-client-junit
+    client-auth-method: client_secret_basic
+    client-secret: junit
+    redirect-uri: http://localhost:8080/idpcallback

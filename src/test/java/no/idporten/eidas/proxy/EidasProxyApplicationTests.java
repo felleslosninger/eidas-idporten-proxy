@@ -1,4 +1,4 @@
-package no.idporten.eidas.demo;
+package no.idporten.eidas.proxy;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

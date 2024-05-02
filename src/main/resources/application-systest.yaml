@@ -10,20 +10,16 @@ spring:
     environment: local-docker
   main:
     log-startup-info: true
-
   data:
     redis:
-      port: 6400
-      host: redis
-
-digdir:
-  event:
-    logging:
-      feature-enabled: false
-
+      password: ${REDIS_PASSWORD}
+      sentinel:
+        master: mymaster
+        nodes: eidas-redis-sentinel-headless:26379
+        password: ${REDIS_PASSWORD}
 eidas:
   eu-proxy:
-    redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
+    redirect-uri: https://eu-eidas-proxy.idporten.dev/SpecificProxyServiceResponse
   oidc-integration:
     connect-timeout-millis: 5000
     read-timeout-millis: 5000
@@ -32,5 +28,9 @@ eidas:
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
-    client-secret: 3aee797c-3fd4-46f2-8faf-ebff1a131055
-    redirect-uri: http://localhost:8080/idpcallback
+    client-secret: ${EIDAS_CLIENT_SECRET}
+    redirect-uri: http://eidas-proxy.idporten.dev/idpcallback
+digdir:
+  event:
+    logging:
+      feature-enabled: false
