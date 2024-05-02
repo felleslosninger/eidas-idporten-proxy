@@ -46,6 +46,8 @@ digdir:
       environment-name: ${spring.application.environment}
 
 eidas:
+  eu-proxy:
+    redirect-uri: http://junit.no/SpecificProxyServiceResponse
   oidc-integration:
     connect-timeout-millis: 5000
     read-timeout-millis: 5000

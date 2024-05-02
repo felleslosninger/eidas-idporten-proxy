@@ -25,6 +25,8 @@ digdir:
       feature-enabled: false
 
 eidas:
+  eu-proxy:
+    redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
   oidc-integration:
     connect-timeout-millis: 5000
     read-timeout-millis: 5000

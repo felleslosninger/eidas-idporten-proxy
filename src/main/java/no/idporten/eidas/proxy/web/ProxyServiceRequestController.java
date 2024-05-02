@@ -72,7 +72,7 @@ public class ProxyServiceRequestController {
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
         URI uri = oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest);
         URI authUri = new AuthorizationRequest.Builder(uri, authenticationRequest.getClientID())
-                .endpointURI(URI.create("http://login.idporten.dev/authorize"))
+                .endpointURI(oidcIntegrationService.getIssuer())
                 .build()
                 .toURI();
         return "redirect:%s".formatted(authUri.toString());

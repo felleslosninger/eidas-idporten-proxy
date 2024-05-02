@@ -18,6 +18,8 @@ spring:
         nodes: eidas-redis-sentinel-headless:26379
         password: ${REDIS_PASSWORD}
 eidas:
+  eu-proxy:
+    redirect-uri: https://eu-eidas-proxy.idporten.dev/SpecificProxyServiceResponse
   oidc-integration:
     connect-timeout-millis: 5000
     read-timeout-millis: 5000
@@ -27,7 +29,7 @@ eidas:
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
     client-secret: ${EIDAS_CLIENT_SECRET}
-    redirect-uri: http://localhost:8080/idpcallback
+    redirect-uri: http://eidas-proxy.idporten.dev/idpcallback
 digdir:
   event:
     logging:

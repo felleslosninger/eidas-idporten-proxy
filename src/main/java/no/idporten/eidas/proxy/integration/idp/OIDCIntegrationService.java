@@ -159,4 +159,8 @@ public class OIDCIntegrationService {
             throw new OAuthException("Failed to create client assertion " + e.getMessage());
         }
     }
+
+    public URI getIssuer() {
+        return oidcIntegrationProperties.getIssuer();
+    }
 }

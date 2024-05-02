@@ -36,6 +36,7 @@ public class IDPCallback {
     private final OIDCIntegrationService oidcIntegrationService;
     private final SpecificCommunicationService specificCommunicationService;
 
+
     @GetMapping("/idpcallback")
     public String callback(HttpServletRequest request) throws Exception {
         URI authorizationResponseUri = UriComponentsBuilder.fromUriString(request.getRequestURL().toString()).query(request.getQueryString()).build().toUri();
@@ -49,7 +50,7 @@ public class IDPCallback {
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
 
-        return "redirect:http://eu-eidas-proxy:8082/SpecificProxyServiceResponse?token=" + storeBinaryLightTokenResponseBase64 + "&relayState=" + lightResponse.getRelayState();
+        return "redirect:%s?token=%s&relayState=".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64, lightResponse.getRelayState());
     }
 
     protected static LightResponse getLightResponse(IDTokenClaimsSet idTokenClaimsSet, ILightRequest lightRequest) {
