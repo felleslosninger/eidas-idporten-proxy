@@ -78,7 +78,7 @@ public class OIDCIntegrationService {
         if (!response.indicatesSuccess()) {
             log.warn("PAR request failed: " + response.toErrorResponse().getErrorObject().getHTTPStatusCode());
             log.warn("Optional error code: " + response.toErrorResponse().getErrorObject().getCode());
-            throw new OAuthException("PAR request failed: " + response.toErrorResponse().getErrorObject());
+            throw new OAuthException("PAR request failed: " + response.toErrorResponse().getErrorObject().getDescription());
         }
 
         PushedAuthorizationSuccessResponse successResponse = response.toSuccessResponse();
