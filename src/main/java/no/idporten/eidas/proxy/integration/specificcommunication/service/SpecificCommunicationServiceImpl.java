@@ -24,6 +24,7 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
 
     public ILightRequest getAndRemoveRequest(String lightTokenId, Collection<AttributeDefinition<?>> registry) {
         log.info("getAndRemoveRequest {}", lightTokenId);
+        //todo her må det parses xml
         return (ILightRequest) redisCache.get(eidasCacheProperties.getLightRequestPrefix(lightTokenId));
     }
 
