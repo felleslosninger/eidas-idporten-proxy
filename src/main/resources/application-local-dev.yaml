@@ -27,6 +27,10 @@ digdir:
 eidas:
   eu-proxy:
     redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
+  cache:
+    secret: mySecretProxyserviceResponse
+    algorithm: SHA-256
+    issuer-name: specificCommunicationDefinitionProxyserviceResponse
   oidc-integration:
     connect-timeout-millis: 5000
     read-timeout-millis: 5000
