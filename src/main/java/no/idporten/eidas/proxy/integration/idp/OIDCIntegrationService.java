@@ -16,12 +16,11 @@ import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.Nonce;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
+import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +44,7 @@ public class OIDCIntegrationService {
     private final Optional<KeyProvider> keyProvider;
     private final IDTokenValidator idTokenValidator;
     private final OIDCIntegrationProperties oidcIntegrationProperties;
-    ;
+    private final OIDCProviderMetadata oidcProviderMetadata;
     final Scope scope = new Scope("openid", "eidas:mds");
 
     private final List<ACR> acrValues = List.of(new ACR("idporten-loa-substantial"));
@@ -55,7 +54,7 @@ public class OIDCIntegrationService {
                 scope,
                 new ClientID(oidcIntegrationProperties.getClientId()),
                 oidcIntegrationProperties.getRedirectUri());
-        builder.endpointURI(URI.create(oidcIntegrationProperties.getIssuer() + "/par"))
+        builder.endpointURI(oidcProviderMetadata.getPushedAuthorizationRequestEndpointURI())
                 .acrValues(acrValues)
                 .state(new com.nimbusds.oauth2.sdk.id.State())
                 .nonce(new Nonce())
@@ -69,7 +68,7 @@ public class OIDCIntegrationService {
     public URI pushedAuthorizationRequest(AuthenticationRequest authenticationRequest) throws IOException, ParseException {
         final ClientAuthentication clientAuth = new ClientSecretBasic(new ClientID(oidcIntegrationProperties.getClientId()), new Secret(oidcIntegrationProperties.getClientSecret()));
         HTTPRequest httpRequest = new PushedAuthorizationRequest(
-                URI.create(oidcIntegrationProperties.getIssuer() + "/par"), clientAuth, authenticationRequest)
+                oidcProviderMetadata.getPushedAuthorizationRequestEndpointURI(), clientAuth, authenticationRequest)
                 .toHTTPRequest();
         HTTPResponse httpResponse = httpRequest.send();
 
@@ -79,7 +78,7 @@ public class OIDCIntegrationService {
         if (!response.indicatesSuccess()) {
             log.warn("PAR request failed: " + response.toErrorResponse().getErrorObject().getHTTPStatusCode());
             log.warn("Optional error code: " + response.toErrorResponse().getErrorObject().getCode());
-            throw new OAuthException("PAR request failed: " + response.toErrorResponse().getErrorObject());
+            throw new OAuthException("PAR request failed: " + response.toErrorResponse().getErrorObject().getDescription());
         }
 
         PushedAuthorizationSuccessResponse successResponse = response.toSuccessResponse();
@@ -102,25 +101,32 @@ public class OIDCIntegrationService {
         return successResponse.getAuthorizationCode();
     }
 
-    public IDTokenClaimsSet getIDToken(AuthorizationCode code, CodeVerifier codeVerifier, Nonce nonce) throws URISyntaxException, ParseException, IOException, BadJOSEException, JOSEException {
-        URI tokenEndpoint = new URI(oidcIntegrationProperties.getIssuer() + "/token");
+    public UserInfo getUserInfo(AuthorizationCode code, CodeVerifier codeVerifier, Nonce nonce) throws URISyntaxException, ParseException, IOException, BadJOSEException, JOSEException {
 
         URI callback = oidcIntegrationProperties.getRedirectUri();
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback, codeVerifier);
 
         final ClientAuthentication clientAuth = new ClientSecretBasic(new ClientID(oidcIntegrationProperties.getClientId()), new Secret(oidcIntegrationProperties.getClientSecret()));
 
-        TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
+        TokenRequest request = new TokenRequest(oidcProviderMetadata.getTokenEndpointURI(), clientAuth, codeGrant);
 
         TokenResponse response = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
 
         if (!response.indicatesSuccess()) {
-            // We got an error response...
             TokenErrorResponse errorResponse = response.toErrorResponse();
             throw new OAuthException("Token request failed: " + errorResponse.getErrorObject());
         }
         OIDCTokenResponse successResponse = (OIDCTokenResponse) response.toSuccessResponse();
-        return idTokenValidator.validate(successResponse.getOIDCTokens().getIDToken(), nonce);
+        IDTokenClaimsSet validate = idTokenValidator.validate(successResponse.getOIDCTokens().getIDToken(), nonce);
+
+        UserInfoRequest userInfoRequest = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), successResponse.getOIDCTokens().getAccessToken());
+        UserInfoResponse userInfoResponse = UserInfoResponse.parse(userInfoRequest.toHTTPRequest().send());
+
+        if (!userInfoResponse.indicatesSuccess()) {
+            UserInfoErrorResponse errorResponse = userInfoResponse.toErrorResponse();
+            throw new OAuthException("UserInfo request failed: " + errorResponse.getErrorObject());
+        }
+        return userInfoResponse.toSuccessResponse().getUserInfo();
     }
 
     protected ClientAuthentication clientAuthentication(OIDCIntegrationProperties oidcIntegrationProperties) {
@@ -160,7 +166,12 @@ public class OIDCIntegrationService {
         }
     }
 
-    public URI getIssuer() {
-        return oidcIntegrationProperties.getIssuer();
+    public URI getAuthorizationEndpoint() {
+        return oidcProviderMetadata.getAuthorizationEndpointURI();
     }
+
+    public String getIssuer() {
+        return oidcProviderMetadata.getIssuer().toString();
+    }
+
 }

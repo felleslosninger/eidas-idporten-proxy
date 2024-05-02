@@ -27,6 +27,10 @@ digdir:
 eidas:
   eu-proxy:
     redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
+  cache:
+    secret: mySecretProxyserviceResponse
+    algorithm: SHA-256
+    issuer-name: specificCommunicationDefinitionProxyserviceResponse
   oidc-integration:
     connect-timeout-millis: 5000
     read-timeout-millis: 5000
@@ -36,4 +40,4 @@ eidas:
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
     client-secret: 3aee797c-3fd4-46f2-8faf-ebff1a131055
-    redirect-uri: http://localhost:8080/idpcallback
+    redirect-uri: http://localhost:8077/idpcallback

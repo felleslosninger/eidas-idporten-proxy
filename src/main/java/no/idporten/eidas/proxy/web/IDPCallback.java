@@ -2,7 +2,7 @@ package no.idporten.eidas.proxy.web;
 
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
 import eu.eidas.auth.commons.attribute.AttributeValue;
 import eu.eidas.auth.commons.attribute.ImmutableAttributeMap;
@@ -43,9 +43,9 @@ public class IDPCallback {
         AuthorizationResponse authorizationResponse = AuthorizationResponse.parse(authorizationResponseUri);
         CorrelatedRequestHolder cachedRequest = specificProxyService.getCachedRequest(authorizationResponse.getState());
         AuthorizationCode code = oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest);
-        IDTokenClaimsSet idTokenClaimsSet = oidcIntegrationService.getIDToken(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
+        UserInfo userInfo = oidcIntegrationService.getUserInfo(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
 
-        LightResponse lightResponse = getLightResponse(idTokenClaimsSet, cachedRequest.getiLightRequest());
+        LightResponse lightResponse = getLightResponse(userInfo, cachedRequest.getiLightRequest());
 
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
@@ -53,12 +53,13 @@ public class IDPCallback {
         return "redirect:%s?token=%s&relayState=".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64, lightResponse.getRelayState());
     }
 
-    protected static LightResponse getLightResponse(IDTokenClaimsSet idTokenClaimsSet, ILightRequest lightRequest) {
+    protected LightResponse getLightResponse(UserInfo userInfo, ILightRequest lightRequest) {
         // Assuming 'FAMILY_NAME' is the AttributeDefinition for the family name
         // Example of fetching a predefined AttributeDefinition for Family Name
+        //todo add all claims friendly name, birthdate and over 18 claim
         AttributeDefinition<String> familyNameDef = new AttributeDefinition.Builder<String>()
                 .nameUri(URI.create("http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName"))
-                .friendlyName("FamilyName")
+                .friendlyName(userInfo.getGivenName())
                 .personType(PersonType.NATURAL_PERSON)
                 .required(true)
                 .transliterationMandatory(false)
@@ -68,15 +69,15 @@ public class IDPCallback {
                 .build();
 
         // Extract the family name value from the ID token claims set
-        String familyNameValue = "smith";//idTokenClaimsSet.getStringClaim("family_name"); // Adjust the claim key as necessary
+        String familyNameValue = userInfo.getFamilyName();
 
         // Create an AttributeValue for the family name
         AttributeValue<String> familyNameAttr = new StringAttributeValue(familyNameValue);
 
         return LightResponse.builder()
                 .id(UUID.randomUUID().toString())
-                .issuer(idTokenClaimsSet.getIssuer().getValue())
-                .subject(idTokenClaimsSet.getSubject().getValue())
+                .issuer(oidcIntegrationService.getIssuer())
+                .subject(userInfo.getSubject().getValue())
                 .attributes(ImmutableAttributeMap.builder()
                         .put(familyNameDef, familyNameAttr)
                         .build())

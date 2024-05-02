@@ -19,10 +19,11 @@ public class EidasCacheProperties {
     @NotEmpty
     private String name = "eidas-proxy";
 
-    private String secret = "secret";
+    private String requestSecret = "secret";
+    private String responseSecret = "secret";
     private String algorithm = "SHA256";
-    private String issuerName = "eidas-proxy";
-
+    private String responseIssuerName = "specificCommunicationDefinitionProxyserviceRequest";
+    private String requestIssuerName = "specificCommunicationDefinitionProxyserviceResponse";
     public String getLightRequestPrefix(String id) {
         return PREFIX_TEMPLATE.formatted(name, LIGHT_REQUEST, id);
     }

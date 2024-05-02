@@ -22,19 +22,6 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
     private final RedisCache redisCache;
     private final EidasCacheProperties eidasCacheProperties;
 
-    @Override
-    public BinaryLightToken putRequest(ILightRequest iLightRequest) throws SpecificCommunicationException {
-
-        BinaryLightToken binaryLightToken = BinaryLightTokenHelper
-                .createBinaryLightToken(eidasCacheProperties.getIssuerName(),
-                        eidasCacheProperties.getSecret(),
-                        eidasCacheProperties.getAlgorithm());
-
-        redisCache.set(eidasCacheProperties.getLightRequestPrefix(binaryLightToken.getToken().getId()), iLightRequest, Duration.ofSeconds(120));
-        return binaryLightToken;
-
-    }
-
     public ILightRequest getAndRemoveRequest(String lightTokenId, Collection<AttributeDefinition<?>> registry) {
         log.info("getAndRemoveRequest {}", lightTokenId);
         return (ILightRequest) redisCache.get(eidasCacheProperties.getLightRequestPrefix(lightTokenId));
@@ -43,8 +30,8 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
     @Override
     public BinaryLightToken putResponse(ILightResponse iLightResponse) throws SpecificCommunicationException {
         BinaryLightToken binaryLightToken = BinaryLightTokenHelper
-                .createBinaryLightToken(eidasCacheProperties.getIssuerName(),
-                        eidasCacheProperties.getSecret(),
+                .createBinaryLightToken(eidasCacheProperties.getResponseIssuerName(),
+                        eidasCacheProperties.getResponseSecret(),
                         eidasCacheProperties.getAlgorithm());
         log.info("putResponse {}", binaryLightToken.getToken().getId());
         redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), iLightResponse, Duration.ofSeconds(120));
@@ -57,5 +44,19 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
         return (ILightResponse) redisCache.get(eidasCacheProperties.getLightResponsePrefix(lightTokenId));
     }
 
+    /**
+     * Only used by fakeit-controller
+     */
+    @Override
+    public BinaryLightToken putRequest(ILightRequest iLightRequest) throws SpecificCommunicationException {
 
+        BinaryLightToken binaryLightToken = BinaryLightTokenHelper
+                .createBinaryLightToken(eidasCacheProperties.getRequestIssuerName(),
+                        eidasCacheProperties.getRequestSecret(),
+                        eidasCacheProperties.getAlgorithm());
+
+        redisCache.set(eidasCacheProperties.getLightRequestPrefix(binaryLightToken.getToken().getId()), iLightRequest, Duration.ofSeconds(120));
+        return binaryLightToken;
+
+    }
 }

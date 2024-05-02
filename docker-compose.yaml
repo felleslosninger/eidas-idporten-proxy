@@ -24,7 +24,7 @@ services:
       spring_profiles_active: local-docker
       OTEL_SDK_DISABLED: "true"
     ports:
-      - "8080:8080"
+      - "8077:8080"
       - "5088:5006"
     networks:
       - eidas
