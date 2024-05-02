@@ -1,20 +1,19 @@
 package no.idporten.eidas.proxy.web;
 
-import com.nimbusds.oauth2.sdk.id.Audience;
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.oauth2.sdk.id.Subject;
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.impl.LightRequest;
 import eu.eidas.auth.commons.light.impl.LightResponse;
+import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
+import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
+import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class IDPCallbackTest {
 
@@ -22,12 +21,12 @@ class IDPCallbackTest {
     @Test
     @DisplayName("when buildLightResponse then return LightResponse without validation errors")
     void buildLightResponse() {
-        IDTokenClaimsSet idTokenClaimsSet = new IDTokenClaimsSet(new Issuer("http://myproxy"),
-                new Subject("bob"),
-                List.of(new Audience("junit")),
-                Date.from(Instant.now()),
-                Date.from(Instant.now()));
-        idTokenClaimsSet.setClaim("family_name", "Smith");
+        UserInfo userInfo = new UserInfo(new Subject("123456789"));
+
+        // Populate standard claims
+        userInfo.setGivenName("John");
+        userInfo.setFamilyName("Smith");
+        userInfo.setBirthdate("1990-01-01");
 
         ILightRequest lightRequest = LightRequest.builder()
                 .id("myid")
@@ -37,8 +36,10 @@ class IDPCallbackTest {
                 .citizenCountryCode("NO")
                 .build();
 
-
-        LightResponse lightResponse = IDPCallback.getLightResponse(idTokenClaimsSet, lightRequest);
+        OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
+        when(mockOidcIntegrationService.getIssuer()).thenReturn("http://myjunit");
+        IDPCallback idpCallback = new IDPCallback(mock(SpecificProxyService.class), mockOidcIntegrationService, mock(SpecificCommunicationService.class));
+        LightResponse lightResponse = idpCallback.getLightResponse(userInfo, lightRequest);
         assertNotNull(lightResponse);
     }
 }
