@@ -25,7 +25,10 @@ eidas:
   eu-proxy:
     redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
   cache:
-    secret: mySecretProxyserviceResponse
+    response-secret: mySecretProxyserviceResponse
+    response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    request-secret: mySecretProxyserviceRequest
+    request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
     algorithm: SHA-256
     issuer-name: specificCommunicationDefinitionProxyserviceResponse
   oidc-integration:

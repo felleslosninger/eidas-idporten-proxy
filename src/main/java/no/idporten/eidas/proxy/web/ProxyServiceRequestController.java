@@ -82,7 +82,7 @@ public class ProxyServiceRequestController {
     private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException {
         final String tokenBase64 = BinaryLightTokenHelper.getBinaryToken(httpServletRequest, EidasParameterKeys.TOKEN.toString());
         try {
-            String lightTokenId = BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getSecret(), eidasCacheProperties.getAlgorithm());
+            String lightTokenId = BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getRequestSecret(), eidasCacheProperties.getAlgorithm());
             return specificCommunicationService.getAndRemoveRequest(lightTokenId, registry);
         } catch (SpecificCommunicationException e) {
             log.error("Error unmarshalling MS Specific Request" + e);
