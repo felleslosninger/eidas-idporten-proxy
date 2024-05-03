@@ -44,7 +44,7 @@ public class IDPCallback {
         CorrelatedRequestHolder cachedRequest = specificProxyService.getCachedRequest(authorizationResponse.getState());
         AuthorizationCode code = oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest);
         UserInfo userInfo = oidcIntegrationService.getUserInfo(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
-
+        log.info("Got userinfo {}", userInfo.toJSONObject().toJSONString());
         LightResponse lightResponse = getLightResponse(userInfo, cachedRequest.getiLightRequest());
 
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);

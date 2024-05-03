@@ -4,11 +4,13 @@ import eu.eidas.auth.commons.attribute.AttributeDefinition;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
+import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
+import no.idporten.eidas.proxy.lightprotocol.LightRequestParser;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -24,8 +26,17 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
 
     public ILightRequest getAndRemoveRequest(String lightTokenId, Collection<AttributeDefinition<?>> registry) {
         log.info("getAndRemoveRequest {}", lightTokenId);
-        //todo her må det parses xml
-        return (ILightRequest) redisCache.get(eidasCacheProperties.getLightRequestPrefix(lightTokenId));
+
+        String xmlMessage = (String) redisCache.get(eidasCacheProperties.getLightRequestPrefix(lightTokenId));
+        log.info("Got message from cache {}", xmlMessage);
+        try {
+            return LightRequestParser.parseXml(xmlMessage);
+        } catch (JAXBException e) {
+            log.error("Failed to parse message. We ignore it for now and carry on {}", e.getMessage());
+        }
+        log.info("Can't parse message yet. We ignore it for now and carry on");
+        return null;
+
     }
 
     @Override

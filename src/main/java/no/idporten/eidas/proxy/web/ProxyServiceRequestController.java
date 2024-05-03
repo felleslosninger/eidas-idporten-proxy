@@ -34,6 +34,8 @@ import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightToke
 import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
+import no.idporten.eidas.proxy.lightprotocol.IncomingLightRequestValidator;
+import no.idporten.eidas.proxy.lightprotocol.LightRequest;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,7 +69,9 @@ public class ProxyServiceRequestController {
     public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException {
 
         final ILightRequest lightRequest = getIncomingiLightRequest(httpServletRequest, null);
-
+        if (IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
+            log.error("Incoming Light Request is invalid. Should not proceed, but we proceed for testing purposes.");
+        }
         //skip consent flow for now
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
         URI uri = oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest);
