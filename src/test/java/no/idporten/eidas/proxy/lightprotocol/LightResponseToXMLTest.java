@@ -2,7 +2,6 @@ package no.idporten.eidas.proxy.lightprotocol;
 
 import jakarta.xml.bind.JAXBException;
 import no.idporten.eidas.proxy.lightprotocol.messages.Attribute;
-import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.Status;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ class LightResponseToXMLTest {
     void testSerializeToXML() {
         LightResponse lightResponse = LightResponse.builder()
                 .inResponseToId("123")
-                .levelOfAssurance(new LevelOfAssurance("type", "value"))
+                .levelOfAssurance("low")
                 .subjectNameIdFormat("format")
                 .issuer("issuer")
                 .status(new Status("200", "ok", null, false))

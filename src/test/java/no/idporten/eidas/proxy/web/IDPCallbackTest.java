@@ -40,7 +40,7 @@ class IDPCallbackTest {
         OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
         when(mockOidcIntegrationService.getIssuer()).thenReturn("http://myjunit");
         IDPCallback idpCallback = new IDPCallback(mock(SpecificProxyService.class), mockOidcIntegrationService, mock(SpecificCommunicationService.class));
-        LightResponse lightResponse = idpCallback.getLightResponse(userInfo, lightRequest);
+        LightResponse lightResponse = idpCallback.getLightResponse(userInfo, lightRequest, "high");
         assertNotNull(lightResponse);
     }
 }

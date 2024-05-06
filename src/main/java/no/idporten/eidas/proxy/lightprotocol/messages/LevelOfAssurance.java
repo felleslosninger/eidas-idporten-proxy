@@ -13,12 +13,12 @@ import java.io.Serial;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@XmlType
+@XmlType(name = "levelOfAssurance")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class LevelOfAssurance implements ILevelOfAssurance {
     @Serial
     private static final long serialVersionUID = 1L;
-    private String type;
+    private String type = "notified";
     private String value;
 
 }

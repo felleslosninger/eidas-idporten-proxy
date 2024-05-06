@@ -1,7 +1,6 @@
 package no.idporten.eidas.proxy.lightprotocol.messages;
 
 import eu.eidas.auth.commons.attribute.ImmutableAttributeMap;
-import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.light.IResponseStatus;
 import jakarta.xml.bind.annotation.*;
@@ -30,7 +29,7 @@ public class LightResponse implements ILightResponse {
     @XmlElement
     private String issuer;
     @XmlElement
-    private LevelOfAssurance levelOfAssurance;
+    private String levelOfAssurance;
     @XmlElement
     private String relayState;
 
@@ -74,8 +73,8 @@ public class LightResponse implements ILightResponse {
         return status;
     }
 
-    public List<ILevelOfAssurance> getLevelsOfAssurance() {
-        return List.of(levelOfAssurance);
+    public List<LevelOfAssurance> getLevelsOfAssurance() {
+        return List.of(new LevelOfAssurance("notified", levelOfAssurance));
     }
 
     @Nonnull
@@ -84,7 +83,7 @@ public class LightResponse implements ILightResponse {
     }
 
     public String getLevelOfAssurance() {
-        return levelOfAssurance.getValue();
+        return levelOfAssurance;
     }
 
     @Nonnull
