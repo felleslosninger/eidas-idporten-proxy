@@ -21,6 +21,7 @@ import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.cert.Certificate;
 import java.time.Clock;
 import java.util.*;
@@ -85,6 +85,7 @@ public class OIDCIntegrationService {
         return successResponse.getRequestURI();
     }
 
+
     public AuthorizationCode getAuthorizationCode(AuthorizationResponse authorizationResponse, CorrelatedRequestHolder cachedRequest) throws ParseException {
 
         if (cachedRequest == null) {
@@ -101,8 +102,7 @@ public class OIDCIntegrationService {
         return successResponse.getAuthorizationCode();
     }
 
-    public UserInfo getUserInfo(AuthorizationCode code, CodeVerifier codeVerifier, Nonce nonce) throws URISyntaxException, ParseException, IOException, BadJOSEException, JOSEException {
-
+    public OIDCTokens getToken(AuthorizationCode code, CodeVerifier codeVerifier, Nonce nonce) throws IOException, ParseException, BadJOSEException, JOSEException {
         URI callback = oidcIntegrationProperties.getRedirectUri();
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback, codeVerifier);
 
@@ -118,8 +118,13 @@ public class OIDCIntegrationService {
         }
         OIDCTokenResponse successResponse = (OIDCTokenResponse) response.toSuccessResponse();
         IDTokenClaimsSet validate = idTokenValidator.validate(successResponse.getOIDCTokens().getIDToken(), nonce);
+        return successResponse.getOIDCTokens();
+    }
 
-        UserInfoRequest userInfoRequest = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), successResponse.getOIDCTokens().getAccessToken());
+    public UserInfo getUserInfo(OIDCTokens oidcTokens) throws ParseException, IOException {
+
+
+        UserInfoRequest userInfoRequest = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), oidcTokens.getAccessToken());
         UserInfoResponse userInfoResponse = UserInfoResponse.parse(userInfoRequest.toHTTPRequest().send());
 
         if (!userInfoResponse.indicatesSuccess()) {
