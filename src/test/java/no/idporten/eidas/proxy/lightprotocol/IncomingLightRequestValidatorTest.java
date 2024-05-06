@@ -1,5 +1,8 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
+import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
+import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
+import no.idporten.eidas.proxy.lightprotocol.messages.RequestedAttribute;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -33,13 +36,6 @@ class IncomingLightRequestValidatorTest {
     void validateRequest_WhenIssuerIsEmpty_ShouldReturnFalse() {
         LightRequest request = createValidLightRequest();
         request.setIssuer(""); // Empty issuer
-        assertFalse(IncomingLightRequestValidator.validateRequest(request));
-    }
-
-    @Test
-    void validateRequest_WhenLevelOfAssuranceIsLow_ShouldReturnFalse() {
-        LightRequest request = createValidLightRequest();
-        request.setLevelOfAssurance(new LevelOfAssurance("notified", "http://eidas.europa.eu/LoA/high")); // Not low
         assertFalse(IncomingLightRequestValidator.validateRequest(request));
     }
 
@@ -85,16 +81,16 @@ class IncomingLightRequestValidatorTest {
     }
 
     private LightRequest createValidLightRequest() {
-        return new LightRequest(
-                "NO",
-                "12345",
-                "http://example.com",
-                new LevelOfAssurance("notified", "http://eidas.europa.eu/LoA/low"),
-                "Provider",
-                "public",
-                "NO",
-                "abcd-efgh-ijkl",
-                List.of(new Attribute("http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName"))
-        );
+        return LightRequest.builder()
+                .citizenCountryCode("NO")
+                .id("12345")
+                .spCountryCode("CA")
+                .levelOfAssurance(new LevelOfAssurance("notified", "http://eidas.europa.eu/LoA/low"))
+                .providerName("DEMO-SP-CA")
+                .relayState("abcd-efgh-ijkl")
+                .issuer("http://example.com")
+                .spType("public")
+                .requestedAttributes(List.of(new RequestedAttribute(null, "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName")))
+                .build();
     }
 }

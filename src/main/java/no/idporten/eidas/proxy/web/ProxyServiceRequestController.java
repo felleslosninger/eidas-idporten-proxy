@@ -35,7 +35,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCac
 import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.IncomingLightRequestValidator;
-import no.idporten.eidas.proxy.lightprotocol.LightRequest;
+import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

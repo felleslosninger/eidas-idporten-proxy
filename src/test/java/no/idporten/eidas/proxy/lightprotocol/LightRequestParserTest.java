@@ -1,6 +1,7 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
 import jakarta.xml.bind.JAXBException;
+import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Fail.fail;

@@ -1,5 +1,6 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
+import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -20,9 +21,7 @@ public class IncomingLightRequestValidator {
         if (lightRequest.getIssuer() == null || lightRequest.getIssuer().isEmpty()) {
             return false;
         }
-        if (!"http://eidas.europa.eu/LoA/low".equals(lightRequest.getLevelOfAssurance())) {
-            return false;
-        }
+
         if (lightRequest.getProviderName() == null || lightRequest.getProviderName().isEmpty()) {
             return false;
         }

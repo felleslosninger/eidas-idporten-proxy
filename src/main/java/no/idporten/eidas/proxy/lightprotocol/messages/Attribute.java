@@ -1,4 +1,4 @@
-package no.idporten.eidas.proxy.lightprotocol;
+package no.idporten.eidas.proxy.lightprotocol.messages;
 
 
 import jakarta.xml.bind.annotation.XmlAccessType;
@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,6 +19,8 @@ import java.io.Serializable;
 public class Attribute implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    @XmlElement(name = "definition", namespace = "http://cef.eidas.eu/LightRequest")
+    @XmlElement(name = "definition")
     private String definition;
+    @XmlElement(name = "value")
+    private List<String> value;
 }
