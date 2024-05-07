@@ -66,11 +66,11 @@ public class ProxyServiceRequestController {
     private final OIDCIntegrationService oidcIntegrationService;
 
     @RequestMapping(path = "/ProxyServiceRequest", method = {RequestMethod.GET, RequestMethod.POST})
-    public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException {
+    public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException, SpecificCommunicationException {
 
         final ILightRequest lightRequest = getIncomingiLightRequest(httpServletRequest, null);
-        if (IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
-            log.error("Incoming Light Request is invalid. Should not proceed, but we proceed for testing purposes.");
+        if (!IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
+            throw new SpecificCommunicationException("Incoming Light Request is invalid. Rejecting request.");
         }
         //skip consent flow for now
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
@@ -82,22 +82,18 @@ public class ProxyServiceRequestController {
         return "redirect:%s".formatted(authUri.toString());
     }
 
-
-    private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException {
-        final String tokenBase64 = BinaryLightTokenHelper.getBinaryToken(httpServletRequest, EidasParameterKeys.TOKEN.toString());
-        try {
-            String lightTokenId = BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getRequestSecret(), eidasCacheProperties.getAlgorithm());
-            return specificCommunicationService.getAndRemoveRequest(lightTokenId, registry);
-        } catch (SpecificCommunicationException e) {
-            log.error("Error unmarshalling MS Specific Request" + e);
-            throw new ServletException(e);
-        }
+    private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException, SpecificCommunicationException {
+        final String lightTokenId = getLightTokenId(httpServletRequest);
+        return specificCommunicationService.getAndRemoveRequest(lightTokenId, registry);
     }
 
+    protected String getLightTokenId(HttpServletRequest httpServletRequest) throws SpecificCommunicationException {
+        String tokenBase64 = BinaryLightTokenHelper.getBinaryToken(httpServletRequest, EidasParameterKeys.TOKEN.toString());
+        return BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getRequestSecret(), eidasCacheProperties.getAlgorithm());
+    }
 
     private AuthenticationRequest createSpecificRequest(ILightRequest originalIlightRequest) {
         return specificProxyService.translateNodeRequest(originalIlightRequest);
     }
-
 
 }

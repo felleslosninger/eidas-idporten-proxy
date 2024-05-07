@@ -18,7 +18,6 @@ import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
@@ -45,8 +44,10 @@ public class OIDCIntegrationService {
     private final IDTokenValidator idTokenValidator;
     private final OIDCIntegrationProperties oidcIntegrationProperties;
     private final OIDCProviderMetadata oidcProviderMetadata;
+    //todo gjør konfigurerbart https://digdir.atlassian.net/browse/ID-4231
     final Scope scope = new Scope("openid", "eidas:mds");
 
+    //todo oversett fra innkommende request https://digdir.atlassian.net/browse/ID-4232
     private final List<ACR> acrValues = List.of(new ACR("idporten-loa-substantial"));
 
     public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier) {
@@ -72,7 +73,6 @@ public class OIDCIntegrationService {
                 .toHTTPRequest();
         HTTPResponse httpResponse = httpRequest.send();
 
-
         PushedAuthorizationResponse response = PushedAuthorizationResponse.parse(httpResponse);
 
         if (!response.indicatesSuccess()) {
@@ -93,9 +93,12 @@ public class OIDCIntegrationService {
             throw new OAuthException("No request found for state " + authorizationResponse.getState());
         }
         if (!authorizationResponse.indicatesSuccess()) {
-            log.error("Authorization response indicates failure");
-            AuthorizationErrorResponse errorResponse = AuthorizationErrorResponse.parse(authorizationResponse.toErrorResponse().toURI());
-            throw new OAuthException("Authorization response indicates failure %s".formatted(errorResponse.getErrorObject().getDescription()));
+            String errorDescription = "not returned";
+            if (authorizationResponse.toErrorResponse() != null) {
+                AuthorizationErrorResponse errorResponse = AuthorizationErrorResponse.parse(authorizationResponse.toErrorResponse().toURI());
+                errorDescription = errorResponse.getErrorObject().getDescription();
+            }
+            throw new OAuthException("Authorization response indicates failure %s".formatted(errorDescription));
         }
 
         AuthorizationSuccessResponse successResponse = authorizationResponse.toSuccessResponse();
@@ -117,7 +120,7 @@ public class OIDCIntegrationService {
             throw new OAuthException("Token request failed: " + errorResponse.getErrorObject());
         }
         OIDCTokenResponse successResponse = (OIDCTokenResponse) response.toSuccessResponse();
-        IDTokenClaimsSet validate = idTokenValidator.validate(successResponse.getOIDCTokens().getIDToken(), nonce);
+        idTokenValidator.validate(successResponse.getOIDCTokens().getIDToken(), nonce);
         return successResponse.getOIDCTokens();
     }
 

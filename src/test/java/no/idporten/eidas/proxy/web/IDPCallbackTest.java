@@ -1,46 +1,80 @@
 package no.idporten.eidas.proxy.web;
 
-import com.nimbusds.oauth2.sdk.id.Subject;
+import com.nimbusds.jwt.JWT;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationResponse;
+import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import eu.eidas.auth.commons.light.ILightRequest;
-import eu.eidas.auth.commons.light.impl.LightRequest;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
+import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
+import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
+import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
+@WebMvcTest(IDPCallback.class)
 class IDPCallbackTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private SpecificProxyService specificProxyService;
+
+    @MockBean
+    private OIDCIntegrationService oidcIntegrationService;
+
+    @MockBean
+    private SpecificCommunicationService specificCommunicationService;
 
     @Test
-    @DisplayName("when buildLightResponse then return LightResponse without validation errors")
-    void buildLightResponse() {
-        UserInfo userInfo = new UserInfo(new Subject("123456789"));
+    @DisplayName("when receiving a valid callback that matches an original request, the callback should redirect successfully")
+    void callback_shouldRedirectSuccessfully() throws Exception {
+        // Mocking necessary data
+        AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
+        State state = new State("123q");
+        when(authorizationResponse.getState()).thenReturn(state);
+        CorrelatedRequestHolder cachedRequest = new CorrelatedRequestHolder(mock(ILightRequest.class), mock(OIDCRequestStateParams.class));
+        AuthorizationCode authorizationCode = new AuthorizationCode("authorization_code");
+        JWT mockJwt = mock(JWT.class);
+        AccessToken mockAccessToken = mock(AccessToken.class);
+        RefreshToken mockRefreshToken = mock(RefreshToken.class);
+        when(mockJwt.getJWTClaimsSet()).thenReturn(null);
+        OIDCTokens oidcTokens = new OIDCTokens(mockJwt, mockAccessToken, mockRefreshToken);
+        when(mockAccessToken.getValue()).thenReturn("access_token");
 
-        // Populate standard claims
-        userInfo.setGivenName("John");
-        userInfo.setFamilyName("Smith");
-        userInfo.setClaim("pid", "123456789");
-        userInfo.setClaim("birth_date", "1990-01-01");
+        when(specificProxyService.getCachedRequest(state)).thenReturn(cachedRequest);
+        when(oidcIntegrationService.getAuthorizationCode(any(AuthorizationResponse.class), eq(cachedRequest))).thenReturn(authorizationCode);
+        when(oidcIntegrationService.getToken(any(), any(), any())).thenReturn(oidcTokens);
+        UserInfo userInfo = mock(UserInfo.class);
+        LightResponse lightResponse = mock(LightResponse.class);
+        when(lightResponse.getRelayState()).thenReturn("abc");
+        when(oidcIntegrationService.getUserInfo(any())).thenReturn(userInfo);
+        when(specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), LevelOfAssurance.EIDAS_LOA_LOW)).thenReturn(lightResponse);
+        when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
+        when(specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse)).thenReturn("hello");
 
-        ILightRequest lightRequest = LightRequest.builder()
-                .id("myid")
-                .issuer("http://euproxy")
-                .levelOfAssurance("weirdprefix:eidas-loa-high")
-                .relayState("myrelaystate")
-                .citizenCountryCode("NO")
-                .build();
+        mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
+                .andExpect(redirectedUrl("http://junit?token=hello&relayState=abc"));
 
-        OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
-        when(mockOidcIntegrationService.getIssuer()).thenReturn("http://myjunit");
-        IDPCallback idpCallback = new IDPCallback(mock(SpecificProxyService.class), mockOidcIntegrationService, mock(SpecificCommunicationService.class));
-        LightResponse lightResponse = idpCallback.getLightResponse(userInfo, lightRequest, "high");
-        assertNotNull(lightResponse);
+
+        verify(specificCommunicationService).putResponse(lightResponse);
     }
 }
