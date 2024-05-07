@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
- * Exception handling for ID-porten web.
+ * Exception handling for eidas-idporten-proxy.
  */
 @ControllerAdvice
 @Slf4j

@@ -23,11 +23,24 @@ import static org.mockito.Mockito.when;
 @EnableConfigurationProperties(OIDCIntegrationProperties.class)
 class OIDCIntegrationConfigurationTest {
 
+    @Bean
+    OIDCProviderMetadata oidcProviderMetadata() {
+        return mock(OIDCProviderMetadata.class);
+    }
+
+    @Bean
+    RemoteJWKSet remoteJWKSet() {
+        return mock(RemoteJWKSet.class);
+    }
+
+    @Bean
+    IDTokenValidator idTokenValidator() {
+        return mock(IDTokenValidator.class);
+    }
     @Test
     @DisplayName("Test OIDCProviderMetadata bean creation")
     void testOIDCProviderMetadataBeanCreation() throws Exception {
         final String issuerUri = "https://idporten.dev";
-        // Mocking necessary dependencies
         OIDCIntegrationProperties properties = new OIDCIntegrationProperties();
         properties.setIssuer(new URI(issuerUri));
         properties.setConnectTimeOutMillis(5000);
@@ -44,7 +57,6 @@ class OIDCIntegrationConfigurationTest {
     @Test
     @DisplayName("Test RemoteJWKSet bean creation")
     void testRemoteJWKSetBeanCreation() throws Exception {
-        // Mocking necessary dependencies
         OIDCIntegrationProperties properties = new OIDCIntegrationProperties();
         OIDCProviderMetadata oidcProviderMetadata = mock(OIDCProviderMetadata.class);
         when(oidcProviderMetadata.getJWKSetURI()).thenReturn(new URI("https://example.com/jwks"));
@@ -59,7 +71,6 @@ class OIDCIntegrationConfigurationTest {
     @Test
     @DisplayName("Test IDTokenValidator bean creation")
     void testIDTokenValidatorBeanCreation() {
-        // Mocking necessary dependencies
         OIDCIntegrationProperties properties = new OIDCIntegrationProperties();
         properties.setIssuer(URI.create("https://idporten.dev"));
         properties.setClientId("client-id");
@@ -74,18 +85,5 @@ class OIDCIntegrationConfigurationTest {
         assertNotNull(idTokenValidator);
     }
 
-    @Bean
-    OIDCProviderMetadata oidcProviderMetadata() {
-        return mock(OIDCProviderMetadata.class);
-    }
 
-    @Bean
-    RemoteJWKSet remoteJWKSet() {
-        return mock(RemoteJWKSet.class);
-    }
-
-    @Bean
-    IDTokenValidator idTokenValidator() {
-        return mock(IDTokenValidator.class);
-    }
 }
