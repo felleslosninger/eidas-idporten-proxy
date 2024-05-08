@@ -23,7 +23,7 @@
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <digdir-log-event.version>1.2.2</digdir-log-event.version>
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
-        <nimbus.oauth2-oidc-sdk.version>11.9.1</nimbus.oauth2-oidc-sdk.version>
+        <nimbus.oauth2-oidc-sdk.version>11.10.1</nimbus.oauth2-oidc-sdk.version>
         <joda-time.version>2.12.7</joda-time.version>
 
     </properties>
