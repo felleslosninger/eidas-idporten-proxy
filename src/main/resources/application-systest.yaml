@@ -18,6 +18,13 @@ spring:
         nodes: eidas-redis-sentinel-headless:26379
         password: ${REDIS_PASSWORD}
 eidas:
+  cache:
+    response-secret: ${LIGHT_TOKEN_PROXYSERVICE_RESPONSE_SECRET}
+    response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    request-secret: ${LIGHT_TOKEN_PROXYSERVICE_REQUEST_SECRET}
+    request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
+    algorithm: SHA-256
+    issuer-name: specificCommunicationDefinitionProxyserviceResponse
   eu-proxy:
     redirect-uri: https://eu-eidas-proxy.idporten.dev/SpecificProxyServiceResponse
   oidc-integration:

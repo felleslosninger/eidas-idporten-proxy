@@ -43,7 +43,7 @@ public class IDPCallback {
         OIDCTokens tokens = oidcIntegrationService.getToken(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
 
         UserInfo userInfo = oidcIntegrationService.getUserInfo(tokens);
-        //todo get acr from token
+        //todo get acr from token https://digdir.atlassian.net/browse/ID-4240
         LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), LevelOfAssurance.EIDAS_LOA_LOW);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
