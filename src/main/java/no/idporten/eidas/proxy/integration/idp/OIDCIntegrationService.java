@@ -50,7 +50,7 @@ public class OIDCIntegrationService {
 
     public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier) {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(ResponseType.CODE,
-                new Scope("openid"),//todo oidcIntegrationProperties.getScopes().toArray(new String[0])),
+                new Scope(oidcIntegrationProperties.getScopes().toArray(new String[0])),
                 new ClientID(oidcIntegrationProperties.getClientId()),
                 oidcIntegrationProperties.getRedirectUri());
         builder.endpointURI(oidcProviderMetadata.getPushedAuthorizationRequestEndpointURI())
