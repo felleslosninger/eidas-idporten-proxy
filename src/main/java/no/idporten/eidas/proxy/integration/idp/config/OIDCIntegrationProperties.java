@@ -12,11 +12,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
+import java.util.Set;
 
 @Data
 @Slf4j
 @Validated
-@ConfigurationProperties(prefix = "eidas.oidc-integration")
+@ConfigurationProperties(ignoreInvalidFields = true, prefix = "eidas.oidc-integration")
 public class OIDCIntegrationProperties implements InitializingBean {
 
     @NotNull
@@ -31,6 +32,9 @@ public class OIDCIntegrationProperties implements InitializingBean {
 
     @NotEmpty
     private String clientId;
+
+    @NotEmpty
+    private Set<String> scopes;
 
     private String clientSecret;
     private String clientKeystoreType;

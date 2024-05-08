@@ -5,7 +5,7 @@ management:
       show-components: always
 spring:
   application:
-    environment: local-docker
+    environment: systest
   main:
     log-startup-info: true
   data:
@@ -26,16 +26,8 @@ eidas:
   eu-proxy:
     redirect-uri: https://eu-eidas-proxy.idporten.dev/SpecificProxyServiceResponse
   oidc-integration:
-    connect-timeout-millis: 5000
-    read-timeout-millis: 5000
-    jwks-cache-lifetime-minutes: 60
-    jwks-cache-refresh-minutes: 5
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
     client-secret: ${EIDAS_CLIENT_SECRET}
     redirect-uri: http://eidas-proxy.idporten.dev/idpcallback
-digdir:
-  event:
-    logging:
-      feature-enabled: false

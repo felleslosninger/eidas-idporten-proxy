@@ -23,6 +23,7 @@ class OIDCIntegrationPropertiesTest {
                 () -> assertNotNull(properties.getClientAuthMethod(), "Client authentication method should not be null"),
                 () -> assertNotNull(properties.getClientId(), "Client ID should not be null"),
                 () -> assertNotNull(properties.getClientSecret(), "Client secret should not be null"),
+                () -> assertNotNull(properties.getScopes(), "Scopes must not be null"),
                 () -> assertTrue(properties.getConnectTimeOutMillis() > 0, "Connect timeout should be greater than 0"),
                 () -> assertTrue(properties.getReadTimeOutMillis() > 0, "Read timeout should be greater than 0"),
                 () -> assertTrue(properties.getJwksCacheRefreshMinutes() > 0, "JWKS cache refresh minutes should be greater than 0"),

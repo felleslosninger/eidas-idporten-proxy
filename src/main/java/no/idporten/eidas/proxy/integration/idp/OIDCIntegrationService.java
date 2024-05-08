@@ -44,15 +44,13 @@ public class OIDCIntegrationService {
     private final IDTokenValidator idTokenValidator;
     private final OIDCIntegrationProperties oidcIntegrationProperties;
     private final OIDCProviderMetadata oidcProviderMetadata;
-    //todo gjør konfigurerbart https://digdir.atlassian.net/browse/ID-4231
-    final Scope scope = new Scope("openid", "eidas:mds");
 
     //todo oversett fra innkommende request https://digdir.atlassian.net/browse/ID-4232
     private final List<ACR> acrValues = List.of(new ACR("idporten-loa-substantial"));
 
     public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier) {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(ResponseType.CODE,
-                scope,
+                new Scope("openid"),//todo oidcIntegrationProperties.getScopes().toArray(new String[0])),
                 new ClientID(oidcIntegrationProperties.getClientId()),
                 oidcIntegrationProperties.getRedirectUri());
         builder.endpointURI(oidcProviderMetadata.getPushedAuthorizationRequestEndpointURI())
