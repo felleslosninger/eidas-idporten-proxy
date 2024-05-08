@@ -27,7 +27,9 @@ management:
     health:
       probes:
         enabled: true
-
+      group:
+        readiness:
+          include: redis
 spring:
   application:
     name: eidas-proxy
@@ -39,6 +41,12 @@ spring:
   web:
     resources:
       add-mappings: false
+  cache:
+    type: redis
+  data:
+    redis:
+      connect-timeout: 3s
+      timeout: 3s
 digdir:
   audit:
     application-name: ${spring.application.name}
