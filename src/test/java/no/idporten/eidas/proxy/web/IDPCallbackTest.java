@@ -28,8 +28,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(IDPCallback.class)
+@DisplayName("When receiving a callback from the IDP")
 class IDPCallbackTest {
 
     @Autowired
@@ -45,7 +47,7 @@ class IDPCallbackTest {
     private SpecificCommunicationService specificCommunicationService;
 
     @Test
-    @DisplayName("when receiving a valid callback that matches an original request, the callback should redirect successfully")
+    @DisplayName("then when receiving a valid callback that matches an original request, the callback should redirect successfully")
     void callback_shouldRedirectSuccessfully() throws Exception {
         AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
         State state = new State("123q");
@@ -75,5 +77,18 @@ class IDPCallbackTest {
 
 
         verify(specificCommunicationService).putResponse(lightResponse);
+    }
+
+    @Test
+    @DisplayName("then when receiving a valid callback that does not match an original request, the callback should redirect with an error message")
+    void callback_shouldNotRedirectSuccessfully() throws Exception {
+        AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
+        State state = new State("123q");
+        when(authorizationResponse.getState()).thenReturn(state);
+        when(specificProxyService.getCachedRequest(state)).thenReturn(null);
+
+        mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
+                .andExpect(view().name("it_is_you"));
+
     }
 }
