@@ -56,13 +56,9 @@ class ProxyServiceRequestControllerTest {
 
     @BeforeAll
     static void setup() throws SpecificCommunicationException {
-
-        // Mock response values
         String tokenBase64 = "mockedTokenBase64";
-        // Stub the behavior of BinaryLightTokenHelper.getBinaryToken
         mockStatic(BinaryLightTokenHelper.class);
         when(BinaryLightTokenHelper.getBinaryToken(any(HttpServletRequest.class), eq(EidasParameterKeys.TOKEN.toString()))).thenReturn(tokenBase64);
-        // Stub the behavior of BinaryLightTokenHelper.getBinaryLightTokenId
         when(BinaryLightTokenHelper.getBinaryLightTokenId(eq(tokenBase64), any(), any())).thenReturn(lightTokenId);
 
     }
@@ -70,7 +66,6 @@ class ProxyServiceRequestControllerTest {
     @Test
     @DisplayName("then if there is a valid lightrequest return redirect to authorization endpoint")
     void testValidLightRequest() throws Exception {
-        // Mock the ILightRequest
         LightRequest lightRequest = LightRequest.builder()
                 .citizenCountryCode("NO")
                 .id("123")
@@ -83,10 +78,8 @@ class ProxyServiceRequestControllerTest {
                 .requestedAttributes(List.of(new RequestedAttribute(null, "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName")))
                 .build();
 
-        // Mock specificCommunicationService behavior
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(lightRequest);
 
-        // Mock OIDCIntegrationService behavior
         AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(new URI("http://example.com"), new ClientID("123")).build();
         when(oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest)).thenReturn(new URI("http://redirect-url.com"));
         when(oidcIntegrationService.getAuthorizationEndpoint()).thenReturn(new URI("http://authorization-endpoint.com"));
@@ -100,7 +93,6 @@ class ProxyServiceRequestControllerTest {
     @Test
     @DisplayName("then if there is an ivalid lightrequest return an error message")
     void testInvalidLightRequest() throws Exception {
-        // Mock the ILightRequest
         LightRequest lightRequest = LightRequest.builder()
                 .citizenCountryCode("SE")
                 .id("123")
@@ -113,9 +105,7 @@ class ProxyServiceRequestControllerTest {
                 .requestedAttributes(List.of(new RequestedAttribute(null, "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName")))
                 .build();
 
-        // Mock specificCommunicationService behavior
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(lightRequest);
-
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(forwardedUrl("it_is_you"));
@@ -125,7 +115,6 @@ class ProxyServiceRequestControllerTest {
     @DisplayName("then if there is a missing lightrequest return error message")
     void testMissingLightRequest() throws Exception {
 
-        // Mock specificCommunicationService behavior
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(null);
 
         mockMvc.perform(post("/ProxyServiceRequest"))
@@ -136,7 +125,6 @@ class ProxyServiceRequestControllerTest {
     @DisplayName("then if there is an internal error return error message")
     void testInternalError() throws Exception {
 
-        // Mock specificCommunicationService behavior
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenThrow(new RedisConnectionException("Internal error"));
 
         mockMvc.perform(post("/ProxyServiceRequest"))

@@ -49,12 +49,9 @@ class OIDCIntegrationServiceTest {
 
     @BeforeEach
     void setup() throws JOSEException {
-        // Initialize keyProvider as a mock
         KeyProvider mockKeyProvider = mock(KeyProvider.class);
-        // Stub the behavior of keyProvider.get()
         when(keyProvider.isPresent()).thenReturn(true);
         when(keyProvider.get()).thenReturn(mockKeyProvider);
-        // Stub the behavior of mockKeyProvider.privateKey()
         KeyPair keyPair = new RSAKeyGenerator(2048).generate().toKeyPair();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
         when(mockKeyProvider.privateKey()).thenReturn(privateKey);
@@ -68,7 +65,6 @@ class OIDCIntegrationServiceTest {
         when(properties.getClientAuthMethod()).thenReturn("private_key_jwt");
 
         ClientAuthentication clientAuth = oidcIntegrationService.clientAuthentication(properties);
-        // Verify that clientAuth is an instance of PrivateKeyJWT
         assertTrue(clientAuth instanceof PrivateKeyJWT);
     }
 
@@ -86,7 +82,6 @@ class OIDCIntegrationServiceTest {
         when(cachedRequest.getiLightRequest()).thenReturn(mock(ILightRequest.class));
         when(cachedRequest.getAuthenticationRequest()).thenReturn(mock(OIDCRequestStateParams.class));
 
-        // Test with a successful authorization response
         assertDoesNotThrow(() -> oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest));
 
     }
@@ -102,7 +97,6 @@ class OIDCIntegrationServiceTest {
         when(cachedRequest.getiLightRequest()).thenReturn(mock(ILightRequest.class));
         when(cachedRequest.getAuthenticationRequest()).thenReturn(mock(OIDCRequestStateParams.class));
 
-        // Test with an error authorization response
         AuthorizationErrorResponse errorResponse = mock(AuthorizationErrorResponse.class);
         when(errorResponse.getErrorObject()).thenReturn(new com.nimbusds.oauth2.sdk.ErrorObject("error"));
         when(authorizationResponse.indicatesSuccess()).thenReturn(false);

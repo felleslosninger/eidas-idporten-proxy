@@ -47,7 +47,6 @@ class IDPCallbackTest {
     @Test
     @DisplayName("when receiving a valid callback that matches an original request, the callback should redirect successfully")
     void callback_shouldRedirectSuccessfully() throws Exception {
-        // Mocking necessary data
         AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
         State state = new State("123q");
         when(authorizationResponse.getState()).thenReturn(state);
