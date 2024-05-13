@@ -21,7 +21,6 @@
         <idporten-audit.version>1.2.1</idporten-audit.version>
         <idporten-access-log.version>2.3.3</idporten-access-log.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
-        <digdir-log-event.version>1.2.2</digdir-log-event.version>
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
         <nimbus.oauth2-oidc-sdk.version>11.10.1</nimbus.oauth2-oidc-sdk.version>
         <joda-time.version>2.12.7</joda-time.version>
@@ -68,11 +67,6 @@
             <version>${idporten-access-log.version}</version>
         </dependency>
         <dependency>
-            <groupId>no.digdir.logging</groupId>
-            <artifactId>log-event-spring-boot-starter</artifactId>
-            <version>${digdir-log-event.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>oauth2-oidc-sdk</artifactId>
             <version>${nimbus.oauth2-oidc-sdk.version}</version>
@@ -117,7 +111,7 @@
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.5</version>
         </dependency>
 
         <!-- Activation API (required for JAXB) -->
@@ -183,10 +177,6 @@
             <name>GitHub felleslosninger Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/felleslosninger/.github</url>
         </repository>
-        <repository>
-            <id>Confluent</id>
-            <name>Confluent Kafka</name>
-            <url>https://packages.confluent.io/maven/</url>
-        </repository>
+
     </repositories>
 </project>
