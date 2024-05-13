@@ -10,12 +10,10 @@ spring:
     environment: local-docker
   main:
     log-startup-info: true
-
   data:
     redis:
       port: 6379
       host: redis
-
 digdir:
   event:
     logging:
@@ -32,10 +30,6 @@ eidas:
     algorithm: SHA-256
     issuer-name: specificCommunicationDefinitionProxyserviceResponse
   oidc-integration:
-    connect-timeout-millis: 5000
-    read-timeout-millis: 5000
-    jwks-cache-lifetime-minutes: 60
-    jwks-cache-refresh-minutes: 5
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic

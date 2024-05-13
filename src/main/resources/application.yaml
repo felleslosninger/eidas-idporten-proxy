@@ -27,7 +27,9 @@ management:
     health:
       probes:
         enabled: true
-
+      group:
+        readiness:
+          include: redis
 spring:
   application:
     name: eidas-proxy
@@ -39,6 +41,22 @@ spring:
   web:
     resources:
       add-mappings: false
+  cache:
+    type: redis
+  data:
+    redis:
+      connect-timeout: 3s
+      timeout: 3s
+eidas:
+  oidc-integration:
+    scopes:
+      - openid
+      - eidas:mds
+    connect-timeout-millis: 5000
+    read-timeout-millis: 5000
+    jwks-cache-lifetime-minutes: 60
+    jwks-cache-refresh-minutes: 5
+
 digdir:
   audit:
     application-name: ${spring.application.name}

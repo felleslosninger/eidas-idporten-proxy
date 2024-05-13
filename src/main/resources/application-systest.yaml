@@ -1,13 +1,11 @@
 management:
-  server:
-    port:
   endpoint:
     health:
       show-details: always
       show-components: always
 spring:
   application:
-    environment: local-docker
+    environment: systest
   main:
     log-startup-info: true
   data:
@@ -18,19 +16,18 @@ spring:
         nodes: eidas-redis-sentinel-headless:26379
         password: ${REDIS_PASSWORD}
 eidas:
+  cache:
+    response-secret: ${LIGHT_TOKEN_PROXYSERVICE_RESPONSE_SECRET}
+    response-issuer-name: specificCommunicationDefinitionProxyserviceResponse
+    request-secret: ${LIGHT_TOKEN_PROXYSERVICE_REQUEST_SECRET}
+    request-issuer-name: specificCommunicationDefinitionProxyserviceRequest
+    algorithm: SHA-256
+    issuer-name: specificCommunicationDefinitionProxyserviceResponse
   eu-proxy:
     redirect-uri: https://eu-eidas-proxy.idporten.dev/SpecificProxyServiceResponse
   oidc-integration:
-    connect-timeout-millis: 5000
-    read-timeout-millis: 5000
-    jwks-cache-lifetime-minutes: 60
-    jwks-cache-refresh-minutes: 5
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
     client-secret: ${EIDAS_CLIENT_SECRET}
     redirect-uri: http://eidas-proxy.idporten.dev/idpcallback
-digdir:
-  event:
-    logging:
-      feature-enabled: false
