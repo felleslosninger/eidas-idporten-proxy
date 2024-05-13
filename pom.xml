@@ -177,10 +177,6 @@
             <name>GitHub felleslosninger Apache Maven Packages</name>
             <url>https://maven.pkg.github.com/felleslosninger/.github</url>
         </repository>
-        <repository>
-            <id>Confluent</id>
-            <name>Confluent Kafka</name>
-            <url>https://packages.confluent.io/maven/</url>
-        </repository>
+
     </repositories>
 </project>
