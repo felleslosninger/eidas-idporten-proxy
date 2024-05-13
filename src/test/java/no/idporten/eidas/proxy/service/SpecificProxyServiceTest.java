@@ -71,7 +71,7 @@ class SpecificProxyServiceTest {
 
         OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
         when(mockOidcIntegrationService.getIssuer()).thenReturn("http://myjunit");
-        LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, lightRequest, "idporten-loa-high");
+        LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
         assertNotNull(lightResponse);
     }
 

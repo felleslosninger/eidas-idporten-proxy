@@ -90,13 +90,13 @@ public class SpecificProxyService {
         return correlatedRequestHolder;
     }
 
-    public LightResponse getLightResponse(UserInfo userInfo, ILightRequest lightRequest, String acr) throws SpecificCommunicationException {
+    public LightResponse getLightResponse(UserInfo userInfo, ILightRequest lightRequest, ILevelOfAssurance acr) {
 
         LightResponse.LightResponseBuilder lightResponseBuilder = LightResponse.builder()
                 .id(UUID.randomUUID().toString())
                 .citizenCountryCode("NO")
                 .consent("yes")
-                .levelOfAssurance(getLoa(acr))
+                .levelOfAssurance(acr.getValue())
                 .issuer(oidcIntegrationService.getIssuer())
                 .subject(userInfo.getSubject().getValue())
                 .subjectNameIdFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent")
@@ -120,10 +120,4 @@ public class SpecificProxyService {
         return lightResponseBuilder.build();
     }
 
-    private String getLoa(String acr) throws SpecificCommunicationException {
-        if (acr == null) {
-            throw new SpecificCommunicationException("No acr value found in id_token");
-        }
-        return idportenAcrListToEidasAcr(acr).getValue();
-    }
 }
