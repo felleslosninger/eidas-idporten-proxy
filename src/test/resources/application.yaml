@@ -49,6 +49,9 @@ eidas:
   eu-proxy:
     redirect-uri: http://junit.no/SpecificProxyServiceResponse
   oidc-integration:
+    scopes:
+      - openid
+      - eidas:mds
     connect-timeout-millis: 5000
     read-timeout-millis: 5000
     jwks-cache-lifetime-minutes: 60
