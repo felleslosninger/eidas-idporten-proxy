@@ -11,7 +11,6 @@ import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
-import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.stereotype.Controller;
@@ -25,6 +24,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class IDPCallback {
 
+    public static final String ACR_CLAIM = "acr";
     private final SpecificProxyService specificProxyService;
     private final OIDCIntegrationService oidcIntegrationService;
     private final SpecificCommunicationService specificCommunicationService;
@@ -43,8 +43,8 @@ public class IDPCallback {
         OIDCTokens tokens = oidcIntegrationService.getToken(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
 
         UserInfo userInfo = oidcIntegrationService.getUserInfo(tokens);
-        //todo get acr from token https://digdir.atlassian.net/browse/ID-4240
-        LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), LevelOfAssurance.EIDAS_LOA_LOW);
+
+        LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), tokens.getIDToken().getJWTClaimsSet().getStringClaim(ACR_CLAIM));
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
 

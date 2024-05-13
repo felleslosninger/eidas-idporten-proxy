@@ -1,6 +1,7 @@
 package no.idporten.eidas.proxy.web;
 
 import com.nimbusds.jwt.JWT;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.id.State;
@@ -13,7 +14,6 @@ import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
-import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.DisplayName;
@@ -57,7 +57,7 @@ class IDPCallbackTest {
         JWT mockJwt = mock(JWT.class);
         AccessToken mockAccessToken = mock(AccessToken.class);
         RefreshToken mockRefreshToken = mock(RefreshToken.class);
-        when(mockJwt.getJWTClaimsSet()).thenReturn(null);
+        when(mockJwt.getJWTClaimsSet()).thenReturn(JWTClaimsSet.parse("{\"acr\":\"idporten-loa-low\"}"));
         OIDCTokens oidcTokens = new OIDCTokens(mockJwt, mockAccessToken, mockRefreshToken);
         when(mockAccessToken.getValue()).thenReturn("access_token");
 
@@ -68,7 +68,7 @@ class IDPCallbackTest {
         LightResponse lightResponse = mock(LightResponse.class);
         when(lightResponse.getRelayState()).thenReturn("abc");
         when(oidcIntegrationService.getUserInfo(any())).thenReturn(userInfo);
-        when(specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), LevelOfAssurance.EIDAS_LOA_LOW)).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), "idporten-loa-low")).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
         when(specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse)).thenReturn("hello");
 

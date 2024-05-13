@@ -5,6 +5,7 @@ import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import eu.eidas.auth.commons.EIDASStatusCode;
+import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
@@ -22,20 +23,17 @@ import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.Status;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
-import static eu.eidas.auth.commons.light.ILevelOfAssurance.EIDAS_LOA_LOW;
 
 /**
  * The main service
  */
 @Service
 @RequiredArgsConstructor
-@EnableConfigurationProperties(EuProxyProperties.class)
 public class SpecificProxyService {
 
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
@@ -57,7 +55,7 @@ public class SpecificProxyService {
 
     public AuthenticationRequest translateNodeRequest(ILightRequest originalIlightRequest) {
         CodeVerifier codeVerifier = new CodeVerifier();
-        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(codeVerifier);
+        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(codeVerifier, eidasAcrListToIdportenAcrList(originalIlightRequest.getLevelsOfAssurance()));
 
         final CorrelatedRequestHolder correlatedRequestHolder = new CorrelatedRequestHolder(originalIlightRequest,
                 new OIDCRequestStateParams(authenticationRequest.getState(),
@@ -68,13 +66,32 @@ public class SpecificProxyService {
         return authenticationRequest;
     }
 
+    protected List<String> eidasAcrListToIdportenAcrList(List<ILevelOfAssurance> acrLevels) {
+        Map<String, String> acrValueMap = euProxyProperties.getAcrValueMap();
+        return acrLevels.stream()
+                .map(a -> {
+                    String eidasAcr = a.getValue(); // Assuming getId() returns the EIDAS URL
+                    return acrValueMap.entrySet().stream()
+                            .filter(entry -> entry.getValue().equals(eidasAcr)) // Match by value
+                            .map(Map.Entry::getKey) // Retrieve the key
+                            .findFirst()
+                            .orElse("idporten-loa-low"); // Default if no match is found
+                })
+                .toList();
+    }
+
+    public ILevelOfAssurance idportenAcrListToEidasAcr(String idportenAcrLevel) {
+        return LevelOfAssurance.fromString(euProxyProperties.getAcrValueMap().get(idportenAcrLevel));
+    }
+
     public CorrelatedRequestHolder getCachedRequest(State state) {
         CorrelatedRequestHolder correlatedRequestHolder = oidcRequestCache.get(state.getValue());
         oidcRequestCache.remove(state.getValue());
         return correlatedRequestHolder;
     }
 
-    public LightResponse getLightResponse(UserInfo userInfo, ILightRequest lightRequest, String acr) {
+    public LightResponse getLightResponse(UserInfo userInfo, ILightRequest lightRequest, String acr) throws SpecificCommunicationException {
+
         LightResponse.LightResponseBuilder lightResponseBuilder = LightResponse.builder()
                 .id(UUID.randomUUID().toString())
                 .citizenCountryCode("NO")
@@ -103,19 +120,10 @@ public class SpecificProxyService {
         return lightResponseBuilder.build();
     }
 
-
-    //hack sorry
-    private static String getLoa(String acr) {
-        try {
-            String suffix = acr.split("-")[2];
-
-            return switch (suffix) {
-                case "high" -> LevelOfAssurance.EIDAS_LOA_HIGH;
-                case "substantial" -> EIDAS_LOA_LOW;
-                default -> EIDAS_LOA_LOW;
-            };
-        } catch (ArrayIndexOutOfBoundsException e) {
-            return EIDAS_LOA_LOW;  // Return default LOA if the acr format is incorrect
+    private String getLoa(String acr) throws SpecificCommunicationException {
+        if (acr == null) {
+            throw new SpecificCommunicationException("No acr value found in id_token");
         }
+        return idportenAcrListToEidasAcr(acr).getValue();
     }
 }
