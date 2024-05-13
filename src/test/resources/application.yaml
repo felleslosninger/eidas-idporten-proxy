@@ -48,6 +48,10 @@ digdir:
 eidas:
   eu-proxy:
     redirect-uri: http://junit.no/SpecificProxyServiceResponse
+    acr-value-map:
+      idporten-loa-low: "http://eidas.europa.eu/LoA/low"
+      idporten-loa-substantial: "http://eidas.europa.eu/LoA/substantial"
+      idporten-loa-high: "http://eidas.europa.eu/LoA/high"
   oidc-integration:
     scopes:
       - openid

@@ -45,16 +45,13 @@ public class OIDCIntegrationService {
     private final OIDCIntegrationProperties oidcIntegrationProperties;
     private final OIDCProviderMetadata oidcProviderMetadata;
 
-    //todo oversett fra innkommende request https://digdir.atlassian.net/browse/ID-4232
-    private final List<ACR> acrValues = List.of(new ACR("idporten-loa-substantial"));
-
-    public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier) {
+    public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier, List<String> acrValues) {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(ResponseType.CODE,
                 new Scope(oidcIntegrationProperties.getScopes().toArray(new String[0])),
                 new ClientID(oidcIntegrationProperties.getClientId()),
                 oidcIntegrationProperties.getRedirectUri());
         builder.endpointURI(oidcProviderMetadata.getPushedAuthorizationRequestEndpointURI())
-                .acrValues(acrValues)
+                .acrValues(acrValues.stream().map(ACR::new).toList())
                 .state(new com.nimbusds.oauth2.sdk.id.State())
                 .nonce(new Nonce())
                 .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
