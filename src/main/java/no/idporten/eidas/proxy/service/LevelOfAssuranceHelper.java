@@ -45,12 +45,12 @@ public class LevelOfAssuranceHelper {
         Map<String, String> acrValueMap = acrProperties.getAcrValueMap();
         return acrLevels.stream()
                 .map(a -> {
-                    String eidasAcr = a.getValue(); // Assuming getId() returns the EIDAS URL
+                    String eidasAcr = a.getValue();
                     return acrValueMap.entrySet().stream()
-                            .filter(entry -> entry.getValue().equals(eidasAcr)) // Match by value
-                            .map(Map.Entry::getKey) // Retrieve the key
+                            .filter(entry -> entry.getValue().equals(eidasAcr))
+                            .map(Map.Entry::getKey)
                             .findFirst()
-                            .orElse("idporten-loa-low"); // Default if no match is found
+                            .orElse("idporten-loa-low");
                 })
                 .toList();
     }
