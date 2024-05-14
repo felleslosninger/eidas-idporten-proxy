@@ -21,7 +21,7 @@ import eu.eidas.auth.commons.attribute.AttributeDefinition;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 
 import java.util.Collection;
 
@@ -40,9 +40,9 @@ public interface SpecificCommunicationService {
      *
      * @param iLightRequest the request to be put in the cache
      * @return the {@link BinaryLightToken} that holds the id/key to the {@link ILightRequest} in the cache
-     * @throws SpecificCommunicationException if the {@link BinaryLightToken} could not be created.
+     * @throws SpecificProxyException if the {@link BinaryLightToken} could not be created.
      */
-    BinaryLightToken putRequest(final ILightRequest iLightRequest) throws SpecificCommunicationException;
+    BinaryLightToken putRequest(final ILightRequest iLightRequest) throws SpecificProxyException;
 
     /**
      * Removes the {@link ILightRequest} from the request communication cache
@@ -51,9 +51,9 @@ public interface SpecificCommunicationService {
      * @param tokenBase64 the {@link BinaryLightToken} in Base64 that holds the id to remove the {@link ILightRequest}
      * @param registry    the collection of attributeDefinitions
      * @return the {@link ILightRequest} corresponding to the id
-     * @throws SpecificCommunicationException if the id could not be obtained
+     * @throws SpecificProxyException if the id could not be obtained
      */
-    ILightRequest getAndRemoveRequest(String tokenBase64, Collection<AttributeDefinition<?>> registry) throws SpecificCommunicationException;
+    ILightRequest getAndRemoveRequest(String tokenBase64, Collection<AttributeDefinition<?>> registry) throws SpecificProxyException;
 
     /**
      * Puts {@link ILightResponse} in the response communication cache.
@@ -62,9 +62,9 @@ public interface SpecificCommunicationService {
      *
      * @param iLightResponse the {@link ILightResponse} to put in the cache
      * @return the {@link BinaryLightToken} that holds the id/key to the {@link ILightResponse} in the cache
-     * @throws SpecificCommunicationException if the {@link BinaryLightToken} could not be created.
+     * @throws SpecificProxyException if the {@link BinaryLightToken} could not be created.
      */
-    BinaryLightToken putResponse(ILightResponse iLightResponse) throws SpecificCommunicationException;
+    BinaryLightToken putResponse(ILightResponse iLightResponse) throws SpecificProxyException;
 
     /**
      * Removes the {@link ILightResponse} from the response communication cache
@@ -73,7 +73,7 @@ public interface SpecificCommunicationService {
      * @param tokenBase64 the {@link BinaryLightToken} in Base64 that holds the id to remove the {@link ILightResponse}
      * @param registry    the collection of attributeDefinitions
      * @return the {@link ILightResponse} corresponding to the id
-     * @throws SpecificCommunicationException if the id could not be obtained
+     * @throws SpecificProxyException if the id could not be obtained
      */
-    ILightResponse getAndRemoveResponse(String tokenBase64, Collection<AttributeDefinition<?>> registry) throws SpecificCommunicationException;
+    ILightResponse getAndRemoveResponse(String tokenBase64, Collection<AttributeDefinition<?>> registry) throws SpecificProxyException;
 }

@@ -2,13 +2,13 @@ package no.idporten.eidas.proxy.service;
 
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import eu.eidas.auth.commons.light.ILevelOfAssurance;
+import eu.eidas.auth.commons.EIDASStatusCode;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.impl.LightRequest;
 import no.idporten.eidas.proxy.config.EuProxyProperties;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.OIDCRequestCache;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
@@ -20,11 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,20 +35,25 @@ class SpecificProxyServiceTest {
     private OIDCIntegrationService oidcIntegrationService;
     @Mock
     private EuProxyProperties euProxyProperties;
+
+    @Mock
+    private LevelOfAssuranceHelper levelOfAssuranceHelper;
+
+    @Mock
+    private ILightRequest mockLightRequest;
     @InjectMocks
     SpecificProxyService specificProxyService;
 
+
     @BeforeEach
     void setup() {
-        when(euProxyProperties.getAcrValueMap()).thenReturn(Map.of(
-                "idporten-loa-low", LevelOfAssurance.EIDAS_LOA_LOW,
-                "idporten-loa-substantial", LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL,
-                "idporten-loa-high", LevelOfAssurance.EIDAS_LOA_HIGH));
+        when(oidcIntegrationService.getIssuer()).thenReturn("Issuer");
+        when(mockLightRequest.getRelayState()).thenReturn("relay123");
     }
 
     @Test
     @DisplayName("when buildLightResponse then return LightResponse without validation errors")
-    void buildLightResponse() throws SpecificCommunicationException {
+    void buildLightResponse() throws SpecificProxyException {
         UserInfo userInfo = new UserInfo(new Subject("123456789"));
 
         // Populate standard claims
@@ -76,19 +77,41 @@ class SpecificProxyServiceTest {
     }
 
     @Test
-    void testAcrValueFromEidasToIdportenMapping() {
-        List<String> idportenAcr = specificProxyService.eidasAcrListToIdportenAcrList(List.of(
-                new LevelOfAssurance("notified", LevelOfAssurance.EIDAS_LOA_LOW),
-                new LevelOfAssurance("notified", LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL),
-                new LevelOfAssurance("notified", LevelOfAssurance.EIDAS_LOA_HIGH)));
-        assertEquals(3, idportenAcr.size());
-        assertEquals(List.of("idporten-loa-low", "idporten-loa-substantial", "idporten-loa-high"), idportenAcr);
+    @DisplayName("when a specific exception return LightResponse with detailed error for SpecificProxyException")
+    void testGetErrorLightResponseWithSpecificProxyException() {
+
+        SpecificProxyException spex = new SpecificProxyException("Error code", "Error message", mockLightRequest);
+
+        LightResponse result = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, spex);
+
+        assertAll("Verifying all properties of the LightResponse for SpecificProxyException",
+                () -> assertNotNull(result.getId(), "ID must not be null"),
+                () -> assertEquals("NO", result.getCitizenCountryCode(), "CitizenCountryCode must be 'NO'"),
+                () -> assertEquals("Issuer", result.getIssuer(), "Issuer must match the expected value"),
+                () -> assertEquals("relay123", result.getRelayState(), "RelayState must be 'relay123'"),
+                () -> assertEquals("Error message", result.getStatus().getStatusMessage(), "Status message must match the error message from the exception"),
+                () -> assertEquals(EIDASStatusCode.REQUESTER_URI.getValue(), result.getStatus().getStatusCode(), "Status code must match the expected value")
+        );
     }
 
     @Test
-    void testAcrValueFromIdportenToEidasMapping() {
-        ILevelOfAssurance eidasAcr = specificProxyService.idportenAcrListToEidasAcr("idporten-loa-high");
-        assertNotNull(eidasAcr);
-        assertEquals(LevelOfAssurance.EIDAS_LOA_HIGH, eidasAcr.getValue());
+    @DisplayName("must return LightResponse with generic error for non-specific exceptions")
+    void testGetErrorLightResponseWithGenericException() {
+
+        Exception ex = new Exception("Generic error");
+
+
+        LightResponse result = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, ex);
+
+        assertAll("must properly handle generic exceptions and form correct LightResponse",
+                () -> assertNotNull(result.getId(), "ID must not be null"),
+                () -> assertEquals("NO", result.getCitizenCountryCode(), "CitizenCountryCode must be 'NO'"),
+                () -> assertEquals("Issuer", result.getIssuer(), "Issuer must match the expected value"),
+                () -> assertNull(result.getRelayState(), "RelayState will be null for generic exceptions"),
+                () -> assertEquals("An internal error occurred", result.getStatus().getStatusMessage(), "Status message must reflect an internal error"),
+                () -> assertEquals(EIDASStatusCode.REQUESTER_URI.getValue(), result.getStatus().getStatusCode(), "Status code must match the expected value")
+        );
     }
+
+
 }

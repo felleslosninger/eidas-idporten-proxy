@@ -48,7 +48,11 @@ spring:
       connect-timeout: 3s
       timeout: 3s
 eidas:
-  eu-proxy:
+  acr:
+    supported-acr-values:
+      - http://eidas.europa.eu/LoA/low
+      - http://eidas.europa.eu/LoA/substantial
+      - http://eidas.europa.eu/LoA/high
     acr-value-map:
       idporten-loa-low: "http://eidas.europa.eu/LoA/low"
       idporten-loa-substantial: "http://eidas.europa.eu/LoA/substantial"

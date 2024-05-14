@@ -7,11 +7,12 @@ import eu.eidas.auth.commons.tx.BinaryLightToken;
 import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.lightprotocol.LightRequestParser;
 import no.idporten.eidas.proxy.lightprotocol.LightResponseToXML;
+import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -41,26 +42,26 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
     }
 
     @Override
-    public BinaryLightToken putResponse(ILightResponse lightResponse) throws SpecificCommunicationException {
+    public BinaryLightToken putResponse(ILightResponse lightResponse) throws SpecificProxyException {
         String xmlResponse = null;
         try {
             xmlResponse = LightResponseToXML.toXml(lightResponse);
             log.info("Storing xml response {}", xmlResponse);
         } catch (JAXBException e) {
             log.error("Failed to convert lightResponse to XML {}", e.getMessage());
-            throw new SpecificCommunicationException("Failed to convert lightResponse to XML", e);
+            throw new SpecificProxyException("Failed to convert lightResponse to XML", e, LightRequest.builder().relayState(lightResponse.getRelayState()).id(lightResponse.getInResponseToId()).build());
         }
         BinaryLightToken binaryLightToken = BinaryLightTokenHelper
                 .createBinaryLightToken(eidasCacheProperties.getResponseIssuerName(),
                         eidasCacheProperties.getResponseSecret(),
                         eidasCacheProperties.getAlgorithm());
         log.info("putResponse {}", binaryLightToken.getToken().getId());
-        redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(120000));//todo back to 120
+        redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(120));
         return binaryLightToken;
     }
 
     @Override
-    public ILightResponse getAndRemoveResponse(String lightTokenId, Collection<AttributeDefinition<?>> registry) throws SpecificCommunicationException {
+    public ILightResponse getAndRemoveResponse(String lightTokenId, Collection<AttributeDefinition<?>> registry) throws SpecificProxyException {
         log.info("getAndRemoveResponse {}", lightTokenId);
         return (ILightResponse) redisCache.get(eidasCacheProperties.getLightResponsePrefix(lightTokenId));
     }
@@ -69,7 +70,7 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
      * Only used by fakeit-controller
      */
     @Override
-    public BinaryLightToken putRequest(ILightRequest iLightRequest) throws SpecificCommunicationException {
+    public BinaryLightToken putRequest(ILightRequest iLightRequest) throws SpecificProxyException {
 
         BinaryLightToken binaryLightToken = BinaryLightTokenHelper
                 .createBinaryLightToken(eidasCacheProperties.getRequestIssuerName(),

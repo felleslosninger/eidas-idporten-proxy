@@ -11,22 +11,20 @@ import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.proxy.config.EuProxyProperties;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.OIDCRequestCache;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.proxy.lightprotocol.messages.Attribute;
-import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.Status;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -40,22 +38,24 @@ public class SpecificProxyService {
     private final OIDCRequestCache oidcRequestCache;
     private final OIDCIntegrationService oidcIntegrationService;
     private final EuProxyProperties euProxyProperties;
+    private final LevelOfAssuranceHelper levelOfAssuranceHelper;
     private static final String FAMILY_NAME = "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName";
     private static final String FIRST_NAME = "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName";
     private static final String DATE_OF_BIRTH = "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth";
     private static final String PID = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
+
     public String getEuProxyRedirectUri() {
         return euProxyProperties.getRedirectUri();
     }
 
-    public String createStoreBinaryLightTokenResponseBase64(ILightResponse lightResponse) throws SpecificCommunicationException {
+    public String createStoreBinaryLightTokenResponseBase64(ILightResponse lightResponse) throws SpecificProxyException {
         BinaryLightToken binaryLightToken = specificCommunicationServiceImpl.putResponse(lightResponse);
         return BinaryLightTokenHelper.encodeBinaryLightTokenBase64(binaryLightToken);
     }
 
     public AuthenticationRequest translateNodeRequest(ILightRequest originalIlightRequest) {
         CodeVerifier codeVerifier = new CodeVerifier();
-        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(codeVerifier, eidasAcrListToIdportenAcrList(originalIlightRequest.getLevelsOfAssurance()));
+        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(codeVerifier, levelOfAssuranceHelper.eidasAcrListToIdportenAcrList(originalIlightRequest.getLevelsOfAssurance()));
 
         final CorrelatedRequestHolder correlatedRequestHolder = new CorrelatedRequestHolder(originalIlightRequest,
                 new OIDCRequestStateParams(authenticationRequest.getState(),
@@ -66,23 +66,7 @@ public class SpecificProxyService {
         return authenticationRequest;
     }
 
-    protected List<String> eidasAcrListToIdportenAcrList(List<ILevelOfAssurance> acrLevels) {
-        Map<String, String> acrValueMap = euProxyProperties.getAcrValueMap();
-        return acrLevels.stream()
-                .map(a -> {
-                    String eidasAcr = a.getValue(); // Assuming getId() returns the EIDAS URL
-                    return acrValueMap.entrySet().stream()
-                            .filter(entry -> entry.getValue().equals(eidasAcr)) // Match by value
-                            .map(Map.Entry::getKey) // Retrieve the key
-                            .findFirst()
-                            .orElse("idporten-loa-low"); // Default if no match is found
-                })
-                .toList();
-    }
 
-    public ILevelOfAssurance idportenAcrListToEidasAcr(String idportenAcrLevel) {
-        return LevelOfAssurance.fromString(euProxyProperties.getAcrValueMap().get(idportenAcrLevel));
-    }
 
     public CorrelatedRequestHolder getCachedRequest(State state) {
         CorrelatedRequestHolder correlatedRequestHolder = oidcRequestCache.get(state.getValue());
@@ -119,5 +103,41 @@ public class SpecificProxyService {
 
         return lightResponseBuilder.build();
     }
+
+    public LightResponse getErrorLightResponse(EIDASStatusCode eidasStatusCode, Exception ex) {
+        if (ex instanceof SpecificProxyException spex) {
+            return LightResponse.builder()
+                    .id(UUID.randomUUID().toString())
+                    .citizenCountryCode("NO")
+                    .issuer(oidcIntegrationService.getIssuer())
+                    .inResponseToId(getInResponseToId(spex))
+                    .relayState(getRelayState(spex))
+                    .status(getErrorStatus(eidasStatusCode, spex.getMessage()))
+                    .build();
+        } else {
+            return LightResponse.builder()
+                    .id(UUID.randomUUID().toString())
+                    .citizenCountryCode("NO")
+                    .issuer(oidcIntegrationService.getIssuer())
+                    .status(getErrorStatus(eidasStatusCode, "An internal error occurred"))
+                    .build();
+        }
+
+    }
+
+    private static String getInResponseToId(SpecificProxyException spex) {
+        return spex.getlightRequest() != null ? spex.getlightRequest().getId() : null;
+    }
+
+    private static String getRelayState(SpecificProxyException ex) {
+        return ex.getlightRequest() != null ? ex.getlightRequest().getRelayState() : null;
+    }
+
+    private static Status getErrorStatus(EIDASStatusCode eidasStatusCode, String message) {
+        return Status.builder().statusCode(eidasStatusCode.getValue())
+                .failure(true)
+                .statusMessage(message).build();
+    }
+
 
 }

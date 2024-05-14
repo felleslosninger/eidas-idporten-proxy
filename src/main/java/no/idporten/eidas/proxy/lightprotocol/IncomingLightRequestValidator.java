@@ -1,7 +1,8 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
 import lombok.extern.slf4j.Slf4j;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
+import no.idporten.eidas.proxy.exceptions.ErrorCodes;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import org.springframework.util.CollectionUtils;
 
@@ -10,35 +11,37 @@ import org.springframework.util.CollectionUtils;
  */
 @Slf4j
 public class IncomingLightRequestValidator {
+    private IncomingLightRequestValidator() {
+    }
 
-    public static boolean validateRequest(LightRequest lightRequest) throws SpecificCommunicationException {
+    public static boolean validateRequest(LightRequest lightRequest) throws SpecificProxyException {
         if (lightRequest == null) {
-            throw new SpecificCommunicationException("Incoming Light Request is null.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is null.", null);
         }
         if (!"NO".equals(lightRequest.getCitizenCountryCode())) {
-            throw new SpecificCommunicationException("Incoming Light Request is not from Norwegian citizen.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is not from Norwegian citizen.", lightRequest);
         }
-        if (lightRequest.getId() == null || lightRequest.getId().isEmpty()) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing an id.");
+        if (lightRequest.getId().isEmpty()) {
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an id.", lightRequest);
         }
-        if (lightRequest.getIssuer() == null || lightRequest.getIssuer().isEmpty()) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing an issuer.");
+        if (lightRequest.getIssuer().isEmpty()) {
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an issuer.", lightRequest);
         }
 
         if (lightRequest.getProviderName() == null || lightRequest.getProviderName().isEmpty()) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing a provider name.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a provider name.", lightRequest);
         }
         if (lightRequest.getSpType() == null || lightRequest.getSpType().isEmpty()) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing a service provider type.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a service provider type.", lightRequest);
         }
         if (lightRequest.getSpCountryCode() == null || lightRequest.getSpCountryCode().isEmpty()) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing an SP country code.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an SP country code.", lightRequest);
         }
         if (lightRequest.getRelayState() == null || lightRequest.getRelayState().isEmpty()) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing a relay state.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a relay state.", lightRequest);
         }
         if (CollectionUtils.isEmpty(lightRequest.getRequestedAttributesList())) {
-            throw new SpecificCommunicationException("Incoming Light Request is missing requested attributes.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing requested attributes.", lightRequest);
         }
 
         //we made it
