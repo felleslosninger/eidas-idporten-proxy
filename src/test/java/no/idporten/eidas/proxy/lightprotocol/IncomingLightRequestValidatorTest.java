@@ -1,6 +1,6 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.proxy.lightprotocol.messages.RequestedAttribute;
@@ -16,63 +16,63 @@ class IncomingLightRequestValidatorTest {
 
     @Test
     void validateRequest_WhenRequestIsNull_ShouldThrowException() {
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(null));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(null));
     }
 
     @Test
     void validateRequest_WhenCitizenCountryCodeIsInvalid_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setCitizenCountryCode("US"); // Invalid country code
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenIdIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setId(""); // Empty ID
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenIssuerIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setIssuer(""); // Empty issuer
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenProviderNameIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setProviderName(""); // Empty provider name
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenSpTypeIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setSpType(""); // Empty service provider type
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenSpCountryCodeIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setSpCountryCode(""); // Empty SP country code
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenRelayStateIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setRelayState(""); // Empty relay state
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
     void validateRequest_WhenRequestedAttributesIsEmpty_ShouldThrowException() {
         LightRequest request = createValidLightRequest();
         request.setRequestedAttributes(Collections.emptyList()); // Empty list of requested attributes
-        assertThrows(SpecificCommunicationException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test

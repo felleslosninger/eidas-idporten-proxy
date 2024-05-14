@@ -11,11 +11,11 @@ import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.proxy.config.EuProxyProperties;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.OIDCRequestCache;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.proxy.lightprotocol.messages.Attribute;
@@ -48,7 +48,7 @@ public class SpecificProxyService {
         return euProxyProperties.getRedirectUri();
     }
 
-    public String createStoreBinaryLightTokenResponseBase64(ILightResponse lightResponse) throws SpecificCommunicationException {
+    public String createStoreBinaryLightTokenResponseBase64(ILightResponse lightResponse) throws SpecificProxyException {
         BinaryLightToken binaryLightToken = specificCommunicationServiceImpl.putResponse(lightResponse);
         return BinaryLightTokenHelper.encodeBinaryLightTokenBase64(binaryLightToken);
     }
@@ -120,4 +120,25 @@ public class SpecificProxyService {
         return lightResponseBuilder.build();
     }
 
+    public LightResponse getErrorLightResponse(EIDASStatusCode eidasStatusCode, Exception ex) {
+        if (ex instanceof SpecificProxyException) {
+            return LightResponse.builder()
+                    .id(UUID.randomUUID().toString())
+                    .relayState(((SpecificProxyException) ex).getRelayState())
+                    .status(getErrorStatus(eidasStatusCode, ex.getMessage()))
+                    .build();
+        } else {
+            return LightResponse.builder()
+                    .id(UUID.randomUUID().toString())
+                    .status(getErrorStatus(eidasStatusCode, "An intenal error occurred"))
+                    .build();
+        }
+
+    }
+
+    private static Status getErrorStatus(EIDASStatusCode eidasStatusCode, String message) {
+        return Status.builder().statusCode(eidasStatusCode.getValue())
+                .failure(true)
+                .statusMessage(message).build();
+    }
 }

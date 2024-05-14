@@ -29,10 +29,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.idporten.eidas.proxy.exceptions.ErrorCodes;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.IncomingLightRequestValidator;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
+
 
 /**
  * Receives/processes the servlet request that contains the token
@@ -66,11 +68,12 @@ public class ProxyServiceRequestController {
     private final OIDCIntegrationService oidcIntegrationService;
 
     @RequestMapping(path = "/ProxyServiceRequest", method = {RequestMethod.GET, RequestMethod.POST})
-    public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException, SpecificCommunicationException {
+    public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException, SpecificProxyException {
 
         final ILightRequest lightRequest = getIncomingiLightRequest(httpServletRequest, null);
+
         if (!IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
-            throw new SpecificCommunicationException("Incoming Light Request is invalid. Rejecting request.");
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is invalid. Rejecting request.", lightRequest.getRelayState());
         }
         //skip consent flow for now
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
@@ -82,12 +85,12 @@ public class ProxyServiceRequestController {
         return "redirect:%s".formatted(authUri.toString());
     }
 
-    private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException, SpecificCommunicationException {
+    private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException, SpecificProxyException {
         final String lightTokenId = getLightTokenId(httpServletRequest);
         return specificCommunicationService.getAndRemoveRequest(lightTokenId, registry);
     }
 
-    protected String getLightTokenId(HttpServletRequest httpServletRequest) throws SpecificCommunicationException {
+    protected String getLightTokenId(HttpServletRequest httpServletRequest) throws SpecificProxyException {
         String tokenBase64 = BinaryLightTokenHelper.getBinaryToken(httpServletRequest, EidasParameterKeys.TOKEN.toString());
         return BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getRequestSecret(), eidasCacheProperties.getAlgorithm());
     }

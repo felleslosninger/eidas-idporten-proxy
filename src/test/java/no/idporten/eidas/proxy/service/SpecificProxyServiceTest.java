@@ -6,9 +6,9 @@ import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.impl.LightRequest;
 import no.idporten.eidas.proxy.config.EuProxyProperties;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.OIDCRequestCache;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationServiceImpl;
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
@@ -52,7 +52,7 @@ class SpecificProxyServiceTest {
 
     @Test
     @DisplayName("when buildLightResponse then return LightResponse without validation errors")
-    void buildLightResponse() throws SpecificCommunicationException {
+    void buildLightResponse() throws SpecificProxyException {
         UserInfo userInfo = new UserInfo(new Subject("123456789"));
 
         // Populate standard claims

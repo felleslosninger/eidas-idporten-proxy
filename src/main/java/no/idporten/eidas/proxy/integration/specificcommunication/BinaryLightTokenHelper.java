@@ -22,7 +22,8 @@ import eu.eidas.auth.commons.light.impl.LightToken;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
 import eu.eidas.auth.commons.tx.LightTokenEncoder;
 import jakarta.servlet.http.HttpServletRequest;
-import no.idporten.eidas.proxy.integration.specificcommunication.exception.SpecificCommunicationException;
+import no.idporten.eidas.proxy.exceptions.ErrorCodes;
+import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
@@ -50,16 +51,16 @@ public class BinaryLightTokenHelper {
      * @param secret                 secret for creating the digest
      * @param algorithm              digest algorithm
      * @return the {@link BinaryLightToken} id
-     * @throws SpecificCommunicationException if the {@code algorithm} is an invalid one
+     * @throws SpecificProxyException if the {@code algorithm} is an invalid one
      */
-    public static String getBinaryLightTokenId(final @Nonnull String binaryLightTokenBase64, final String secret, final String algorithm) throws SpecificCommunicationException {
+    public static String getBinaryLightTokenId(final @Nonnull String binaryLightTokenBase64, final String secret, final String algorithm) throws SpecificProxyException {
         final String binaryLightTokenString = EidasStringUtil.decodeStringFromBase64(binaryLightTokenBase64);
 
         final BinaryLightToken binaryLightToken;
         try {
             binaryLightToken = LightTokenEncoder.decode(binaryLightTokenString.getBytes(), secret, algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new SpecificCommunicationException(e);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), e, null);
         }
 
         return binaryLightToken.getToken().getId();
@@ -98,14 +99,14 @@ public class BinaryLightTokenHelper {
      * @param secret     secret for creating the digest
      * @param algorithm  digest algorithm
      * @return {@link BinaryLightToken}
-     * @throws SpecificCommunicationException when digest algorithm could not be found.
+     * @throws SpecificProxyException when digest algorithm could not be found.
      */
-    public static BinaryLightToken createBinaryLightToken(String issuerName, String secret, String algorithm) throws SpecificCommunicationException {
+    public static BinaryLightToken createBinaryLightToken(String issuerName, String secret, String algorithm) throws SpecificProxyException {
         final LightToken lightToken = BinaryLightTokenHelper.createLightToken(issuerName);
         try {
             return LightTokenEncoder.encode(lightToken, secret, algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new SpecificCommunicationException(e);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), e, null);
         }
     }
 
