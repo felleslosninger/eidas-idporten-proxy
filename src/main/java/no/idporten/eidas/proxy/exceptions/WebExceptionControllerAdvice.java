@@ -27,22 +27,23 @@ public class WebExceptionControllerAdvice {
 
     @ExceptionHandler(SpecificProxyException.class)
     public String handleOAuth2Exception(HttpServletRequest request, HttpServletResponse response, SpecificProxyException ex) {
-        log.error("SpecificProxyException occurred for relayState: {} {}", ex.getRelayState(), ex.getMessage());
+
+        log.error("SpecificProxyException occurred for request: {} {}", ex.getlightRequest(), ex.getMessage());
 
         LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, ex);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
-        return "redirect:%s?token=%s&relayState=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64, ex.getRelayState());
+        return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
     }
 
     @ExceptionHandler(Exception.class)
     public String handleException(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, Exception ex) {
         String relayState = (String) httpSession.getAttribute(RELAY_STATE.getValue());
-        log.error("Exception occurred for relayState: {} {}", relayState, ex.getMessage());
+        log.error("Exception occurred :{}", ex.getMessage());
         LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.RESPONDER_URI, ex);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
-        return "redirect:%s?token=%s&relayState=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64, relayState);
+        return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
     }
 
 }

@@ -17,6 +17,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCReq
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
+import no.idporten.eidas.proxy.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,13 +50,18 @@ class IDPCallbackTest {
 
     @MockBean
     private SpecificCommunicationService specificCommunicationService;
+
+    @MockBean
+    private LevelOfAssuranceHelper levelOfAssuranceHelper;
     private ILightRequest mockLightRequest;
     private State state;
 
-    private AuthorizationResponse authorizationResponse;
+    private ILevelOfAssurance levelOfAssurance = LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW);
 
     @BeforeEach
     void setup() {
+        when(levelOfAssuranceHelper.hasValidAcrLevel(any(), any())).thenReturn(true);
+        when(levelOfAssuranceHelper.idportenAcrListToEidasAcr("idporten-loa-low")).thenReturn(levelOfAssurance);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
         mockLightRequest = mock(ILightRequest.class);
         state = new State("123q");
@@ -67,6 +73,7 @@ class IDPCallbackTest {
         when(authorizationResponse.getState()).thenReturn(state);
         LightResponse lightResponse = mock(LightResponse.class);
         when(specificProxyService.getErrorLightResponse(any(), any())).thenReturn(lightResponse);
+
     }
 
     @AfterEach
@@ -91,19 +98,16 @@ class IDPCallbackTest {
         when(oidcIntegrationService.getAuthorizationCode(any(AuthorizationResponse.class), any(CorrelatedRequestHolder.class))).thenReturn(authorizationCode);
         when(oidcIntegrationService.getToken(any(), any(), any())).thenReturn(oidcTokens);
         UserInfo userInfo = mock(UserInfo.class);
+
         LightResponse lightResponse = mock(LightResponse.class);
         when(lightResponse.getRelayState()).thenReturn("abc");
         when(oidcIntegrationService.getUserInfo(any())).thenReturn(userInfo);
-        when(specificProxyService.idportenAcrListToEidasAcr("idporten-loa-low")).thenReturn(LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW));
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW))).thenReturn(lightResponse);
+
+        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
-        when(specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse)).thenReturn("hello");
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW))).thenReturn(lightResponse);
-        when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
-        when(specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse)).thenReturn("hello");
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
-                .andExpect(redirectedUrl("http://junit?token=hello&relayState=abc"));
+                .andExpect(redirectedUrl("http://junit?token=hello"));
 
 
         verify(specificCommunicationService).putResponse(lightResponse);
@@ -130,17 +134,15 @@ class IDPCallbackTest {
         LightResponse lightResponse = mock(LightResponse.class);
         when(lightResponse.getRelayState()).thenReturn("abc");
         when(oidcIntegrationService.getUserInfo(any())).thenReturn(userInfo);
-        when(specificProxyService.idportenAcrListToEidasAcr("idporten-loa-low")).thenReturn(LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW));
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW))).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
-        when(specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse)).thenReturn("hello");
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW))).thenReturn(lightResponse);
+
+        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
-                .andExpect(redirectedUrl("http://junit?token=hello&relayState=abc"));
+                .andExpect(redirectedUrl("http://junit?token=hello"));
 
 
-//        verify(specificCommunicationService).putResponse(lightResponse);
     }
 
     @Test
@@ -150,7 +152,7 @@ class IDPCallbackTest {
         when(specificProxyService.getCachedRequest(state)).thenReturn(null);
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
-                .andExpect(redirectedUrl("http://junit?token=hello&relayState=null"));
+                .andExpect(redirectedUrl("http://junit?token=hello"));
 
     }
 }

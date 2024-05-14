@@ -12,6 +12,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightToke
 import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.proxy.lightprotocol.LightRequestParser;
 import no.idporten.eidas.proxy.lightprotocol.LightResponseToXML;
+import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -48,14 +49,14 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
             log.info("Storing xml response {}", xmlResponse);
         } catch (JAXBException e) {
             log.error("Failed to convert lightResponse to XML {}", e.getMessage());
-            throw new SpecificProxyException("Failed to convert lightResponse to XML", e, lightResponse.getRelayState());
+            throw new SpecificProxyException("Failed to convert lightResponse to XML", e, LightRequest.builder().relayState(lightResponse.getRelayState()).id(lightResponse.getInResponseToId()).build());
         }
         BinaryLightToken binaryLightToken = BinaryLightTokenHelper
                 .createBinaryLightToken(eidasCacheProperties.getResponseIssuerName(),
                         eidasCacheProperties.getResponseSecret(),
                         eidasCacheProperties.getAlgorithm());
         log.info("putResponse {}", binaryLightToken.getToken().getId());
-        redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(120000));//todo back to 120
+        redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(120));
         return binaryLightToken;
     }
 

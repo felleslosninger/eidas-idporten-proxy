@@ -19,29 +19,29 @@ public class IncomingLightRequestValidator {
             throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is null.", null);
         }
         if (!"NO".equals(lightRequest.getCitizenCountryCode())) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is not from Norwegian citizen.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is not from Norwegian citizen.", lightRequest);
         }
         if (lightRequest.getId().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an id.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an id.", lightRequest);
         }
         if (lightRequest.getIssuer().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an issuer.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an issuer.", lightRequest);
         }
 
         if (lightRequest.getProviderName() == null || lightRequest.getProviderName().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a provider name.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a provider name.", lightRequest);
         }
         if (lightRequest.getSpType() == null || lightRequest.getSpType().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a service provider type.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a service provider type.", lightRequest);
         }
         if (lightRequest.getSpCountryCode() == null || lightRequest.getSpCountryCode().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an SP country code.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an SP country code.", lightRequest);
         }
         if (lightRequest.getRelayState() == null || lightRequest.getRelayState().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a relay state.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a relay state.", lightRequest);
         }
         if (CollectionUtils.isEmpty(lightRequest.getRequestedAttributesList())) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing requested attributes.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing requested attributes.", lightRequest);
         }
 
         //we made it

@@ -132,7 +132,7 @@ class ProxyServiceRequestControllerTest {
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(lightRequest);
 
         mockMvc.perform(post("/ProxyServiceRequest"))
-                .andExpect(redirectedUrl("http://junit?token=hello&relayState=relayState"));
+                .andExpect(redirectedUrl("http://junit?token=hello"));
     }
 
     @Test
@@ -142,7 +142,7 @@ class ProxyServiceRequestControllerTest {
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(null);
 
         mockMvc.perform(post("/ProxyServiceRequest"))
-                .andExpect(redirectedUrl("http://junit?token=hello&relayState=null"));
+                .andExpect(redirectedUrl("http://junit?token=hello"));
     }
 
     @Test
@@ -152,6 +152,6 @@ class ProxyServiceRequestControllerTest {
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenThrow(new RedisConnectionException("Internal error"));
 
         mockMvc.perform(post("/ProxyServiceRequest"))
-                .andExpect(redirectedUrl("http://junit?token=hello&relayState=null"));
+                .andExpect(redirectedUrl("http://junit?token=hello"));
     }
 }

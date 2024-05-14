@@ -73,7 +73,7 @@ public class ProxyServiceRequestController {
         final ILightRequest lightRequest = getIncomingiLightRequest(httpServletRequest, null);
 
         if (!IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is invalid. Rejecting request.", lightRequest.getRelayState());
+            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is invalid. Rejecting request.", lightRequest);
         }
         //skip consent flow for now
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);

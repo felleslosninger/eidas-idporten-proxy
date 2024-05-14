@@ -19,6 +19,7 @@
 package no.idporten.eidas.proxy.exceptions;
 
 import eu.eidas.auth.commons.exceptions.AbstractEIDASException;
+import eu.eidas.auth.commons.light.ILightRequest;
 
 /**
  * This exception is thrown when a catchable exception occurred within
@@ -28,35 +29,35 @@ import eu.eidas.auth.commons.exceptions.AbstractEIDASException;
  */
 public class SpecificProxyException extends AbstractEIDASException {
 
-    private String relayState;
+    private ILightRequest lightRequest;
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final String relayState) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final ILightRequest lightRequest) {
         super(errorCode, errorMessage);
-        this.relayState = relayState;
+        this.lightRequest = lightRequest;
     }
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final String relayState) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final ILightRequest lightRequest) {
         super(errorCode, errorMessage, additionalInformation);
-        this.relayState = relayState;
+        this.lightRequest = lightRequest;
     }
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final Throwable cause, final String relayState) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final Throwable cause, final ILightRequest lightRequest) {
         super(errorCode, errorMessage, cause);
-        this.relayState = relayState;
+        this.lightRequest = lightRequest;
     }
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final Throwable cause, final String relayState) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final Throwable cause, final ILightRequest lightRequest) {
         super(errorCode, errorMessage, additionalInformation, cause);
-        this.relayState = relayState;
+        this.lightRequest = lightRequest;
     }
 
-    public SpecificProxyException(String message, Throwable cause, final String relayState) {
+    public SpecificProxyException(String message, Throwable cause, final ILightRequest lightRequest) {
         super(message, cause.getMessage());
-        this.relayState = relayState;
+        this.lightRequest = lightRequest;
     }
 
-    public String getRelayState() {
-        return this.relayState;
+    public ILightRequest getlightRequest() {
+        return this.lightRequest;
     }
 
 }
