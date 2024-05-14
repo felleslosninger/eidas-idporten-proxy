@@ -11,10 +11,8 @@ spring:
   data:
     redis:
       password: ${REDIS_PASSWORD}
-      sentinel:
-        master: mymaster
-        nodes: eidas-redis-sentinel-headless:26379
-        password: ${REDIS_PASSWORD}
+      port: 6379
+      host: eidas-redis-sentinel-master
 eidas:
   cache:
     response-secret: ${LIGHT_TOKEN_PROXYSERVICE_RESPONSE_SECRET}
