@@ -16,7 +16,7 @@ public class EidasCacheProperties {
     private static final String PREFIX_TEMPLATE = "%s:%s";
 
     private long lightResponseLifetimeSeconds = 120;
-    private long oidcRequestStateLifetimeSeconds = 60;
+    private long oidcRequestStateLifetimeSeconds = 700;
     private String requestSecret;
     private String responseSecret;
     private String algorithm = "SHA256";
