@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>no.idporten.eidas</groupId>
-    <artifactId>eidas-proxy</artifactId>
+    <artifactId>eidas-idporten-proxy</artifactId>
     <version>DEV-SNAPSHOT</version>
     <name>eidas-proxy</name>
     <description>Specific eidas-proxy for Norway</description>
