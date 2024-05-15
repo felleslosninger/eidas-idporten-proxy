@@ -40,7 +40,7 @@ spring:
     log-startup-info: false
   web:
     resources:
-      add-mappings: false
+      add-mappings: true
   cache:
     type: redis
   data:
