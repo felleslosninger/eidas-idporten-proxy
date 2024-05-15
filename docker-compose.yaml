@@ -13,7 +13,7 @@ services:
   #    networks:
   #      - eidas
   #    command: redis-server --maxmemory-policy allkeys-lru
-  eidas-proxy:
+  idporten-proxy:
     build:
       context: .
       dockerfile: docker/dev.Dockerfile
