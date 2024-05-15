@@ -1,7 +1,7 @@
 # eidas-idporten-proxy
 
 Eidas-idporten-proxy as specific proxy for service for Norway from ID-porten.
-Cache for LightProtocol requests and responses. Must match names that the eu-eidas-proxy uses.
+Cache for LightProtocol requests and responses. Must match names that the eidas-proxy uses.
 
 ## Configuration
 
