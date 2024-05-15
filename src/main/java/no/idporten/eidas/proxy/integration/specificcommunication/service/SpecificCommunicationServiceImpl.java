@@ -56,7 +56,7 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
                         eidasCacheProperties.getResponseSecret(),
                         eidasCacheProperties.getAlgorithm());
         log.info("putResponse {}", binaryLightToken.getToken().getId());
-        redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(120));
+        redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(eidasCacheProperties.getLightResponseLifetimeSeconds()));
         return binaryLightToken;
     }
 
@@ -67,18 +67,12 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
     }
 
     /**
-     * Only used by fakeit-controller
+     * eidas-idporten-proxy does not send lightrequests
      */
     @Override
     public BinaryLightToken putRequest(ILightRequest iLightRequest) throws SpecificProxyException {
 
-        BinaryLightToken binaryLightToken = BinaryLightTokenHelper
-                .createBinaryLightToken(eidasCacheProperties.getRequestIssuerName(),
-                        eidasCacheProperties.getRequestSecret(),
-                        eidasCacheProperties.getAlgorithm());
-
-        redisCache.set(eidasCacheProperties.getLightRequestPrefix(binaryLightToken.getToken().getId()), iLightRequest, Duration.ofSeconds(120));
-        return binaryLightToken;
+        throw new UnsupportedOperationException("Not relevant for this service implementation");
 
     }
 }

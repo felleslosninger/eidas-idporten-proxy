@@ -33,13 +33,14 @@ import java.time.Duration;
  * @since 1.1
  */
 public abstract class AbstractCorrelationMap<T> implements CorrelationMap<T> {
+    private final long lifetimeInSeconds;
 
     @javax.annotation.Nonnull
     protected RedisCache<String, T> redisCache;
 
-    protected AbstractCorrelationMap(RedisCache redisCache) {
+    protected AbstractCorrelationMap(RedisCache redisCache, long lifetimeInSeconds) {
         this.redisCache = redisCache;
-
+        this.lifetimeInSeconds = lifetimeInSeconds;
     }
 
     @javax.annotation.Nullable
