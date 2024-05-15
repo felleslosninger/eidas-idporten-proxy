@@ -86,7 +86,7 @@ public class ProxyServiceRequestController {
                     .toURI();
             return "redirect:%s".formatted(authUri.toString());
         } catch (OAuthException e) {
-            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider", lightRequest);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider: %s".formatted(e.getMessage()), lightRequest);
         }
     }
 

@@ -63,7 +63,7 @@ public class IDPCallback {
 
             return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
         } catch (OAuthException e) {
-            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider", cachedRequest.getiLightRequest());
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider: %s".formatted(e.getMessage()), cachedRequest.getiLightRequest());
         }
     }
 
