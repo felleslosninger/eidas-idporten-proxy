@@ -54,7 +54,7 @@ eidas:
     issuer-name: specificCommunicationDefinitionProxyserviceResponse
     algorithm: SHA-256
     light-response-lifetime-seconds: 120
-    oidc-request-state-lifetime-seconds: 60
+    oidc-request-state-lifetime-seconds: 700
   acr:
     supported-acr-values:
       - http://eidas.europa.eu/LoA/low
