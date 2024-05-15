@@ -15,7 +15,8 @@ public class EidasCacheProperties {
     public static final String IDP_REQUEST = "correlation-map";
     private static final String PREFIX_TEMPLATE = "%s:%s";
 
-
+    private long lightResponseLifetimeSeconds = 120;
+    private long oidcRequestStateLifetimeSeconds = 700;
     private String requestSecret;
     private String responseSecret;
     private String algorithm = "SHA256";
