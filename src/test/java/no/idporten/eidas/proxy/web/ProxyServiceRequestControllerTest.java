@@ -105,7 +105,7 @@ class ProxyServiceRequestControllerTest {
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(lightRequest);
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(new URI("http://example.com"), new ClientID("123")).build();
-        when(oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest)).thenReturn(new URI("http://redirect-url.com"));
+        when(oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest, lightRequest)).thenReturn(new URI("http://redirect-url.com"));
         when(oidcIntegrationService.getAuthorizationEndpoint()).thenReturn(new URI("http://authorization-endpoint.com"));
 
         when(specificProxyService.translateNodeRequest(lightRequest)).thenReturn(authenticationRequest);

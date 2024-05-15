@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.exceptions.ErrorCodes;
 import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
+import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
@@ -48,17 +49,22 @@ public class IDPCallback {
             throw new SpecificProxyException(ErrorCodes.INVALID_SESSION.getValue(), "No request found in eidas-idporten-proxy for state %s after idpcallback. ".formatted(authorizationResponse.getState()), null);
         }
 
+        try {
+            AuthorizationCode code = oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest);
+            OIDCTokens tokens = oidcIntegrationService.getToken(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
 
-        AuthorizationCode code = oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest);
-        OIDCTokens tokens = oidcIntegrationService.getToken(code, cachedRequest.getAuthenticationRequest().getCodeVerifier(), cachedRequest.getAuthenticationRequest().getNonce());
+            UserInfo userInfo = oidcIntegrationService.getUserInfo(tokens);
 
-        UserInfo userInfo = oidcIntegrationService.getUserInfo(tokens);
-        ILevelOfAssurance acrClaim = getAcrClaim(tokens.getIDToken().getJWTClaimsSet(), cachedRequest);
-        LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), acrClaim);
-        String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
-        specificCommunicationService.putResponse(lightResponse);
+            ILevelOfAssurance acrClaim = getAcrClaim(tokens.getIDToken().getJWTClaimsSet(), cachedRequest);
+            LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), acrClaim);
 
-        return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
+            String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
+            specificCommunicationService.putResponse(lightResponse);
+
+            return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
+        } catch (OAuthException e) {
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider", cachedRequest.getiLightRequest());
+        }
     }
 
     private ILevelOfAssurance getAcrClaim(JWTClaimsSet claimsSet, CorrelatedRequestHolder cachedRequest) throws ParseException, SpecificProxyException {

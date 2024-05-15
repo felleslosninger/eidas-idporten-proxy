@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.exceptions.ErrorCodes;
 import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
+import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.BinaryLightTokenHelper;
 import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
@@ -77,12 +78,16 @@ public class ProxyServiceRequestController {
         }
         //skip consent flow for now
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
-        URI uri = oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest);
-        URI authUri = new AuthorizationRequest.Builder(uri, authenticationRequest.getClientID())
-                .endpointURI(oidcIntegrationService.getAuthorizationEndpoint())
-                .build()
-                .toURI();
-        return "redirect:%s".formatted(authUri.toString());
+        try {
+            URI uri = oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest);
+            URI authUri = new AuthorizationRequest.Builder(uri, authenticationRequest.getClientID())
+                    .endpointURI(oidcIntegrationService.getAuthorizationEndpoint())
+                    .build()
+                    .toURI();
+            return "redirect:%s".formatted(authUri.toString());
+        } catch (OAuthException e) {
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider", lightRequest);
+        }
     }
 
     private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException, SpecificProxyException {
