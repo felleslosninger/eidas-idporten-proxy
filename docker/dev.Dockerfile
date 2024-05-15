@@ -19,7 +19,7 @@ RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentat
 
 FROM eclipse-temurin:21-jre-jammy
 
-ARG APPLICATION=idporten-proxy
+ARG APPLICATION=eidas-idporten-proxy
 RUN mkdir /var/log/${APPLICATION}
 RUN mkdir /usr/local/webapps
 WORKDIR /usr/local/webapps

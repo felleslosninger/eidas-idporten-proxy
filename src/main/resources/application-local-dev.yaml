@@ -27,8 +27,6 @@ eidas:
     redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
   cache:
     secret: mySecretProxyserviceResponse
-    algorithm: SHA-256
-    issuer-name: specificCommunicationDefinitionProxyserviceResponse
   oidc-integration:
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
