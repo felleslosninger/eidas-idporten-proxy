@@ -17,7 +17,7 @@ jobs:
   build-publish-image:
     uses: felleslosninger/github-workflows/.github/workflows/ci-spring-boot-build-publish-image.yml@main
     with:
-      image-name: eidas-proxy
+      image-name: eidas-idporten-proxy
       java-version: 21
     secrets: inherit
 
@@ -25,10 +25,10 @@ jobs:
     uses: felleslosninger/github-workflows/.github/workflows/ci-call-update-image.yml@main
     needs: build-publish-image
     with:
-      application-name: eidas-proxy
+      application-name: eidas-idporten-proxy
       deployment-environment: systest
       image-digest: ${{ needs.build-publish-image.outputs.image-digest }}
-      image-name: eidas-proxy
+      image-name: eidas-idporten-proxy
       image-version: ${{ needs.build-publish-image.outputs.image-version }}
       kubernetes-repo: idporten-cd
       product-name: eidas
