@@ -18,7 +18,7 @@ eidas:
     response-secret: ${LIGHT_TOKEN_PROXYSERVICE_RESPONSE_SECRET}
     request-secret: ${LIGHT_TOKEN_PROXYSERVICE_REQUEST_SECRET}
   eu-proxy:
-    redirect-uri: https://eidas-proxy.idporten.dev/SpecificProxyServiceResponse
+    redirect-uri: https://proxy.eidasnode.dev/SpecificProxyServiceResponse
   oidc-integration:
     issuer: https://idporten.dev
     client-id: eidas-proxy-client-dev
