@@ -12,8 +12,6 @@ import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import static eu.eidas.auth.commons.EidasParameterKeys.RELAY_STATE;
-
 /**
  * Exception handling for eidas-idporten-proxy.
  */
@@ -38,7 +36,6 @@ public class WebExceptionControllerAdvice {
 
     @ExceptionHandler(Exception.class)
     public String handleException(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, Exception ex) {
-        String relayState = (String) httpSession.getAttribute(RELAY_STATE.getValue());
         log.error("Exception occurred :{}", ex.getMessage());
         LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.RESPONDER_URI, ex);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);

@@ -21,7 +21,7 @@ digdir:
 
 eidas:
   eu-proxy:
-    redirect-uri: http://eu-eidas-proxy:8082/SpecificProxyServiceResponse
+    redirect-uri: http://eidas-proxy:8082/SpecificProxyServiceResponse
   cache:
     response-secret: mySecretProxyserviceResponse
     request-secret: mySecretProxyserviceRequest
