@@ -1,0 +1,27 @@
+management:
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+spring:
+  application:
+    environment: test
+  main:
+    log-startup-info: true
+  data:
+    redis:
+      password: ${REDIS_PASSWORD}
+      port: 6379
+      host: eidas-redis-sentinel-master
+eidas:
+  cache:
+    response-secret: ${LIGHT_TOKEN_PROXYSERVICE_RESPONSE_SECRET}
+    request-secret: ${LIGHT_TOKEN_PROXYSERVICE_REQUEST_SECRET}
+  eu-proxy:
+    redirect-uri: https://proxy.eidasnode.no/SpecificProxyServiceResponse
+  oidc-integration:
+    issuer: https://idporten.no
+    client-id: eidas-proxy-client-prod
+    client-auth-method: client_secret_basic
+    client-secret: ${EIDAS_CLIENT_SECRET}
+    redirect-uri: https://idporten-proxy.eidasnode.no/idpcallback
