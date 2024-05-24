@@ -24,4 +24,4 @@ eidas:
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
     client-secret: ${EIDAS_CLIENT_SECRET}
-    redirect-uri: http://idporten-proxy.eidasnode.dev/idpcallback
+    redirect-uri: https://idporten-proxy.eidasnode.dev/idpcallback
