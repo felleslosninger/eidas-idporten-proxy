@@ -1,13 +1,12 @@
 management:
   endpoint:
     health:
-      show-details: always
+      show-details: never
       show-components: always
 spring:
   application:
-    environment: systest
-  main:
-    log-startup-info: true
+    environment: test
+
   data:
     redis:
       password: ${REDIS_PASSWORD}
@@ -18,10 +17,10 @@ eidas:
     response-secret: ${LIGHT_TOKEN_PROXYSERVICE_RESPONSE_SECRET}
     request-secret: ${LIGHT_TOKEN_PROXYSERVICE_REQUEST_SECRET}
   eu-proxy:
-    redirect-uri: https://proxy.eidasnode.dev/SpecificProxyServiceResponse
+    redirect-uri: https://proxy.eidasnode.no/SpecificProxyServiceResponse
   oidc-integration:
-    issuer: https://idporten.dev
-    client-id: eidas-proxy-client-dev
+    issuer: https://idporten.no
+    client-id: eidas-proxy-client-prod
     client-auth-method: client_secret_basic
     client-secret: ${EIDAS_CLIENT_SECRET}
-    redirect-uri: https://idporten-proxy.eidasnode.dev/idpcallback
+    redirect-uri: https://idporten-proxy.eidasnode.no/idpcallback
