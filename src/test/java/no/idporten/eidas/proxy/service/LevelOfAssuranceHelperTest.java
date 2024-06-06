@@ -31,9 +31,16 @@ class LevelOfAssuranceHelperTest {
         when(acrPropertiesMock.getSupportedAcrValues()).thenReturn(List.of("http://eidas.europa.eu/LoA/low",
                 "http://eidas.europa.eu/LoA/substantial",
                 "http://eidas.europa.eu/LoA/high"));
-        when(acrPropertiesMock.getAcrValueMap()).thenReturn(Map.of("idporten-loa-low", "http://eidas.europa.eu/LoA/low",
+        when(acrPropertiesMock.getAcrValueMapFromIdporten()).thenReturn(Map.of("idporten-loa-low", "http://eidas.europa.eu/LoA/low",
                 "idporten-loa-substantial", "http://eidas.europa.eu/LoA/substantial",
                 "idporten-loa-high", "http://eidas.europa.eu/LoA/high"));
+
+        when(acrPropertiesMock.getAcrValueMapToIdporten()).thenReturn(Map.of(
+                "http://eidas.europa.eu/LoA/low", "no-notified-low",
+                "http://eidas.europa.eu/LoA/substantial", "no-notified-substantial",
+                "http://eidas.europa.eu/LoA/high", "no-notified-high"
+        ));
+
     }
 
     @Test
@@ -87,7 +94,7 @@ class LevelOfAssuranceHelperTest {
                 LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL),
                 LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_HIGH)));
         assertEquals(3, idportenAcr.size());
-        assertEquals(List.of("idporten-loa-low", "idporten-loa-substantial", "idporten-loa-high"), idportenAcr);
+        assertEquals(List.of("no-notified-low", "no-notified-substantial", "no-notified-high"), idportenAcr);
     }
 
     @Test

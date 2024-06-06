@@ -7,7 +7,6 @@ import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Representation of Level of Assurance
@@ -42,20 +41,13 @@ public class LevelOfAssuranceHelper {
     }
 
     protected List<String> eidasAcrListToIdportenAcrList(List<ILevelOfAssurance> acrLevels) {
-        Map<String, String> acrValueMap = acrProperties.getAcrValueMap();
         return acrLevels.stream()
-                .map(a -> {
-                    String eidasAcr = a.getValue();
-                    return acrValueMap.entrySet().stream()
-                            .filter(entry -> entry.getValue().equals(eidasAcr))
-                            .map(Map.Entry::getKey)
-                            .findFirst()
-                            .orElse("idporten-loa-low");
-                })
+                .map(ILevelOfAssurance::getValue)
+                .map(acrProperties.getAcrValueMapToIdporten()::get)
                 .toList();
     }
 
     public ILevelOfAssurance idportenAcrListToEidasAcr(String idportenAcrLevel) {
-        return LevelOfAssurance.fromString(acrProperties.getAcrValueMap().get(idportenAcrLevel));
+        return LevelOfAssurance.fromString(acrProperties.getAcrValueMapFromIdporten().get(idportenAcrLevel));
     }
 }

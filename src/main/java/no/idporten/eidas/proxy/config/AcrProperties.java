@@ -24,10 +24,13 @@ public class AcrProperties implements InitializingBean {
     private List<String> supportedAcrValues;
 
     @NotEmpty
-    private Map<String, String> acrValueMap;
+    private Map<String, String> acrValueMapToIdporten;
+
+    @NotEmpty
+    private Map<String, String> acrValueMapFromIdporten;
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        log.info("Loaded Acr Proxy properties: supported {} and acrValueMap {}", this.supportedAcrValues, this.acrValueMap.entrySet());
+        log.info("Loaded Acr Proxy properties: supported {}, acrValueMapToIdporten {} and acrValueMapFromIdporten {}", this.supportedAcrValues, this.acrValueMapToIdporten.entrySet(), this.acrValueMapFromIdporten.entrySet());
     }
 }

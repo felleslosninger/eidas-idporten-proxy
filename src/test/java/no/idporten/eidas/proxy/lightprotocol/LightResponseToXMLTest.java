@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class LightResponseToXMLTest {
@@ -30,6 +31,7 @@ class LightResponseToXMLTest {
         try {
             String xml = LightResponseToXML.toXml(lightResponse);
             assertNotNull(xml);
+            assertFalse(xml.contains("ns2:"), "should not include any namespace prefix (ns2:)");
         } catch (JAXBException e) {
             fail("Failed to serialize to XML %s : %s: %s", e.getErrorCode(), e.getMessage(), e.getCause());
             ;
