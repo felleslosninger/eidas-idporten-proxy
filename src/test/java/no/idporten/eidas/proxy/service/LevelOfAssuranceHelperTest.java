@@ -1,47 +1,22 @@
 package no.idporten.eidas.proxy.service;
 
 import eu.eidas.auth.commons.light.ILevelOfAssurance;
-import no.idporten.eidas.proxy.config.AcrProperties;
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @DisplayName("When checking level of assurance")
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 class LevelOfAssuranceHelperTest {
 
-    @Mock
-    private AcrProperties acrPropertiesMock;
-    @InjectMocks
+    @Autowired
     private LevelOfAssuranceHelper levelOfAssuranceHelper;
-
-    @BeforeEach
-    void setup() {
-        when(acrPropertiesMock.getSupportedAcrValues()).thenReturn(List.of("http://eidas.europa.eu/LoA/low",
-                "http://eidas.europa.eu/LoA/substantial",
-                "http://eidas.europa.eu/LoA/high"));
-        when(acrPropertiesMock.getAcrValueMapFromIdporten()).thenReturn(Map.of("idporten-loa-low", "http://eidas.europa.eu/LoA/low",
-                "idporten-loa-substantial", "http://eidas.europa.eu/LoA/substantial",
-                "idporten-loa-high", "http://eidas.europa.eu/LoA/high"));
-
-        when(acrPropertiesMock.getAcrValueMapToIdporten()).thenReturn(Map.of(
-                "http://eidas.europa.eu/LoA/low", "no-notified-low",
-                "http://eidas.europa.eu/LoA/substantial", "no-notified-substantial",
-                "http://eidas.europa.eu/LoA/high", "no-notified-high"
-        ));
-
-    }
 
     @Test
     @DisplayName("then substantial must be allowed if requested value was substantial and high")
