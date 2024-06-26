@@ -5,12 +5,14 @@ import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightRequest;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.eidas.proxy.logging.AuditIdPattern;
 import no.idporten.logging.audit.AuditEntry;
 import no.idporten.logging.audit.AuditEntryProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Serial;
 import java.util.List;
+import java.util.Map;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -80,12 +82,16 @@ public class LightRequest implements ILightRequest, AuditEntryProvider {
     @Override
     public AuditEntry getAuditEntry() {
         return AuditEntry.builder()
-                .attribute("id", id)
-                .attribute("relay_state", relayState)
-                .attribute("citizen_country_code", citizenCountryCode)
-                .attribute("level_of_assurance_requested", levelOfAssurance)
-                .attribute("sp_country_code", spCountryCode)
-                .attribute("requested_attributes", requestedAttributes)
+                .auditId(AuditIdPattern.EIDAS_LIGHT_REQUEST.auditIdentifier())
+                .attribute("light_request", Map.of(
+                        "id", id,
+                        "relay_state", relayState,
+                        "citizen_country_code", citizenCountryCode,
+                        "level_of_assurance_requested", levelOfAssurance,
+                        "sp_country_code", spCountryCode,
+                        "requested_attributes", requestedAttributes
+                ))
+                .logNullAttributes(false)
                 .build();
     }
 }
