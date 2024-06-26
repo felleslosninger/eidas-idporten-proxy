@@ -17,6 +17,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCReq
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
+import no.idporten.eidas.proxy.logging.AuditService;
 import no.idporten.eidas.proxy.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.AfterEach;
@@ -50,6 +51,8 @@ class IDPCallbackTest {
 
     @MockBean
     private SpecificCommunicationService specificCommunicationService;
+    @MockBean
+    private AuditService auditService;
 
     @MockBean
     private LevelOfAssuranceHelper levelOfAssuranceHelper;
@@ -111,6 +114,7 @@ class IDPCallbackTest {
 
 
         verify(specificCommunicationService).putResponse(lightResponse);
+        verify(auditService).auditLightResponse(lightResponse);
     }
 
     @Test
@@ -141,7 +145,7 @@ class IDPCallbackTest {
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-
+        verify(auditService).auditLightResponse(lightResponse);
 
     }
 
@@ -153,6 +157,6 @@ class IDPCallbackTest {
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-
+        verify(auditService).auditLightResponse(any());
     }
 }
