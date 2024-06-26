@@ -38,6 +38,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCac
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.IncomingLightRequestValidator;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
+import no.idporten.eidas.proxy.logging.AuditService;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,6 +68,7 @@ public class ProxyServiceRequestController {
     private final SpecificProxyService specificProxyService;
     private final EidasCacheProperties eidasCacheProperties;
     private final OIDCIntegrationService oidcIntegrationService;
+    private final AuditService auditService;
 
     @RequestMapping(path = "/ProxyServiceRequest", method = {RequestMethod.GET, RequestMethod.POST})
     public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException, SpecificProxyException {
@@ -76,6 +78,7 @@ public class ProxyServiceRequestController {
         if (!IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
             throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is invalid. Rejecting request.", lightRequest);
         }
+        auditService.auditLightRequest((LightRequest) lightRequest);
         //skip consent flow for now
         final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
         try {

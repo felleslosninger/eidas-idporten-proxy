@@ -19,6 +19,7 @@ import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.RequestedAttribute;
+import no.idporten.eidas.proxy.logging.AuditService;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,8 @@ class ProxyServiceRequestControllerTest {
 
     @MockBean
     private OIDCIntegrationService oidcIntegrationService;
-
+    @MockBean
+    private AuditService auditService;
     private final static String lightTokenId = "mockedLightTokenId";
 
     private ILightRequest mockLightRequest;
@@ -112,6 +114,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://authorization-endpoint.com?client_id=123&request_uri=http%3A%2F%2Fredirect-url.com"));
+        verify(auditService).auditLightRequest(lightRequest);
     }
 
     @Test
@@ -133,6 +136,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
+        verify(auditService).auditLightResponse(any(LightResponse.class));
     }
 
     @Test
@@ -143,6 +147,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
+        verify(auditService).auditLightResponse(any(LightResponse.class));
     }
 
     @Test
@@ -153,5 +158,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
+        verify(auditService).auditLightResponse(any(LightResponse.class));
     }
+
 }

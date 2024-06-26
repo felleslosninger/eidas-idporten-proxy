@@ -5,6 +5,8 @@ import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightRequest;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.logging.audit.AuditEntry;
+import no.idporten.logging.audit.AuditEntryProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Serial;
@@ -18,7 +20,7 @@ import java.util.List;
 @ToString(exclude = "requestedAttributes")
 @EqualsAndHashCode
 @Builder
-public class LightRequest implements ILightRequest {
+public class LightRequest implements ILightRequest, AuditEntryProvider {
     @Serial
     private static final long serialVersionUID = 1L;
     @XmlElement(namespace = "http://cef.eidas.eu/LightRequest")
@@ -75,6 +77,16 @@ public class LightRequest implements ILightRequest {
         return issuer;
     }
 
-
+    @Override
+    public AuditEntry getAuditEntry() {
+        return AuditEntry.builder()
+                .attribute("id", id)
+                .attribute("relay_state", relayState)
+                .attribute("citizen_country_code", citizenCountryCode)
+                .attribute("level_of_assurance", levelOfAssurance)
+                .attribute("sp_country_code", spCountryCode)
+                .attribute("requested_attributes", requestedAttributes)
+                .build();
+    }
 }
 

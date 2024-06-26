@@ -16,6 +16,7 @@ import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
+import no.idporten.eidas.proxy.logging.AuditService;
 import no.idporten.eidas.proxy.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.stereotype.Controller;
@@ -37,6 +38,7 @@ public class IDPCallback {
     private final OIDCIntegrationService oidcIntegrationService;
     private final SpecificCommunicationService specificCommunicationService;
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;
+    private final AuditService auditService;
 
 
     @GetMapping("/idpcallback")
@@ -57,7 +59,7 @@ public class IDPCallback {
 
             ILevelOfAssurance acrClaim = getAcrClaim(tokens.getIDToken().getJWTClaimsSet(), cachedRequest);
             LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), acrClaim);
-
+            auditService.auditLightResponse(lightResponse);
             String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
             specificCommunicationService.putResponse(lightResponse);
 
