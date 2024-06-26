@@ -100,7 +100,7 @@ public class LightResponse implements ILightResponse, AuditEntryProvider {
                 .attribute("in_response_to_id", inResponseToId)
                 .attribute("relay_state", relayState)
                 .attribute("country_code", citizenCountryCode)
-                .attribute("level_of_assurance", levelOfAssurance)
+                .attribute("level_of_assurance_received", levelOfAssurance)
                 .attribute("sub", subject)
                 .attribute("attributes", attributes)
                 .build();
