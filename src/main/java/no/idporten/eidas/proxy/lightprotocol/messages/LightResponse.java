@@ -5,6 +5,8 @@ import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.light.IResponseStatus;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
+import no.idporten.logging.audit.AuditEntry;
+import no.idporten.logging.audit.AuditEntryProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,7 +21,7 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LightResponse implements ILightResponse {
+public class LightResponse implements ILightResponse, AuditEntryProvider {
     @Serial
     private static final long serialVersionUID = 1L;
     @XmlElement
@@ -91,6 +93,18 @@ public class LightResponse implements ILightResponse {
         return issuer;
     }
 
+    @Override
+    public AuditEntry getAuditEntry() {
+        return AuditEntry.builder()
+                .attribute("status", status)
+                .attribute("in_response_to_id", inResponseToId)
+                .attribute("relay_state", relayState)
+                .attribute("country_code", citizenCountryCode)
+                .attribute("level_of_assurance_returned", levelOfAssurance)
+                .attribute("sub", subject)
+                .attribute("attributes", attributes)
+                .build();
+    }
 
 }
 
