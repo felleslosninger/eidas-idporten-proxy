@@ -114,7 +114,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
         all.put("citizen_country_code", citizenCountryCode);
         all.put("level_of_assurance", levelOfAssurance);
         all.put("sub", subject);
-        all.put("attributes", attributes != null ? attributes.stream().map(Attribute::toString).toList() : null);
+        all.put("attributes", attributes != null ? attributes.stream().map(a -> "%s=%s".formatted(a.getDefinition(), a.getValue())).toList() : null);
         all.values().removeIf(Objects::isNull);
         return Map.copyOf(all); // Immutable map throws NPE if values (or keys) is null
     }

@@ -33,7 +33,7 @@ class LightRequestTest {
     private static LightRequest createLightRequest() {
         return LightRequest.builder()
                 .id("id")
-                .requestedAttributes(List.of(new RequestedAttribute()))
+                .requestedAttributes(List.of(new RequestedAttribute("value", "definition")))
                 .relayState("state")
                 .citizenCountryCode("CA")
                 .spCountryCode("CB")
