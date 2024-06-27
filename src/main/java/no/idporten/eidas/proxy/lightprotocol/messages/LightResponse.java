@@ -8,12 +8,15 @@ import lombok.*;
 import no.idporten.eidas.proxy.logging.AuditIdPattern;
 import no.idporten.logging.audit.AuditEntry;
 import no.idporten.logging.audit.AuditEntryProvider;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serial;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @XmlRootElement(name = "lightResponse", namespace = "http://cef.eidas.eu/LightResponse")
 @XmlType
@@ -99,18 +102,23 @@ public class LightResponse implements ILightResponse, AuditEntryProvider {
     public AuditEntry getAuditEntry() {
         return AuditEntry.builder()
                 .auditId(AuditIdPattern.EIDAS_LIGHT_RESPONSE.auditIdentifier())
-                .attribute("light_response", Map.of(
-                        "id", id,
-                        "issuer", issuer,
-                        "status", status,
-                        "in_response_to_id", inResponseToId,
-                        "relay_state", relayState,
-                        "country_code", citizenCountryCode,
-                        "level_of_assurance_returned", levelOfAssurance,
-                        "sub", subject,
-                        "attributes", attributes
-                ))
+                .attribute("light_response", createMapForAuditLogging())
                 .build();
+    }
+
+    private Map<String, Object> createMapForAuditLogging() {
+        HashMap<String, Object> all = new HashMap<>();
+        all.put("id", id);
+        all.put("issuer", issuer);
+        all.put("status", status);
+        all.put("in_response_to_id", inResponseToId);
+        all.put("relay_state", relayState);
+        all.put("citizen_country_code", citizenCountryCode);
+        all.put("level_of_assurance", levelOfAssurance);
+        all.put("sub", subject);
+        all.put("attributes", attributes);
+        all.values().removeIf(Objects::isNull);
+        return Map.copyOf(all); // Immutable map throws NPE if values (or keys) is null
     }
 
 }
