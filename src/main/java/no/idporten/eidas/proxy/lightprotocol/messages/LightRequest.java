@@ -5,9 +5,8 @@ import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import eu.eidas.auth.commons.light.ILightRequest;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
-import no.idporten.eidas.proxy.logging.AuditIdPattern;
-import no.idporten.logging.audit.AuditEntry;
-import no.idporten.logging.audit.AuditEntryProvider;
+import no.idporten.logging.audit.AuditData;
+import no.idporten.logging.audit.AuditDataProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Serial;
@@ -24,7 +23,7 @@ import java.util.Objects;
 @ToString(exclude = "requestedAttributes")
 @EqualsAndHashCode
 @Builder
-public class LightRequest implements ILightRequest, AuditEntryProvider {
+public class LightRequest implements ILightRequest, AuditDataProvider {
     @Serial
     private static final long serialVersionUID = 1L;
     @XmlElement(namespace = "http://cef.eidas.eu/LightRequest")
@@ -82,11 +81,9 @@ public class LightRequest implements ILightRequest, AuditEntryProvider {
     }
 
     @Override
-    public AuditEntry getAuditEntry() {
-        return AuditEntry.builder()
-                .auditId(AuditIdPattern.EIDAS_LIGHT_REQUEST.auditIdentifier())
-                .attribute("light_request", createMapForAuditLogging())
-                .logNullAttributes(false)
+    public AuditData getAuditData() {
+        return AuditData.builder()
+                .attributes(createMapForAuditLogging())
                 .build();
     }
 
@@ -95,9 +92,9 @@ public class LightRequest implements ILightRequest, AuditEntryProvider {
         all.put("id", id);
         all.put("relay_state", relayState);
         all.put("citizen_country_code", citizenCountryCode);
-        all.put("level_of_assurance", levelOfAssurance);
+        all.put("level_of_assurance", levelOfAssurance != null ? levelOfAssurance.getValue() : null);
         all.put("sp_country_code", spCountryCode);
-        all.put("attributes", requestedAttributes);
+        all.put("attributes", requestedAttributes != null ? requestedAttributes.stream().map(RequestedAttribute::toString).toList() : null);
         all.values().removeIf(Objects::isNull);
         return Map.copyOf(all); // Immutable map throws NPE if values (or keys) is null
     }

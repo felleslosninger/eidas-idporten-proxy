@@ -3,37 +3,29 @@ package no.idporten.eidas.proxy.lightprotocol;
 import no.idporten.eidas.proxy.lightprotocol.messages.Attribute;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.Status;
-import no.idporten.eidas.proxy.logging.AuditIdPattern;
-import no.idporten.logging.audit.AuditEntry;
+import no.idporten.logging.audit.AuditData;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-public class LightResponseTest {
+class LightResponseTest {
 
     @Test
-    public void getAuditEntryWhenEmtpyThenDoesNotFailAndLoggesEmptyResponse() {
-        AuditEntry auditEntry = new LightResponse().getAuditEntry();
-        assertNotNull(auditEntry);
-        assertEquals(AuditIdPattern.EIDAS_LIGHT_RESPONSE.auditIdentifier().auditId(), auditEntry.getAuditId().auditId());
-        assertEquals(1, auditEntry.getAttributes().size());
-        assertNotNull(auditEntry.getAttribute("light_response"));
-        Map lightResponse = (Map) auditEntry.getAttribute("light_response");
-        assertEquals(0, lightResponse.size());
+    void getAuditDataWhenEmtpyThenDoesNotFailAndLoggesEmptyResponse() {
+        AuditData auditData = new LightResponse().getAuditData();
+        assertNotNull(auditData);
+        assertNotNull(auditData.getAttributes());
+        assertEquals(0, auditData.getAttributes().size());
 
     }
 
     @Test
-    public void getAuditEntryWhenResponseHasAll9AttributesThenLoggesAllAttributes() {
-        AuditEntry auditEntry = createLightResponse().getAuditEntry();
-        assertNotNull(auditEntry);
-        assertEquals(AuditIdPattern.EIDAS_LIGHT_RESPONSE.auditIdentifier().auditId(), auditEntry.getAuditId().auditId());
-        assertEquals(1, auditEntry.getAttributes().size());
-        assertNotNull(auditEntry.getAttribute("light_response"));
-        Map lightResponse = (Map) auditEntry.getAttribute("light_response");
-        assertEquals(9, lightResponse.size());
+    void getAuditDataWhenResponseHasAll9AttributesThenLoggesAllAttributes() {
+        AuditData auditData = createLightResponse().getAuditData();
+        assertNotNull(auditData);
+        assertNotNull(auditData.getAttributes());
+        assertEquals(9, auditData.getAttributes().size());
     }
 
     private static LightResponse createLightResponse() {
