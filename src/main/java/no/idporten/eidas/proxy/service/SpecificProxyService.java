@@ -34,15 +34,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SpecificProxyService {
 
+    private static final String BIRTH_DATE_CLAIM = "birth_date";
+    private static final String PID_CLAIM = "pid";
+    private static final String URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_PERSISTENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
+    private static final String NO_COUNTRY_CODE = "NO";
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
     private final OIDCRequestCache oidcRequestCache;
     private final OIDCIntegrationService oidcIntegrationService;
     private final EuProxyProperties euProxyProperties;
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;
-    private static final String FAMILY_NAME = "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName";
-    private static final String FIRST_NAME = "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName";
-    private static final String DATE_OF_BIRTH = "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth";
-    private static final String PID = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
+    private static final String FAMILY_NAME_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName";
+    private static final String FIRST_NAME_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName";
+    private static final String DATE_OF_BIRTH_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth";
+    private static final String PID_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
 
     public String getEuProxyRedirectUri() {
         return euProxyProperties.getRedirectUri();
@@ -78,26 +82,26 @@ public class SpecificProxyService {
 
         LightResponse.LightResponseBuilder lightResponseBuilder = LightResponse.builder()
                 .id(UUID.randomUUID().toString())
-                .citizenCountryCode("NO")
+                .citizenCountryCode(NO_COUNTRY_CODE)
                 .consent("yes")
                 .levelOfAssurance(acr.getValue())
                 .issuer(oidcIntegrationService.getIssuer())
                 .subject(userInfo.getSubject().getValue())
-                .subjectNameIdFormat("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent")
+                .subjectNameIdFormat(URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_PERSISTENT)
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
                 .inResponseToId(lightRequest.getId())
                 .relayState(lightRequest.getRelayState());
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
-            lightResponseBuilder.attribute(new Attribute(FAMILY_NAME, List.of(userInfo.getFamilyName())));
+            lightResponseBuilder.attribute(new Attribute(FAMILY_NAME_EIDAS, List.of(userInfo.getFamilyName())));
         }
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
-            lightResponseBuilder.attribute(new Attribute(FIRST_NAME, List.of(userInfo.getGivenName())));
+            lightResponseBuilder.attribute(new Attribute(FIRST_NAME_EIDAS, List.of(userInfo.getGivenName())));
         }
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
-            lightResponseBuilder.attribute(new Attribute(DATE_OF_BIRTH, List.of(userInfo.getStringClaim("birth_date"))));
+            lightResponseBuilder.attribute(new Attribute(DATE_OF_BIRTH_EIDAS, List.of(userInfo.getStringClaim(BIRTH_DATE_CLAIM))));
         }
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
-            lightResponseBuilder.attribute(new Attribute(PID, List.of(userInfo.getStringClaim("pid"))));
+            lightResponseBuilder.attribute(new Attribute(PID_EIDAS, List.of(userInfo.getStringClaim(PID_CLAIM))));
         }
 
 
@@ -108,7 +112,7 @@ public class SpecificProxyService {
         if (ex instanceof SpecificProxyException spex) {
             return LightResponse.builder()
                     .id(UUID.randomUUID().toString())
-                    .citizenCountryCode("NO")
+                    .citizenCountryCode(NO_COUNTRY_CODE)
                     .issuer(oidcIntegrationService.getIssuer())
                     .inResponseToId(getInResponseToId(spex))
                     .relayState(getRelayState(spex))
@@ -117,7 +121,7 @@ public class SpecificProxyService {
         } else {
             return LightResponse.builder()
                     .id(UUID.randomUUID().toString())
-                    .citizenCountryCode("NO")
+                    .citizenCountryCode(NO_COUNTRY_CODE)
                     .issuer(oidcIntegrationService.getIssuer())
                     .status(getErrorStatus(eidasStatusCode, "An internal error occurred"))
                     .build();

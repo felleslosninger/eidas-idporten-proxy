@@ -47,6 +47,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
     @XmlElement
     private String consent;
 
+    @XmlElement
     private String subject;
 
     @XmlElement
