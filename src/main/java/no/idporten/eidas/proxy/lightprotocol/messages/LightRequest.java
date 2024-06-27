@@ -11,8 +11,10 @@ import no.idporten.logging.audit.AuditEntryProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Serial;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -83,16 +85,21 @@ public class LightRequest implements ILightRequest, AuditEntryProvider {
     public AuditEntry getAuditEntry() {
         return AuditEntry.builder()
                 .auditId(AuditIdPattern.EIDAS_LIGHT_REQUEST.auditIdentifier())
-                .attribute("light_request", Map.of(
-                        "id", id,
-                        "relay_state", relayState,
-                        "citizen_country_code", citizenCountryCode,
-                        "level_of_assurance_requested", levelOfAssurance,
-                        "sp_country_code", spCountryCode,
-                        "requested_attributes", requestedAttributes
-                ))
+                .attribute("light_request", createMapForAuditLogging())
                 .logNullAttributes(false)
                 .build();
+    }
+
+    private Map<String, Object> createMapForAuditLogging() {
+        HashMap<String, Object> all = new HashMap<>();
+        all.put("id", id);
+        all.put("relay_state", relayState);
+        all.put("citizen_country_code", citizenCountryCode);
+        all.put("level_of_assurance", levelOfAssurance);
+        all.put("sp_country_code", spCountryCode);
+        all.put("attributes", requestedAttributes);
+        all.values().removeIf(Objects::isNull);
+        return Map.copyOf(all); // Immutable map throws NPE if values (or keys) is null
     }
 }
 
