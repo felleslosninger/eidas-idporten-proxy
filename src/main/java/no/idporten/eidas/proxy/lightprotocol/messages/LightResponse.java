@@ -5,10 +5,8 @@ import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.light.IResponseStatus;
 import jakarta.xml.bind.annotation.*;
 import lombok.*;
-import no.idporten.eidas.proxy.logging.AuditIdPattern;
-import no.idporten.logging.audit.AuditEntry;
-import no.idporten.logging.audit.AuditEntryProvider;
-import org.slf4j.LoggerFactory;
+import no.idporten.logging.audit.AuditData;
+import no.idporten.logging.audit.AuditDataProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -26,7 +24,7 @@ import java.util.Objects;
 @EqualsAndHashCode
 @Builder
 @XmlAccessorType(XmlAccessType.FIELD)
-public class LightResponse implements ILightResponse, AuditEntryProvider {
+public class LightResponse implements ILightResponse, AuditDataProvider {
     @Serial
     private static final long serialVersionUID = 1L;
     @XmlElement
@@ -49,6 +47,7 @@ public class LightResponse implements ILightResponse, AuditEntryProvider {
     @XmlElement
     private String consent;
 
+    @XmlElement
     private String subject;
 
     @XmlElement
@@ -99,10 +98,9 @@ public class LightResponse implements ILightResponse, AuditEntryProvider {
     }
 
     @Override
-    public AuditEntry getAuditEntry() {
-        return AuditEntry.builder()
-                .auditId(AuditIdPattern.EIDAS_LIGHT_RESPONSE.auditIdentifier())
-                .attribute("light_response", createMapForAuditLogging())
+    public AuditData getAuditData() {
+        return AuditData.builder()
+                .attributes(createMapForAuditLogging())
                 .build();
     }
 
@@ -116,7 +114,7 @@ public class LightResponse implements ILightResponse, AuditEntryProvider {
         all.put("citizen_country_code", citizenCountryCode);
         all.put("level_of_assurance", levelOfAssurance);
         all.put("sub", subject);
-        all.put("attributes", attributes);
+        all.put("attributes", attributes != null ? attributes.stream().map(Attribute::toString).toList() : null);
         all.values().removeIf(Objects::isNull);
         return Map.copyOf(all); // Immutable map throws NPE if values (or keys) is null
     }
