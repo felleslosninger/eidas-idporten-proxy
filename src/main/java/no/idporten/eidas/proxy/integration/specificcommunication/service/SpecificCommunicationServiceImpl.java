@@ -30,7 +30,6 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
         log.info("getAndRemoveRequest {}", lightTokenId);
 
         String xmlMessage = (String) redisCache.get(eidasCacheProperties.getLightRequestPrefix(lightTokenId));
-        log.info("Got message from cache {}", xmlMessage);
         try {
             return LightRequestParser.parseXml(xmlMessage);
         } catch (JAXBException e) {
@@ -46,7 +45,6 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
         String xmlResponse = null;
         try {
             xmlResponse = LightResponseToXML.toXml(lightResponse);
-            log.info("Storing xml response {}", xmlResponse);
         } catch (JAXBException e) {
             log.error("Failed to convert lightResponse to XML {}", e.getMessage());
             throw new SpecificProxyException("Failed to convert lightResponse to XML", e, LightRequest.builder().relayState(lightResponse.getRelayState()).id(lightResponse.getInResponseToId()).build());

@@ -13,6 +13,6 @@ public enum AuditIdPattern {
     private String pattern;
 
     public AuditIdentifier auditIdentifier() {
-        return () -> String.format(getPattern(), "EIDAS_IDPORTEN_PROXY");
+        return () -> String.format(getPattern(), "EIDAS-IDPORTEN-PROXY");
     }
 }

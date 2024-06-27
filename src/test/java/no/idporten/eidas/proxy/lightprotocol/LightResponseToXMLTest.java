@@ -19,6 +19,7 @@ class LightResponseToXMLTest {
         LightResponse lightResponse = LightResponse.builder()
                 .inResponseToId("123")
                 .levelOfAssurance("low")
+                .subject("123")
                 .subjectNameIdFormat("format")
                 .issuer("issuer")
                 .status(new Status("200", "ok", null, false))
