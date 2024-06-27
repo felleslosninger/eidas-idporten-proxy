@@ -30,4 +30,4 @@ eidas:
     client-id: eidas-proxy-client-dev
     client-auth-method: client_secret_basic
     client-secret: 3aee797c-3fd4-46f2-8faf-ebff1a131055
-    redirect-uri: http://eidas-proxy:8077/idpcallback
+    redirect-uri: http://idporten-proxy:8077/idpcallback
