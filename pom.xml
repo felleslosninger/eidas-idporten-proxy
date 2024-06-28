@@ -90,11 +90,6 @@
             <artifactId>idporten-metric-constants-lib</artifactId>
             <version>${idporten-metric-constants.version}</version>
         </dependency>
-        <dependency>
-            <groupId>no.idporten.logging</groupId>
-            <artifactId>idporten-log-audit-spring-boot-3-starter</artifactId>
-            <version>${idporten-audit.version}</version>
-        </dependency>
         <!---should be put in a repository-->
         <dependency>
             <groupId>eu.eidas</groupId>
