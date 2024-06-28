@@ -6,8 +6,7 @@ import no.idporten.eidas.proxy.lightprotocol.messages.Status;
 import no.idporten.logging.audit.AuditData;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LightResponseTest {
 
@@ -26,6 +25,8 @@ class LightResponseTest {
         assertNotNull(auditData);
         assertNotNull(auditData.getAttributes());
         assertEquals(9, auditData.getAttributes().size());
+        assertInstanceOf(String.class, auditData.getAttributes().get("attributes"));
+        assertInstanceOf(String.class, auditData.getAttributes().get("level_of_assurance"));
     }
 
     private static LightResponse createLightResponse() {
