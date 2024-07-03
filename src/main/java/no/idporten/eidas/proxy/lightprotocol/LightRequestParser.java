@@ -9,6 +9,7 @@ import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import java.io.StringReader;
 
 public class LightRequestParser {
+
     public static LightRequest parseXml(String xml) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(LightRequest.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -16,5 +17,6 @@ public class LightRequestParser {
         return (LightRequest) unmarshaller.unmarshal(new StringReader(xml));
     }
 
-
+    private LightRequestParser() {
+    }
 }

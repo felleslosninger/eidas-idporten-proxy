@@ -36,7 +36,7 @@ public class OIDCIntegrationConfiguration {
     }
 
     @Bean
-    public RemoteJWKSet remoteJWKSet(OIDCIntegrationProperties properties, OIDCProviderMetadata oidcProviderMetadata) throws Exception {
+    public RemoteJWKSet<JWKSecurityContext> remoteJWKSet(OIDCIntegrationProperties properties, OIDCProviderMetadata oidcProviderMetadata) throws Exception {
         ResourceRetriever resourceRetriever = new LoggingResourceRetriever(
                 properties.getConnectTimeOutMillis(),
                 properties.getReadTimeOutMillis());
@@ -44,12 +44,12 @@ public class OIDCIntegrationConfiguration {
                 properties.getJwksCacheLifetimeMinutes(),
                 properties.getJwksCacheRefreshMinutes(),
                 TimeUnit.MINUTES);
-        return new RemoteJWKSet(oidcProviderMetadata.getJWKSetURI().toURL(), resourceRetriever, jwkSetCache);
+        return new RemoteJWKSet<>(oidcProviderMetadata.getJWKSetURI().toURL(), resourceRetriever, jwkSetCache);
     }
 
     @Bean
-    public IDTokenValidator idTokenValidator(OIDCIntegrationProperties properties, OIDCProviderMetadata oidcProviderMetadata, RemoteJWKSet remoteJWKSet) {
-        JWSKeySelector<JWKSecurityContext> keySelector = new JWSVerificationKeySelector(
+    public IDTokenValidator idTokenValidator(OIDCIntegrationProperties properties, OIDCProviderMetadata oidcProviderMetadata, RemoteJWKSet<JWKSecurityContext> remoteJWKSet) {
+        JWSKeySelector<JWKSecurityContext> keySelector = new JWSVerificationKeySelector<>(
                 new HashSet<>(oidcProviderMetadata.getIDTokenJWSAlgs()),
                 remoteJWKSet);
         return new IDTokenValidator(

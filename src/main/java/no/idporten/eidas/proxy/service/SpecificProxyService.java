@@ -130,11 +130,11 @@ public class SpecificProxyService {
     }
 
     private static String getInResponseToId(SpecificProxyException spex) {
-        return spex.getlightRequest() != null ? spex.getlightRequest().getId() : null;
+        return spex.getLightRequest() != null ? spex.getLightRequest().getId() : null;
     }
 
     private static String getRelayState(SpecificProxyException ex) {
-        return ex.getlightRequest() != null ? ex.getlightRequest().getRelayState() : null;
+        return ex.getLightRequest() != null ? ex.getLightRequest().getRelayState() : null;
     }
 
     private static Status getErrorStatus(EIDASStatusCode eidasStatusCode, String message) {

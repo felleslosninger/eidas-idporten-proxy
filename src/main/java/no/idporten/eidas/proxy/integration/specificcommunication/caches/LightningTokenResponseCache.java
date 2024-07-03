@@ -17,7 +17,6 @@ package no.idporten.eidas.proxy.integration.specificcommunication.caches;
 
 import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
-import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.AbstractCorrelationMap;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.RedisCache;
 
@@ -28,7 +27,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.RedisCa
  */
 public final class LightningTokenResponseCache extends AbstractCorrelationMap<ILightResponse> {
 
-    public LightningTokenResponseCache(final RedisCache redisCache, final EidasCacheProperties eidasCacheProperties) {
-        super(redisCache, eidasCacheProperties.getLightResponseLifetimeSeconds());
+    public LightningTokenResponseCache(final RedisCache<String, ILightResponse> redisCache, final long lightResponseLifetimeSeconds) {
+        super(redisCache, lightResponseLifetimeSeconds);
     }
 }

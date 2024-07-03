@@ -38,7 +38,7 @@ public abstract class AbstractCorrelationMap<T> implements CorrelationMap<T> {
     @javax.annotation.Nonnull
     protected RedisCache<String, T> redisCache;
 
-    protected AbstractCorrelationMap(RedisCache redisCache, long lifetimeInSeconds) {
+    protected AbstractCorrelationMap(RedisCache<String, T> redisCache, long lifetimeInSeconds) {
         this.redisCache = redisCache;
         this.lifetimeInSeconds = lifetimeInSeconds;
     }
@@ -52,7 +52,7 @@ public abstract class AbstractCorrelationMap<T> implements CorrelationMap<T> {
     @javax.annotation.Nullable
     @Override
     public final T put(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull T value) {
-        return redisCache.set(id, value, Duration.ofSeconds(60));
+        return redisCache.set(id, value, Duration.ofSeconds(lifetimeInSeconds));
     }
 
     @Nullable

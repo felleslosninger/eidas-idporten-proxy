@@ -25,7 +25,6 @@ import eu.eidas.auth.commons.EidasParameterKeys;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
 import eu.eidas.auth.commons.light.ILightRequest;
 import jakarta.annotation.Nonnull;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +70,7 @@ public class ProxyServiceRequestController {
     private final AuditService auditService;
 
     @RequestMapping(path = "/ProxyServiceRequest", method = {RequestMethod.GET, RequestMethod.POST})
-    public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ServletException, ParseException, SpecificProxyException {
+    public String execute(@Nonnull final HttpServletRequest httpServletRequest) throws IOException, ParseException, SpecificProxyException {
 
         final ILightRequest lightRequest = getIncomingiLightRequest(httpServletRequest, null);
 
@@ -93,7 +92,7 @@ public class ProxyServiceRequestController {
         }
     }
 
-    private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws ServletException, SpecificProxyException {
+    private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws SpecificProxyException {
         final String lightTokenId = getLightTokenId(httpServletRequest);
         return specificCommunicationService.getAndRemoveRequest(lightTokenId, registry);
     }
