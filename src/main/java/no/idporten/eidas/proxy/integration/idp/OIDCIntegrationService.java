@@ -1,14 +1,7 @@
 package no.idporten.eidas.proxy.integration.idp;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSSigner;
-import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.proc.BadJOSEException;
-import com.nimbusds.jose.util.Base64;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
@@ -24,26 +17,26 @@ import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.idporten.eidas.proxy.crypto.KeyProvider;
 import no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties;
 import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
+import no.idporten.eidas.proxy.jwt.ClientAssertionGenerator;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
-import java.security.cert.Certificate;
-import java.time.Clock;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OIDCIntegrationService {
-    private final Optional<KeyProvider> keyProvider;
+
     private final IDTokenValidator idTokenValidator;
     private final OIDCIntegrationProperties oidcIntegrationProperties;
     private final OIDCProviderMetadata oidcProviderMetadata;
+    private final Optional<ClientAssertionGenerator> jwtGrantGenerator;
 
     public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier, List<String> acrValues) {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(ResponseType.CODE,
@@ -104,9 +97,7 @@ public class OIDCIntegrationService {
         URI callback = oidcIntegrationProperties.getRedirectUri();
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback, codeVerifier);
 
-        final ClientAuthentication clientAuth = new ClientSecretBasic(new ClientID(oidcIntegrationProperties.getClientId()), new Secret(oidcIntegrationProperties.getClientSecret()));
-
-        TokenRequest request = new TokenRequest(oidcProviderMetadata.getTokenEndpointURI(), clientAuth, codeGrant);
+        TokenRequest request = new TokenRequest(oidcProviderMetadata.getTokenEndpointURI(), clientAuthentication(), codeGrant);
 
         TokenResponse response = OIDCTokenResponseParser.parse(request.toHTTPRequest().send());
 
@@ -121,7 +112,6 @@ public class OIDCIntegrationService {
 
     public UserInfo getUserInfo(OIDCTokens oidcTokens) throws ParseException, IOException {
 
-
         UserInfoRequest userInfoRequest = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), oidcTokens.getAccessToken());
         UserInfoResponse userInfoResponse = UserInfoResponse.parse(userInfoRequest.toHTTPRequest().send());
 
@@ -132,42 +122,22 @@ public class OIDCIntegrationService {
         return userInfoResponse.toSuccessResponse().getUserInfo();
     }
 
-    protected ClientAuthentication clientAuthentication(OIDCIntegrationProperties oidcIntegrationProperties) {
+    protected ClientAuthentication clientAuthentication() {
         ClientAuthenticationMethod clientAuthenticationMethod = ClientAuthenticationMethod.parse(oidcIntegrationProperties.getClientAuthMethod());
-        if (ClientAuthenticationMethod.PRIVATE_KEY_JWT == clientAuthenticationMethod) {
-            return clientAssertion(oidcIntegrationProperties, keyProvider.get());
+        if (ClientAuthenticationMethod.PRIVATE_KEY_JWT.equals(clientAuthenticationMethod)) {
+            if (jwtGrantGenerator.isEmpty()) {
+                throw new IllegalStateException("JWT Grant Generator is not present for PRIVATE_KEY_JWT authentication");
+            }
+            return jwtGrantGenerator.get().create();
+        } else if (ClientAuthenticationMethod.CLIENT_SECRET_BASIC.equals(clientAuthenticationMethod)) {
+            return new ClientSecretBasic(new ClientID(oidcIntegrationProperties.getClientId()), new Secret(oidcIntegrationProperties.getClientSecret()));
+        } else if (ClientAuthenticationMethod.CLIENT_SECRET_POST.equals(clientAuthenticationMethod)) {
+            return new ClientSecretPost(new ClientID(oidcIntegrationProperties.getClientId()), new Secret(oidcIntegrationProperties.getClientSecret()));
+        } else {
+            throw new IllegalStateException(String.format("Unknown client authentication method %s. Valid methods are PRIVATE_KEY_JWT, CLIENT_SECRET_BASIC, and CLIENT_SECRET_POST.", clientAuthenticationMethod));
         }
-        throw new IllegalStateException(String.format("Unknown client authentication method %s", clientAuthenticationMethod));
     }
 
-    protected ClientAuthentication clientAssertion(OIDCIntegrationProperties oidcIntegrationProperties, KeyProvider keyProvider) {
-        try {
-            List<Base64> encodedCertificates = new ArrayList<>();
-            for (Certificate c : keyProvider.certificateChain()) {
-                encodedCertificates.add(Base64.encode(c.getEncoded()));
-            }
-            JWSHeader header = new JWSHeader
-                    .Builder(JWSAlgorithm.RS256)
-                    .x509CertChain(encodedCertificates)
-                    .build();
-            long created = Clock.systemUTC().millis();
-            long expires = created + (120 * 1000L);
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .issuer(oidcIntegrationProperties.getClientId())
-                    .subject(oidcIntegrationProperties.getClientId())
-                    .audience(oidcIntegrationProperties.getIssuer().toString())
-                    .jwtID(UUID.randomUUID().toString())
-                    .issueTime(new Date(created))
-                    .expirationTime(new Date(expires))
-                    .build();
-            JWSSigner signer = new RSASSASigner(keyProvider.privateKey());
-            SignedJWT signedJWT = new SignedJWT(header, claims);
-            signedJWT.sign(signer);
-            return new PrivateKeyJWT(signedJWT);
-        } catch (Exception e) {
-            throw new OAuthException("Failed to create client assertion " + e.getMessage());
-        }
-    }
 
     public URI getAuthorizationEndpoint() {
         return oidcProviderMetadata.getAuthorizationEndpointURI();
