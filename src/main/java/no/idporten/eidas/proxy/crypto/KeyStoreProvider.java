@@ -30,7 +30,6 @@ public class KeyStoreProvider {
 
             this.keyStore = keystore;
         } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException e) {
-            log.error("Failed to load keystoreprovider.", e);
             throw new IDPortenKeyStoreException("Failed to load keystore.", e);
         }
     }

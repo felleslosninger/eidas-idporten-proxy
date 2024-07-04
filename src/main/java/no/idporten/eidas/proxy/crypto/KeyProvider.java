@@ -22,7 +22,6 @@ public class KeyProvider {
             certificate = keyStore.getCertificate(alias);
             certificateChain = Arrays.asList(keyStore.getCertificateChain(alias));
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            log.error("Failed to load keystore.", e);
             throw new IDPortenKeyStoreException("Failed to load keystore.", e);
         }
     }
