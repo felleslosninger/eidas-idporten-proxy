@@ -70,7 +70,7 @@ eidas:
     jwks-cache-lifetime-minutes: 60
     jwks-cache-refresh-minutes: 5
     issuer: https://idporten.dev
+    redirect-uri: http://localhost:8080/idpcallback
     client-id: eidas-proxy-client-junit
     client-auth-method: client_secret_basic
-    client-secret: junit
-    redirect-uri: http://localhost:8080/idpcallback
+    client-secret: password

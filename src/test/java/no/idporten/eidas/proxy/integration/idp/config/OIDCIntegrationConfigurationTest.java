@@ -1,7 +1,8 @@
 package no.idporten.eidas.proxy.integration.idp.config;
 
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
@@ -28,10 +29,6 @@ class OIDCIntegrationConfigurationTest {
         return mock(OIDCProviderMetadata.class);
     }
 
-    @Bean
-    RemoteJWKSet remoteJWKSet() {
-        return mock(RemoteJWKSet.class);
-    }
 
     @Bean
     IDTokenValidator idTokenValidator() {
@@ -62,8 +59,7 @@ class OIDCIntegrationConfigurationTest {
         when(oidcProviderMetadata.getJWKSetURI()).thenReturn(new URI("https://example.com/jwks"));
 
         OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration();
-        RemoteJWKSet remoteJWKSet = configuration.remoteJWKSet(properties, oidcProviderMetadata);
-
+        JWKSource<SecurityContext> remoteJWKSet = configuration.remoteJWKSet(properties, oidcProviderMetadata);
 
         assertNotNull(remoteJWKSet);
     }
@@ -78,7 +74,7 @@ class OIDCIntegrationConfigurationTest {
         when(oidcProviderMetadata.getIDTokenJWSAlgs()).thenReturn(Collections.singletonList(JWSAlgorithm.RS256));
         when(oidcProviderMetadata.getJWKSetURI()).thenReturn(URI.create("https://idporten.dev/jwks"));
         OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration();
-        RemoteJWKSet remoteJWKSet = mock(RemoteJWKSet.class);
+        JWKSource<SecurityContext> remoteJWKSet = mock(JWKSource.class);
 
         IDTokenValidator idTokenValidator = configuration.idTokenValidator(properties, oidcProviderMetadata, remoteJWKSet);
 

@@ -72,8 +72,8 @@ eidas:
     scopes:
       - openid
       - eidas:mds
-    connect-timeout-millis: 5000
-    read-timeout-millis: 5000
+    connect-timeout-millis: 500
+    read-timeout-millis: 500
     jwks-cache-lifetime-minutes: 60
     jwks-cache-refresh-minutes: 5
 

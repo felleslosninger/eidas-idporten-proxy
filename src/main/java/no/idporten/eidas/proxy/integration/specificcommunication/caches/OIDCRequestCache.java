@@ -16,7 +16,6 @@
 package no.idporten.eidas.proxy.integration.specificcommunication.caches;
 
 
-import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCacheProperties;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.AbstractCorrelationMap;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.RedisCache;
 
@@ -28,7 +27,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.RedisCa
  */
 public final class OIDCRequestCache extends AbstractCorrelationMap<CorrelatedRequestHolder> {
 
-    public OIDCRequestCache(final RedisCache redisCache, final EidasCacheProperties eidasCacheProperties) {
-        super(redisCache, eidasCacheProperties.getOidcRequestStateLifetimeSeconds());
+    public OIDCRequestCache(final RedisCache<String, CorrelatedRequestHolder> redisCache, final long oidcRequestStateLifetimeSeconds) {
+        super(redisCache, oidcRequestStateLifetimeSeconds);
     }
 }

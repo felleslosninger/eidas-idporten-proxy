@@ -37,11 +37,7 @@ public class OIDCIntegrationProperties implements InitializingBean {
     private Set<String> scopes;
 
     private String clientSecret;
-    private String clientKeystoreType;
-    private String clientKeystoreLocation;
-    private String clientKeystorePassword;
-    private String clientKeystoreKeyAlias;
-    private String clientKeystoreKeyPassword;
+    private String keyId;
 
     @Min(1)
     private int connectTimeOutMillis = 5000;
@@ -57,19 +53,14 @@ public class OIDCIntegrationProperties implements InitializingBean {
         if (clientAuthMethod.startsWith("client_secret") && !StringUtils.hasText(clientSecret)) {
             notEmptyForClientAuth("client-secret", clientSecret, clientAuthMethod);
         }
-        if (clientAuthMethod.equals("private_key_jwt")) {
-            notEmptyForClientAuth("client-keystore-type", clientKeystoreType, clientAuthMethod);
-            notEmptyForClientAuth("client-keystore-location", clientKeystoreLocation, clientAuthMethod);
-            notEmptyForClientAuth("client-keystore-password", clientKeystorePassword, clientAuthMethod);
-            notEmptyForClientAuth("client-keystore-key-alias", clientKeystoreKeyAlias, clientAuthMethod);
-            notEmptyForClientAuth("client-keystore-key-password", clientKeystoreKeyPassword, clientAuthMethod);
-        }
-
     }
 
     protected void notEmptyForClientAuth(String property, String value, String clientAuthMethod) {
         if (!StringUtils.hasText(value)) {
             throw new IllegalArgumentException(String.format("Property %s must have a value when using client auth method %s", property, clientAuthMethod));
+        }
+        if (StringUtils.hasText(keyId)) {
+            log.info("KeyId (kid) set to {}", keyId);
         }
     }
 

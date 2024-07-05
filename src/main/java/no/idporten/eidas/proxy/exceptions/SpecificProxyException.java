@@ -20,6 +20,7 @@ package no.idporten.eidas.proxy.exceptions;
 
 import eu.eidas.auth.commons.exceptions.AbstractEIDASException;
 import eu.eidas.auth.commons.light.ILightRequest;
+import lombok.Getter;
 
 /**
  * This exception is thrown when a catchable exception occurred within
@@ -27,9 +28,10 @@ import eu.eidas.auth.commons.light.ILightRequest;
  * <p>
  * Catchable exceptions are to be included in this exception.
  */
+@Getter
 public class SpecificProxyException extends AbstractEIDASException {
 
-    private ILightRequest lightRequest;
+    private final ILightRequest lightRequest;
 
     public SpecificProxyException(final String errorCode, final String errorMessage, final ILightRequest lightRequest) {
         super(errorCode, errorMessage);
@@ -54,10 +56,6 @@ public class SpecificProxyException extends AbstractEIDASException {
     public SpecificProxyException(String message, Throwable cause, final ILightRequest lightRequest) {
         super(message, cause.getMessage());
         this.lightRequest = lightRequest;
-    }
-
-    public ILightRequest getlightRequest() {
-        return this.lightRequest;
     }
 
 }
