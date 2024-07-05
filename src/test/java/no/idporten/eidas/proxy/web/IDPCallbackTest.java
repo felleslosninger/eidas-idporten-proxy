@@ -111,7 +111,7 @@ class IDPCallbackTest {
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
 
-        verify(auditService).auditLightResponse(lightResponse);
+        verify(auditService).auditLightResponse(lightResponse, null);
     }
 
     @Test
@@ -142,7 +142,7 @@ class IDPCallbackTest {
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(lightResponse);
+        verify(auditService).auditLightResponse(lightResponse, null);
 
     }
 
@@ -154,6 +154,6 @@ class IDPCallbackTest {
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any());
+        verify(auditService).auditLightResponse(any(), isNull());
     }
 }

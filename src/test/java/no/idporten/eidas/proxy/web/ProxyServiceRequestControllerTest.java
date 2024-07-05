@@ -136,7 +136,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(LightResponse.class));
+        verify(auditService).auditLightResponse(any(LightResponse.class), isNull());
     }
 
     @Test
@@ -147,7 +147,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(LightResponse.class));
+        verify(auditService).auditLightResponse(any(LightResponse.class), isNull());
     }
 
     @Test
@@ -158,7 +158,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(LightResponse.class));
+        verify(auditService).auditLightResponse(any(LightResponse.class), isNull());
     }
 
 }
