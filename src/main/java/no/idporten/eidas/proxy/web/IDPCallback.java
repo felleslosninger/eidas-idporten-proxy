@@ -59,10 +59,8 @@ public class IDPCallback {
 
             ILevelOfAssurance acrClaim = getAcrClaim(tokens.getIDToken().getJWTClaimsSet(), cachedRequest);
             LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), acrClaim);
-            auditService.auditLightResponse(lightResponse);
+            auditService.auditLightResponse(lightResponse, cachedRequest.getAuthenticationRequest().getRequestTraceId());
             String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
-            specificCommunicationService.putResponse(lightResponse);
-
             return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
         } catch (OAuthException e) {
             throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider: %s".formatted(e.getMessage()), cachedRequest.getiLightRequest());

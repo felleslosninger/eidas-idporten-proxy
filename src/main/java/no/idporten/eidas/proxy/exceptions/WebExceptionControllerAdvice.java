@@ -1,9 +1,6 @@
 package no.idporten.eidas.proxy.exceptions;
 
 import eu.eidas.auth.commons.EIDASStatusCode;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.SpecificCommunicationService;
@@ -26,22 +23,22 @@ public class WebExceptionControllerAdvice {
     private final AuditService auditService;
 
     @ExceptionHandler(SpecificProxyException.class)
-    public String handleOAuth2Exception(HttpServletRequest request, HttpServletResponse response, SpecificProxyException ex) {
+    public String handleOAuth2Exception(SpecificProxyException ex) {
 
-        log.error("SpecificProxyException occurred for request: {} {}", ex.getlightRequest(), ex.getMessage());
+        log.error("SpecificProxyException occurred for request: {} {}", ex.getLightRequest(), ex.getMessage());
 
         LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, ex);
-        auditService.auditLightResponse(lightResponse);
+        auditService.auditLightResponse(lightResponse, null);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
         return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleException(HttpServletRequest request, HttpServletResponse response, HttpSession httpSession, Exception ex) {
+    public String handleException(Exception ex) {
         log.error("Exception occurred :{}", ex.getMessage());
         LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.RESPONDER_URI, ex);
-        auditService.auditLightResponse(lightResponse);
+        auditService.auditLightResponse(lightResponse, null);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
         return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);

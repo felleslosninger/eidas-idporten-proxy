@@ -21,6 +21,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.Specifi
 import no.idporten.eidas.proxy.lightprotocol.messages.Attribute;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.Status;
+import no.idporten.eidas.proxy.logging.MDCFilter;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,8 @@ public class SpecificProxyService {
         final CorrelatedRequestHolder correlatedRequestHolder = new CorrelatedRequestHolder(originalIlightRequest,
                 new OIDCRequestStateParams(authenticationRequest.getState(),
                         authenticationRequest.getNonce(),
-                        codeVerifier));
+                        codeVerifier,
+                        MDCFilter.getTraceId()));
         oidcRequestCache.put(authenticationRequest.getState().getValue(), correlatedRequestHolder);
 
         return authenticationRequest;
@@ -130,11 +132,11 @@ public class SpecificProxyService {
     }
 
     private static String getInResponseToId(SpecificProxyException spex) {
-        return spex.getlightRequest() != null ? spex.getlightRequest().getId() : null;
+        return spex.getLightRequest() != null ? spex.getLightRequest().getId() : null;
     }
 
     private static String getRelayState(SpecificProxyException ex) {
-        return ex.getlightRequest() != null ? ex.getlightRequest().getRelayState() : null;
+        return ex.getLightRequest() != null ? ex.getLightRequest().getRelayState() : null;
     }
 
     private static Status getErrorStatus(EIDASStatusCode eidasStatusCode, String message) {

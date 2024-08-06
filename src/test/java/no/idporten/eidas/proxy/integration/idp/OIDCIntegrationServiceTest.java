@@ -1,7 +1,5 @@
 package no.idporten.eidas.proxy.integration.idp;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
@@ -10,12 +8,11 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import eu.eidas.auth.commons.light.ILightRequest;
-import no.idporten.eidas.proxy.crypto.KeyProvider;
 import no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties;
 import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
-import org.junit.jupiter.api.BeforeEach;
+import no.idporten.eidas.proxy.jwt.ClientAssertionGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,8 +21,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.net.URI;
-import java.security.KeyPair;
-import java.security.interfaces.RSAPrivateKey;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,32 +35,25 @@ class OIDCIntegrationServiceTest {
     private OIDCProviderMetadata providerMetadata;
 
     @Mock
-    private Optional<KeyProvider> keyProvider;
-    @Mock
-    private LoggingResourceRetriever resourceRetriever;
+    private Optional<ClientAssertionGenerator> clientAssertionGenerator;
 
     @InjectMocks
     private OIDCIntegrationService oidcIntegrationService;
 
-    @BeforeEach
-    void setup() throws JOSEException {
-        KeyProvider mockKeyProvider = mock(KeyProvider.class);
-        when(keyProvider.isPresent()).thenReturn(true);
-        when(keyProvider.get()).thenReturn(mockKeyProvider);
-        KeyPair keyPair = new RSAKeyGenerator(2048).generate().toKeyPair();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        when(mockKeyProvider.privateKey()).thenReturn(privateKey);
-    }
 
     @Test
     @DisplayName("Test client authentication with private key JWT")
     void testClientAuthenticationPrivateKeyJWT() throws Exception {
+        ClientAssertionGenerator mockClientAssertionGenerator = mock(ClientAssertionGenerator.class);
+        when(clientAssertionGenerator.isPresent()).thenReturn(true);
+        when(clientAssertionGenerator.get()).thenReturn(mockClientAssertionGenerator);
         when(properties.getClientId()).thenReturn("testClientId");
         when(properties.getIssuer()).thenReturn(new URI("https://example.com"));
         when(properties.getClientAuthMethod()).thenReturn("private_key_jwt");
+        when(mockClientAssertionGenerator.create()).thenReturn(mock(PrivateKeyJWT.class));
 
-        ClientAuthentication clientAuth = oidcIntegrationService.clientAuthentication(properties);
-        assertTrue(clientAuth instanceof PrivateKeyJWT);
+        ClientAuthentication clientAuth = oidcIntegrationService.clientAuthentication();
+        assertInstanceOf(PrivateKeyJWT.class, clientAuth);
     }
 
     @Test

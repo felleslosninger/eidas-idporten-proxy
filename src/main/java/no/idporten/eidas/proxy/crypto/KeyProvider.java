@@ -1,47 +1,29 @@
 package no.idporten.eidas.proxy.crypto;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
+@Getter
 public class KeyProvider {
 
-    private PrivateKey privateKey;
-    private Certificate certificate;
-    private List<Certificate> certificateChain;
-
-    private PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final java.security.cert.Certificate certificate;
+    private final List<Certificate> certificateChain;
 
     public KeyProvider(KeyStore keyStore, String alias, String password) {
         try {
             privateKey = (PrivateKey) keyStore.getKey(alias, password.toCharArray());
             certificate = keyStore.getCertificate(alias);
-            publicKey = certificate.getPublicKey();
             certificateChain = Arrays.asList(keyStore.getCertificateChain(alias));
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            throw new RuntimeException(e);
+            throw new IDPortenKeyStoreException("Failed to load keystore.", e);
         }
     }
 
-    public PrivateKey privateKey() {
-        return privateKey;
-    }
-
-    public PublicKey publicKey() {
-        return publicKey;
-    }
-
-    public RSAPublicKey rsaPublicKey() {
-        return (RSAPublicKey) publicKey();
-    }
-
-    public Certificate certificate() {
-        return certificate;
-    }
-
-    public List<Certificate> certificateChain() {
-        return certificateChain;
-    }
 }
