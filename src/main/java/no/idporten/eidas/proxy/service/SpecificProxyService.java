@@ -60,7 +60,10 @@ public class SpecificProxyService {
 
     public AuthenticationRequest translateNodeRequest(ILightRequest originalIlightRequest) {
         CodeVerifier codeVerifier = new CodeVerifier();
-        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(codeVerifier, levelOfAssuranceHelper.eidasAcrListToIdportenAcrList(originalIlightRequest.getLevelsOfAssurance()));
+        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(
+                codeVerifier,
+                levelOfAssuranceHelper.eidasAcrListToIdportenAcrList(originalIlightRequest.getLevelsOfAssurance()),
+                originalIlightRequest.getSpCountryCode());
 
         final CorrelatedRequestHolder correlatedRequestHolder = new CorrelatedRequestHolder(originalIlightRequest,
                 new OIDCRequestStateParams(authenticationRequest.getState(),
