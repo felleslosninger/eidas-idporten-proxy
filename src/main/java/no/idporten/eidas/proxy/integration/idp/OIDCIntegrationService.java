@@ -38,7 +38,7 @@ public class OIDCIntegrationService {
     protected static final String ONBEHALFOF_ORGNO = "onbehalfof_orgno";
     protected static final String ONBEHALFOF_NAME = "onbehalfof_name";
     protected static final String DIGDIR_ORGNO = "991825827";
-    protected static final String IDPORTEN_EIDAS_PROXY = "idporten-eidas-proxy";
+    protected static final String EIDAS_DISPLAY_NAME = "eIDAS";
     private final IDTokenValidator idTokenValidator;
     private final OIDCIntegrationProperties oidcIntegrationProperties;
     private final OIDCProviderMetadata oidcProviderMetadata;
@@ -56,7 +56,7 @@ public class OIDCIntegrationService {
                 .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
                 .customParameter(ONBEHALFOF, serviceProviderCountryCode)
                 .customParameter(ONBEHALFOF_ORGNO, DIGDIR_ORGNO)
-                .customParameter(ONBEHALFOF_NAME, IDPORTEN_EIDAS_PROXY)
+                .customParameter(ONBEHALFOF_NAME, EIDAS_DISPLAY_NAME)
         ;
 
         return builder.build();

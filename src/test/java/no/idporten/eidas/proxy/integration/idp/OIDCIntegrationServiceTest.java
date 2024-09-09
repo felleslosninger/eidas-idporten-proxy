@@ -124,7 +124,7 @@ class OIDCIntegrationServiceTest {
                 () -> assertEquals(CodeChallengeMethod.S256, authRequest.getCodeChallengeMethod(), "CodeChallengeMethod should be S256"),
                 () -> assertEquals(serviceProviderCountryCode, authRequest.getCustomParameter(ONBEHALFOF).getFirst(), "onbehalfof custom parameter should match"),
                 () -> assertEquals(DIGDIR_ORGNO, authRequest.getCustomParameter(ONBEHALFOF_ORGNO).getFirst(), "onbehalfof_orgno custom parameter should match"),
-                () -> assertEquals(IDPORTEN_EIDAS_PROXY, authRequest.getCustomParameter(ONBEHALFOF_NAME).getFirst(), "onbehalfof_name custom parameter should match")
+                () -> assertEquals(EIDAS_DISPLAY_NAME, authRequest.getCustomParameter(ONBEHALFOF_NAME).getFirst(), "onbehalfof_name custom parameter should match")
         );
     }
 }
