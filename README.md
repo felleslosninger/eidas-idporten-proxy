@@ -10,6 +10,8 @@ eidas.acr.supported-acr-values - Eidas ACR values supported by the eIDAS proxy. 
 in subsequent order
 eidas.acr.acr-value-map - maps ipdorten acr level to eidas acr levels.
 
+NB! The client_id for the proxy must be added in all the environments as a trusted-onbehalfof-clients of for
+client-sync.
 ## Sequence diagrams
 
 ### Norwegian citizen
