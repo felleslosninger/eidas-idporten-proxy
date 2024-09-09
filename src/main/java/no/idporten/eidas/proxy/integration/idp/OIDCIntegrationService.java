@@ -33,12 +33,18 @@ import java.util.Optional;
 @Slf4j
 public class OIDCIntegrationService {
 
+    //trusted onbehalfof parameters
+    protected static final String ONBEHALFOF = "onbehalfof";
+    protected static final String ONBEHALFOF_ORGNO = "onbehalfof_orgno";
+    protected static final String ONBEHALFOF_NAME = "onbehalfof_name";
+    protected static final String DIGDIR_ORGNO = "991825827";
+    protected static final String EIDAS_DISPLAY_NAME = "eIDAS";
     private final IDTokenValidator idTokenValidator;
     private final OIDCIntegrationProperties oidcIntegrationProperties;
     private final OIDCProviderMetadata oidcProviderMetadata;
     private final Optional<ClientAssertionGenerator> jwtGrantGenerator;
 
-    public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier, List<String> acrValues) {
+    public AuthenticationRequest createAuthenticationRequest(CodeVerifier codeVerifier, List<String> acrValues, String serviceProviderCountryCode) {
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(ResponseType.CODE,
                 new Scope(oidcIntegrationProperties.getScopes().toArray(new String[0])),
                 new ClientID(oidcIntegrationProperties.getClientId()),
@@ -48,6 +54,9 @@ public class OIDCIntegrationService {
                 .state(new com.nimbusds.oauth2.sdk.id.State())
                 .nonce(new Nonce())
                 .codeChallenge(codeVerifier, CodeChallengeMethod.S256)
+                .customParameter(ONBEHALFOF, serviceProviderCountryCode)
+                .customParameter(ONBEHALFOF_ORGNO, DIGDIR_ORGNO)
+                .customParameter(ONBEHALFOF_NAME, EIDAS_DISPLAY_NAME)
         ;
 
         return builder.build();
