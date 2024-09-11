@@ -5,9 +5,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,6 +17,8 @@ import java.io.Serial;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class Status implements IResponseStatus {
     @Serial
     private static final long serialVersionUID = 1L;
