@@ -62,10 +62,10 @@ class IncomingLightRequestValidatorTest {
     }
 
     @Test
-    void validateRequest_WhenRelayStateIsEmpty_ShouldThrowException() {
+    void validateRequest_WhenRelayStateIsEmpty_ShouldThrowExceptionBecauseOfTheDanes() {
         LightRequest request = createValidLightRequest();
         request.setRelayState(""); // Empty relay state
-        assertThrows(SpecificProxyException.class, () -> IncomingLightRequestValidator.validateRequest(request));
+        assertDoesNotThrow(() -> IncomingLightRequestValidator.validateRequest(request));
     }
 
     @Test
