@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
+        <version>3.3.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>no.idporten.eidas</groupId>
@@ -16,7 +16,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <open.telemetry.version>1.42.0</open.telemetry.version>
+        <open.telemetry.version>1.42.1</open.telemetry.version>
         <logstash.logback.version>8.0</logstash.logback.version>
         <idporten-access-log.version>2.4.3</idporten-access-log.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
