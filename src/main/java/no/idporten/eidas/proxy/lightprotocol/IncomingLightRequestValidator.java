@@ -38,7 +38,7 @@ public class IncomingLightRequestValidator {
             throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing an SP country code.", lightRequest);
         }
         if (lightRequest.getRelayState() == null || lightRequest.getRelayState().isEmpty()) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing a relay state.", lightRequest);
+            log.warn("Incoming Light Request is missing a relay state: {}", lightRequest);
         }
         if (CollectionUtils.isEmpty(lightRequest.getRequestedAttributesList())) {
             throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is missing requested attributes.", lightRequest);
