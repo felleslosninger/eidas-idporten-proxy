@@ -31,10 +31,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(IDPCallback.class)
 @DisplayName("When receiving a callback from the IDP")
@@ -109,7 +110,8 @@ class IDPCallbackTest {
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
-                .andExpect(redirectedUrl("http://junit?token=hello"));
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().string(containsString("Click to redirect")));
 
         verify(auditService).auditLightResponse(lightResponse, null);
     }
@@ -141,7 +143,8 @@ class IDPCallbackTest {
         when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
-                .andExpect(redirectedUrl("http://junit?token=hello"));
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().string(containsString("Click to redirect")));
         verify(auditService).auditLightResponse(lightResponse, null);
 
     }

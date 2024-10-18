@@ -21,6 +21,7 @@
         <idporten-access-log.version>2.4.3</idporten-access-log.version>
         <idporten-metric-constants.version>1.1.0</idporten-metric-constants.version>
         <idporten-actuator-starter.version>1.2.0</idporten-actuator-starter.version>
+        <oidc-server.version>2.5.0</oidc-server.version>
         <nimbus.oauth2-oidc-sdk.version>11.19.1</nimbus.oauth2-oidc-sdk.version>
         <joda-time.version>2.13.0</joda-time.version>
         <idporten-audit.version>1.2.6</idporten-audit.version>
@@ -60,6 +61,11 @@
             <groupId>no.idporten.logging</groupId>
             <artifactId>idporten-access-log-spring-boot-3-starter</artifactId>
             <version>${idporten-access-log.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.idporten.sdk</groupId>
+            <artifactId>oidc-server-sdk</artifactId>
+            <version>${oidc-server.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
