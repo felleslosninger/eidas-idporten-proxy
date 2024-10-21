@@ -7,6 +7,7 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import eu.eidas.auth.commons.light.ILevelOfAssurance;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.exceptions.ErrorCodes;
@@ -19,6 +20,7 @@ import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.logging.AuditService;
 import no.idporten.eidas.proxy.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
+import no.idporten.sdk.oidcserver.protocol.FormPostResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.text.ParseException;
+import java.util.Map;
 
 
 @Controller
@@ -42,7 +45,9 @@ public class IDPCallback {
 
 
     @GetMapping("/idpcallback")
-    public String callback(HttpServletRequest request) throws Exception {
+    public void callback(HttpServletRequest request,
+                         HttpServletResponse response
+    ) throws Exception {
         URI authorizationResponseUri = UriComponentsBuilder.fromUriString(request.getRequestURL().toString()).query(request.getQueryString()).build().toUri();
         AuthorizationResponse authorizationResponse = AuthorizationResponse.parse(authorizationResponseUri);
         CorrelatedRequestHolder cachedRequest = specificProxyService.getCachedRequest(authorizationResponse.getState());
@@ -61,7 +66,11 @@ public class IDPCallback {
             LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, cachedRequest.getiLightRequest(), acrClaim);
             auditService.auditLightResponse(lightResponse, cachedRequest.getAuthenticationRequest().getRequestTraceId());
             String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
-            return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
+            FormPostResponse formPostResponse = new FormPostResponse(specificProxyService.getEuProxyRedirectUri(),
+                    Map.of("token", storeBinaryLightTokenResponseBase64));
+            response.setContentType("text/html;charset=UTF-8");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(formPostResponse.getRedirectForm());
         } catch (OAuthException e) {
             throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider: %s".formatted(e.getMessage()), cachedRequest.getiLightRequest());
         }

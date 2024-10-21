@@ -32,7 +32,7 @@ sequenceDiagram
     SEP ->> IL: getUserInfo
     SEP ->> SEP: map to LightProtocol response
     SEP ->> RED: store LightProtocol response
-    SEP ->> NEP: LightToken
+    SEP ->> NEP: post LightToken
     NEP ->> RED: get LightResponse from token
 
 ```    
