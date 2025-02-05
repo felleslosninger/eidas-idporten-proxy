@@ -23,7 +23,7 @@
         <oidc-server.version>2.6.0</oidc-server.version>
         <idporten-actuator-starter.version>1.2.2</idporten-actuator-starter.version>
         <nimbus.oauth2-oidc-sdk.version>11.21.3</nimbus.oauth2-oidc-sdk.version>
-        <joda-time.version>2.13.0</joda-time.version>
+        <joda-time.version>2.13.1</joda-time.version>
         <idporten-audit.version>2.4.0</idporten-audit.version>
     </properties>
     <dependencies>
