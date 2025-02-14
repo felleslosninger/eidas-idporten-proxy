@@ -4,3 +4,4 @@ CVE-2024-34750 # tomcat - improper handling of exceptional conditions
 CVE-2024-34156 # golang
 CVE-2024-47554 # io-commons - fixed version 2.14.0
 CVE-2024-57699 # jsonsmart
+CVE-2025-24970 # netty
