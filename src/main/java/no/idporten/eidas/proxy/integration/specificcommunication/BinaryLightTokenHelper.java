@@ -24,10 +24,10 @@ import eu.eidas.auth.commons.tx.LightTokenEncoder;
 import jakarta.servlet.http.HttpServletRequest;
 import no.idporten.eidas.proxy.exceptions.ErrorCodes;
 import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
-import org.joda.time.DateTime;
 
 import javax.annotation.Nonnull;
 import java.security.NoSuchAlgorithmException;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.UUID;
 
@@ -120,7 +120,7 @@ public class BinaryLightTokenHelper {
         final String lightTokenId = UUID.randomUUID().toString();
         return new LightToken.Builder().id(lightTokenId)
                 .issuer(issuerName)
-                .createdOn(new DateTime(Calendar.getInstance().getTimeInMillis()))
+                .createdOn(ZonedDateTime.now())
                 .build();
     }
 

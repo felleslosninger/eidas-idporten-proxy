@@ -29,7 +29,7 @@ eidas:
     secret: mySecretProxyserviceResponse
   oidc-integration:
     issuer: https://idporten.dev
-    client-id: eidas-proxy-client-dev
+    client-id: eidas-proxy-client-docker
     client-auth-method: client_secret_basic
-    client-secret: 3aee797c-3fd4-46f2-8faf-ebff1a131055
+    client-secret: 40915c2e-df80-4224-89d8-40db4cd56bcd
     redirect-uri: http://localhost:8077/idpcallback
