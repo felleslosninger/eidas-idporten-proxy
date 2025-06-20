@@ -3,9 +3,6 @@ management:
     health:
       show-details: never
       show-components: always
-spring:
-  application:
-    environment: test
 
   data:
     redis:

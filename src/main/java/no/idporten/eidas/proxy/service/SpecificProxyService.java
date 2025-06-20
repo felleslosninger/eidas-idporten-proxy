@@ -10,6 +10,7 @@ import eu.eidas.auth.commons.light.ILightRequest;
 import eu.eidas.auth.commons.light.ILightResponse;
 import eu.eidas.auth.commons.tx.BinaryLightToken;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.config.EuProxyProperties;
 import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService;
@@ -33,6 +34,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SpecificProxyService {
 
     private static final String BIRTH_DATE_CLAIM = "birth_date";
@@ -114,6 +116,7 @@ public class SpecificProxyService {
     }
 
     public LightResponse getErrorLightResponse(EIDASStatusCode eidasStatusCode, Exception ex) {
+        log.warn("Exception {} occurred with eidasStatusCode {} ", ex.getClass().getSimpleName() ,eidasStatusCode);
         if (ex instanceof SpecificProxyException spex) {
             return LightResponse.builder()
                     .id(UUID.randomUUID().toString())
