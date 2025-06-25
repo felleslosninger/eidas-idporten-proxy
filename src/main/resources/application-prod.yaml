@@ -23,8 +23,8 @@ eidas:
   eu-proxy:
     redirect-uri: https://proxy.eidasnode.no/SpecificProxyServiceResponse
   oidc-integration:
-    issuer: https://eidas.no
+    issuer: https://idporten.no
     client-id: eidas-proxy-client-prod
     client-auth-method: client_secret_basic
     client-secret: ${EIDAS_CLIENT_SECRET}
-    redirect-uri: https://eidas-proxy.eidasnode.no/idpcallback
+    redirect-uri: https://idporten-proxy.eidasnode.no/idpcallback
