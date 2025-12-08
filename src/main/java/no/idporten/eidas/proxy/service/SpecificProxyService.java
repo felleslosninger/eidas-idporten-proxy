@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
-import static no.idporten.eidas.proxy.service.EIDAS_ATTRIBUTE_NAMES.*;
+import static no.idporten.eidas.proxy.service.EidasAttributeNames.*;
 
 /**
  * The main service

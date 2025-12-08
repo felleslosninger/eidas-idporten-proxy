@@ -10,7 +10,7 @@ public enum AuditIdPattern {
     EIDAS_LIGHT_REQUEST("%s-LIGHT-REQUEST"),
     EIDAS_LIGHT_RESPONSE("%s-LIGHT-RESPONSE"),
     EIDAS_IDP_PAR_REQUEST("%s-PAR-REQUEST"),
-    EIDAS_IDP_PAR_RESPONSE("%s-PAR-REQUEST");
+    EIDAS_IDP_PAR_RESPONSE("%s-PAR-RESPONSE");
 
     private final String pattern;
 

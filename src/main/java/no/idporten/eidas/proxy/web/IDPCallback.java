@@ -46,7 +46,7 @@ public class IDPCallback {
     /**
      * Callback from IDP (idporten or ansattporten)
      *
-     * @param idpQuery optinal param for idps that are not idporten
+     * @param idpQuery optional param for idps that are not idporten
      * @param request  httpRequest
      * @param response httpResponse
      * @throws Exception exception
@@ -60,7 +60,7 @@ public class IDPCallback {
     ) throws Exception {
 
         String idp = IDPSelector.ANSATTPORTEN.equals(idpQuery) ? IDPSelector.ANSATTPORTEN : IDPSelector.IDPORTEN;
-        //we trust the request
+        //security validation follows
         URI authorizationResponseUri = UriComponentsBuilder.fromUriString(request.getRequestURL().toString()).query(request.getQueryString()).build().toUri();
 
         AuthorizationResponse authorizationResponse = AuthorizationResponse.parse(authorizationResponseUri);

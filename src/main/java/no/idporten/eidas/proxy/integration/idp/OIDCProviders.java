@@ -1,16 +1,16 @@
 package no.idporten.eidas.proxy.integration.idp;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import no.idporten.eidas.proxy.service.IDPSelector;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.util.Map;
 
 @Data
 @AllArgsConstructor
-public class OIDCProviders {
+public class OIDCProviders implements InitializingBean {
     @NotEmpty
     private Map<String, OIDCProvider> providers;
 
@@ -18,8 +18,8 @@ public class OIDCProviders {
         return providers.getOrDefault(idp, providers.get(IDPSelector.IDPORTEN));
     }
 
-    @PostConstruct
-    public void validate() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
         if (providers.isEmpty()) throw new IllegalArgumentException("No OIDC providers configured");
         if (!providers.containsKey(IDPSelector.IDPORTEN))
             throw new IllegalArgumentException("No OIDC provider configured for idporten");

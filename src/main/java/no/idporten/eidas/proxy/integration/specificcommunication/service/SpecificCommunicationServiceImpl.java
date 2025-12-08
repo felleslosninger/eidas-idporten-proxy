@@ -49,10 +49,10 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
             xmlResponse = LightResponseToXML.toXml(lightResponse);
         } catch (JAXBException e) {
             log.error("Failed to convert lightResponse to XML {}", e.getMessage());
-            String idp = IDPSelector.chooseIdp(((LightResponse) lightResponse).getRequestedAttributesAsStringSet());
+            String idp = getIdp((LightResponse) lightResponse);
             throw new SpecificProxyException("Failed to convert lightResponse to XML", e, LightRequest.builder().relayState(lightResponse.getRelayState()).id(lightResponse.getInResponseToId()).build(), idp);
         }
-        String idp = IDPSelector.chooseIdp(((LightResponse) lightResponse).getRequestedAttributesAsStringSet());
+        String idp = getIdp((LightResponse) lightResponse);
         BinaryLightToken binaryLightToken = BinaryLightTokenHelper
                 .createBinaryLightToken(idp, eidasCacheProperties.getResponseIssuerName(),
                         eidasCacheProperties.getResponseSecret(),
@@ -60,6 +60,10 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
         log.info("putResponse {}", binaryLightToken.getToken().getId());
         redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(eidasCacheProperties.getLightResponseLifetimeSeconds()));
         return binaryLightToken;
+    }
+
+    private static String getIdp(LightResponse lightResponse) {
+        return IDPSelector.chooseIdp(lightResponse.getRequestedAttributesAsStringSet());
     }
 
     @Override

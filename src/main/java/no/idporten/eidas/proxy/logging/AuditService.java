@@ -64,7 +64,7 @@ public class AuditService {
                     String key = entry.getKey();
                     List<String> values = entry.getValue();
                     if (values == null || values.isEmpty()) {
-                        return Stream.of(key + ", " + "null");
+                        return Stream.of(key + ", null");
                     }
                     return values.stream().map(v -> key + ", " + v);
                 })

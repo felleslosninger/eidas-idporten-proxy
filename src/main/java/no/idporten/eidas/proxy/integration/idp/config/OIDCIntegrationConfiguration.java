@@ -88,6 +88,7 @@ public class OIDCIntegrationConfiguration {
     private static KeyProvider loadKeyProvider(OIDCIntegrationProperties props) {
 
         KeystoreProperties keystoreProperties = props.getKeystore();
+        if (keystoreProperties == null) throw new IllegalStateException("Keystore properties not configured");
         KeyStoreResourceLoader keyStoreResourceLoader = new KeyStoreResourceLoader();
         KeyStoreProvider keyStoreProvider = new KeyStoreProvider(
                 keystoreProperties.getKeystoreType(),

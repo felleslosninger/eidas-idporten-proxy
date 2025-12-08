@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static no.idporten.eidas.proxy.service.EIDAS_ATTRIBUTE_NAMES.E_JUSTICE_NATURAL_PERSON_ROLE;
+import static no.idporten.eidas.proxy.service.EidasAttributeNames.E_JUSTICE_NATURAL_PERSON_ROLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("IDPSelector")
