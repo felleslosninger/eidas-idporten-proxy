@@ -1,3 +1,6 @@
+# NB: Login to Azure Container Registry : az login && az acr login -n crutvikling --subscription 9c0d7873-b8aa-4042-96f8-b8ce5c9888d0
+# https://portal.azure.com/#@Nasjonalfelleslosning.onmicrosoft.com/resource/subscriptions/9c0d7873-b8aa-4042-96f8-b8ce5c9888d0/resourceGroups/rg-eid-systest-cr/providers/Microsoft.ContainerRegistry/registries/crutvikling/overview
+
 name: eidas
 networks:
   eidas:

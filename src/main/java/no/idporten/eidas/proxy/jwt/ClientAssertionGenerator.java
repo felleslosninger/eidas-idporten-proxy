@@ -11,9 +11,9 @@ import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.proxy.crypto.KeyProvider;
+import no.idporten.eidas.proxy.integration.idp.OIDCProviders;
 import no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties;
 import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.security.cert.Certificate;
@@ -23,16 +23,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNull;
+
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "eidas.oidc-integration", name = "client-auth-method", havingValue = "private_key_jwt")
 public class ClientAssertionGenerator {
 
-    private final OIDCIntegrationProperties oidcIntegrationProperties;
-    private final KeyProvider keyProvider;
+    private final OIDCProviders oidcProviders;
 
-    public ClientAuthentication create() {
+    public ClientAuthentication create(String idp) {
         try {
+            OIDCIntegrationProperties properties = oidcProviders.get(idp).getProperties();
+            KeyProvider keyProvider = requireNonNull(oidcProviders.get(idp).getKeyProvider());
             List<Base64> encodedCertificates = new ArrayList<>();
             for (Certificate c : keyProvider.getCertificateChain()) {
                 encodedCertificates.add(Base64.encode(c.getEncoded()));
@@ -40,14 +42,14 @@ public class ClientAssertionGenerator {
             JWSHeader header = new JWSHeader
                     .Builder(JWSAlgorithm.RS256)
                     .x509CertChain(encodedCertificates)
-                    .keyID(oidcIntegrationProperties.getKeyId())
+                    .keyID(properties.getKeyId())
                     .build();
             long created = Clock.systemUTC().millis();
             long expires = created + (120 * 1000L);
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .issuer(oidcIntegrationProperties.getClientId())
-                    .subject(oidcIntegrationProperties.getClientId())
-                    .audience(oidcIntegrationProperties.getIssuer().toString())
+                    .issuer(properties.getClientId())
+                    .subject(properties.getClientId())
+                    .audience(properties.getIssuer().toString())
                     .jwtID(UUID.randomUUID().toString())
                     .issueTime(new Date(created))
                     .expirationTime(new Date(expires))

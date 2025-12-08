@@ -27,8 +27,8 @@ public class WebExceptionControllerAdvice {
 
         log.error("SpecificProxyException occurred for request: {} {}", ex.getLightRequest(), ex.getMessage());
 
-        LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, ex);
-        auditService.auditLightResponse(lightResponse, null);
+        LightResponse lightResponse = specificProxyService.getErrorLightResponse(ex.getIdp(), EIDASStatusCode.REQUESTER_URI, ex);
+        auditService.auditLightResponse(lightResponse, null, ex.getIdp());
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
         return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);
@@ -37,8 +37,8 @@ public class WebExceptionControllerAdvice {
     @ExceptionHandler(Exception.class)
     public String handleException(Exception ex) {
         log.error("Exception occurred :{}", ex.getMessage());
-        LightResponse lightResponse = specificProxyService.getErrorLightResponse(EIDASStatusCode.RESPONDER_URI, ex);
-        auditService.auditLightResponse(lightResponse, null);
+        LightResponse lightResponse = specificProxyService.getErrorLightResponse(null, EIDASStatusCode.RESPONDER_URI, ex);
+        auditService.auditLightResponse(lightResponse, null, null);
         String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
         specificCommunicationService.putResponse(lightResponse);
         return "redirect:%s?token=%s".formatted(specificProxyService.getEuProxyRedirectUri(), storeBinaryLightTokenResponseBase64);

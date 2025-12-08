@@ -68,15 +68,26 @@ eidas:
       idporten-loa-low: 'http://eidas.europa.eu/LoA/low'
       idporten-loa-substantial: 'http://eidas.europa.eu/LoA/substantial'
       idporten-loa-high: 'http://eidas.europa.eu/LoA/high'
-  oidc-integration:
-    scopes:
-      - openid
-      - eidas:mds
-    connect-timeout-millis: 500
-    read-timeout-millis: 500
-    jwks-cache-lifetime-minutes: 60
-    jwks-cache-refresh-minutes: 5
-
+      low: 'http://eidas.europa.eu/LoA/low'
+      substantial: 'http://eidas.europa.eu/LoA/substantial'
+      high: 'http://eidas.europa.eu/LoA/high'
+  oidc-integrations:
+    idporten:
+      scopes:
+        - openid
+        - eidas:mds
+      connect-timeout-millis: 500
+      read-timeout-millis: 500
+      jwks-cache-lifetime-minutes: 60
+      jwks-cache-refresh-minutes: 5
+    ansattporten:
+      scopes:
+        - openid
+        - eidas:mds
+      connect-timeout-millis: 500
+      read-timeout-millis: 500
+      jwks-cache-lifetime-minutes: 60
+      jwks-cache-refresh-minutes: 5
 digdir:
   audit:
     application-name: ${spring.application.name}

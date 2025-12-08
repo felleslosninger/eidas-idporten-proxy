@@ -15,6 +15,8 @@ import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.proxy.jwt.ClientAssertionGenerator;
+import no.idporten.eidas.proxy.service.IDPSelector;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,12 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class OIDCIntegrationServiceTest {
+
+    @Mock
+    private OIDCProviders oidcProviders;
+
+    @Mock
+    private OIDCProvider oidcProvider;
     @Mock
     private OIDCIntegrationProperties oidcIntegrationProperties;
     @Mock
@@ -45,6 +53,13 @@ class OIDCIntegrationServiceTest {
     @InjectMocks
     private OIDCIntegrationService oidcIntegrationService;
 
+    @BeforeEach
+    public void setup() {
+        when(oidcProviders.get(IDPSelector.IDPORTEN)).thenReturn(oidcProvider);
+        when(oidcProvider.getMetadata()).thenReturn(oidcProviderMetadata);
+        when(oidcProvider.getProperties()).thenReturn(oidcIntegrationProperties);
+    }
+
 
     @Test
     @DisplayName("Test client authentication with private key JWT")
@@ -55,9 +70,9 @@ class OIDCIntegrationServiceTest {
         when(oidcIntegrationProperties.getClientId()).thenReturn("testClientId");
         when(oidcIntegrationProperties.getIssuer()).thenReturn(new URI("https://example.com"));
         when(oidcIntegrationProperties.getClientAuthMethod()).thenReturn("private_key_jwt");
-        when(mockClientAssertionGenerator.create()).thenReturn(mock(PrivateKeyJWT.class));
+        when(mockClientAssertionGenerator.create(IDPSelector.IDPORTEN)).thenReturn(mock(PrivateKeyJWT.class));
 
-        ClientAuthentication clientAuth = oidcIntegrationService.clientAuthentication();
+        ClientAuthentication clientAuth = oidcIntegrationService.clientAuthentication(IDPSelector.IDPORTEN);
         assertInstanceOf(PrivateKeyJWT.class, clientAuth);
     }
 
@@ -110,7 +125,7 @@ class OIDCIntegrationServiceTest {
         when(oidcProviderMetadata.getPushedAuthorizationRequestEndpointURI()).thenReturn(new URI("https://example.com/authorize"));
 
         // Call the method under test
-        AuthenticationRequest authRequest = oidcIntegrationService.createAuthenticationRequest(codeVerifier, acrValues, serviceProviderCountryCode);
+        AuthenticationRequest authRequest = oidcIntegrationService.createAuthenticationRequest(IDPSelector.IDPORTEN, codeVerifier, acrValues, serviceProviderCountryCode);
 
         // Using assertAll to group all assertions together
         assertAll("AuthenticationRequest validation",

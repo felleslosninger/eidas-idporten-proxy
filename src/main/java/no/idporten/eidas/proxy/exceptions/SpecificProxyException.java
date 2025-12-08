@@ -32,30 +32,36 @@ import lombok.Getter;
 public class SpecificProxyException extends AbstractEIDASException {
 
     private final ILightRequest lightRequest;
+    private final String idp;
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final ILightRequest lightRequest) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final ILightRequest lightRequest, final String idp) {
         super(errorCode, errorMessage);
         this.lightRequest = lightRequest;
+        this.idp = idp;
     }
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final ILightRequest lightRequest) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final ILightRequest lightRequest, String idp) {
         super(errorCode, errorMessage, additionalInformation);
         this.lightRequest = lightRequest;
+        this.idp = idp;
     }
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final Throwable cause, final ILightRequest lightRequest) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final Throwable cause, final ILightRequest lightRequest, String idp) {
         super(errorCode, errorMessage, cause);
         this.lightRequest = lightRequest;
+        this.idp = idp;
     }
 
-    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final Throwable cause, final ILightRequest lightRequest) {
+    public SpecificProxyException(final String errorCode, final String errorMessage, final String additionalInformation, final Throwable cause, final ILightRequest lightRequest, String idp) {
         super(errorCode, errorMessage, additionalInformation, cause);
         this.lightRequest = lightRequest;
+        this.idp = idp;
     }
 
-    public SpecificProxyException(String message, Throwable cause, final ILightRequest lightRequest) {
+    public SpecificProxyException(String message, Throwable cause, final ILightRequest lightRequest, String idp) {
         super(message, cause.getMessage());
         this.lightRequest = lightRequest;
+        this.idp = idp;
     }
 
 }

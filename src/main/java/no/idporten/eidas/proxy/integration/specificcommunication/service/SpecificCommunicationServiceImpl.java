@@ -13,6 +13,8 @@ import no.idporten.eidas.proxy.integration.specificcommunication.config.EidasCac
 import no.idporten.eidas.proxy.lightprotocol.LightRequestParser;
 import no.idporten.eidas.proxy.lightprotocol.LightResponseToXML;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
+import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -47,15 +49,21 @@ public class SpecificCommunicationServiceImpl implements SpecificCommunicationSe
             xmlResponse = LightResponseToXML.toXml(lightResponse);
         } catch (JAXBException e) {
             log.error("Failed to convert lightResponse to XML {}", e.getMessage());
-            throw new SpecificProxyException("Failed to convert lightResponse to XML", e, LightRequest.builder().relayState(lightResponse.getRelayState()).id(lightResponse.getInResponseToId()).build());
+            String idp = getIdp((LightResponse) lightResponse);
+            throw new SpecificProxyException("Failed to convert lightResponse to XML", e, LightRequest.builder().relayState(lightResponse.getRelayState()).id(lightResponse.getInResponseToId()).build(), idp);
         }
+        String idp = getIdp((LightResponse) lightResponse);
         BinaryLightToken binaryLightToken = BinaryLightTokenHelper
-                .createBinaryLightToken(eidasCacheProperties.getResponseIssuerName(),
+                .createBinaryLightToken(idp, eidasCacheProperties.getResponseIssuerName(),
                         eidasCacheProperties.getResponseSecret(),
                         eidasCacheProperties.getAlgorithm());
         log.info("putResponse {}", binaryLightToken.getToken().getId());
         redisCache.set(eidasCacheProperties.getLightResponsePrefix(binaryLightToken.getToken().getId()), xmlResponse, Duration.ofSeconds(eidasCacheProperties.getLightResponseLifetimeSeconds()));
         return binaryLightToken;
+    }
+
+    private static String getIdp(LightResponse lightResponse) {
+        return IDPSelector.chooseIdp(lightResponse.getRequestedAttributesAsStringSet());
     }
 
     @Override

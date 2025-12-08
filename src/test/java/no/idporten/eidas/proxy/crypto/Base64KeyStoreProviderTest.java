@@ -1,5 +1,8 @@
 package no.idporten.eidas.proxy.crypto;
 
+import no.idporten.eidas.proxy.integration.idp.OIDCProvider;
+import no.idporten.eidas.proxy.integration.idp.OIDCProviders;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.security.PrivateKey;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("When loading keystores")
@@ -16,16 +20,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class Base64KeyStoreProviderTest {
 
     @Autowired
-    private KeyStoreProvider keyStoreProvider;
-
-    @Autowired
-    private KeyProvider keyProvider;
+    private OIDCProviders oidcProviders;
 
     @DisplayName("then keystores can be loaded from a base64-encoded string using the base64: prefix")
     @Test
     void testLoadKeyStore() {
-        assertNotNull(keyStoreProvider.getKeyStore());
-        PrivateKey key = keyProvider.getPrivateKey();
+        OIDCProvider oidcProvider = oidcProviders.get(IDPSelector.IDPORTEN);
+        assertEquals("idporten", oidcProvider.getId());
+        assertNotNull(oidcProvider.getKeyProvider());
+        PrivateKey key = oidcProvider.getKeyProvider().getPrivateKey();
         assertNotNull(key);
     }
 }

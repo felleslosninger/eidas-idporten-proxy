@@ -1,13 +1,13 @@
 package no.idporten.eidas.proxy.integration.idp.config;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import no.idporten.eidas.proxy.crypto.KeystoreProperties;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -17,8 +17,7 @@ import java.util.Set;
 @Data
 @Slf4j
 @Validated
-@ConfigurationProperties(ignoreInvalidFields = true, prefix = "eidas.oidc-integration")
-public class OIDCIntegrationProperties implements InitializingBean {
+public class OIDCIntegrationProperties {
 
     @NotNull
     private URI issuer;
@@ -40,16 +39,18 @@ public class OIDCIntegrationProperties implements InitializingBean {
     private String keyId;
 
     @Min(1)
-    private int connectTimeOutMillis = 5000;
+    private int connectTimeoutMillis = 5000;
     @Min(1)
-    private int readTimeOutMillis = 5000;
+    private int readTimeoutMillis = 5000;
     @Min(1)
     private int jwksCacheRefreshMinutes = 5;
     @Min(1)
     private int jwksCacheLifetimeMinutes = 60;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    private KeystoreProperties keystore;
+
+    @PostConstruct
+    public void afterPropertiesSet() {
         if (clientAuthMethod.startsWith("client_secret") && !StringUtils.hasText(clientSecret)) {
             notEmptyForClientAuth("client-secret", clientSecret, clientAuthMethod);
         }

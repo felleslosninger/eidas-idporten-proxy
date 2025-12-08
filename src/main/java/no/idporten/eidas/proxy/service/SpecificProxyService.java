@@ -29,6 +29,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+import static no.idporten.eidas.proxy.service.EidasAttributeNames.*;
+
 /**
  * The main service
  */
@@ -46,10 +48,7 @@ public class SpecificProxyService {
     private final OIDCIntegrationService oidcIntegrationService;
     private final EuProxyProperties euProxyProperties;
     private final LevelOfAssuranceHelper levelOfAssuranceHelper;
-    private static final String FAMILY_NAME_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/CurrentFamilyName";
-    private static final String FIRST_NAME_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName";
-    private static final String DATE_OF_BIRTH_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/DateOfBirth";
-    private static final String PID_EIDAS = "http://eidas.europa.eu/attributes/naturalperson/PersonIdentifier";
+
 
     public String getEuProxyRedirectUri() {
         return euProxyProperties.getRedirectUri();
@@ -60,9 +59,9 @@ public class SpecificProxyService {
         return BinaryLightTokenHelper.encodeBinaryLightTokenBase64(binaryLightToken);
     }
 
-    public AuthenticationRequest translateNodeRequest(ILightRequest originalIlightRequest) {
+    public AuthenticationRequest translateNodeRequest(String idp, ILightRequest originalIlightRequest) {
         CodeVerifier codeVerifier = new CodeVerifier();
-        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(
+        final AuthenticationRequest authenticationRequest = oidcIntegrationService.createAuthenticationRequest(idp,
                 codeVerifier,
                 levelOfAssuranceHelper.eidasAcrListToIdportenAcrList(originalIlightRequest.getLevelsOfAssurance()),
                 originalIlightRequest.getSpCountryCode());
@@ -85,14 +84,14 @@ public class SpecificProxyService {
         return correlatedRequestHolder;
     }
 
-    public LightResponse getLightResponse(UserInfo userInfo, ILightRequest lightRequest, ILevelOfAssurance acr) {
+    public LightResponse getLightResponse(String idp, UserInfo userInfo, ILightRequest lightRequest, ILevelOfAssurance acr) {
 
         LightResponse.LightResponseBuilder lightResponseBuilder = LightResponse.builder()
                 .id(UUID.randomUUID().toString())
                 .citizenCountryCode(NO_COUNTRY_CODE)
                 .consent("yes")
                 .levelOfAssurance(acr.getValue())
-                .issuer(oidcIntegrationService.getIssuer())
+                .issuer(oidcIntegrationService.getIssuer(idp))
                 .subject(userInfo.getSubject().getValue())
                 .subjectNameIdFormat(URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_PERSISTENT)
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
@@ -115,13 +114,13 @@ public class SpecificProxyService {
         return lightResponseBuilder.build();
     }
 
-    public LightResponse getErrorLightResponse(EIDASStatusCode eidasStatusCode, Exception ex) {
+    public LightResponse getErrorLightResponse(String idp, EIDASStatusCode eidasStatusCode, Exception ex) {
         log.warn("Exception {} occurred with eidasStatusCode {} ", ex.getClass().getSimpleName() ,eidasStatusCode);
         if (ex instanceof SpecificProxyException spex) {
             return LightResponse.builder()
                     .id(UUID.randomUUID().toString())
                     .citizenCountryCode(NO_COUNTRY_CODE)
-                    .issuer(oidcIntegrationService.getIssuer())
+                    .issuer(oidcIntegrationService.getIssuer(idp))
                     .inResponseToId(getInResponseToId(spex))
                     .relayState(getRelayState(spex))
                     .status(getErrorStatus(eidasStatusCode, spex.getMessage()))
@@ -130,7 +129,7 @@ public class SpecificProxyService {
             return LightResponse.builder()
                     .id(UUID.randomUUID().toString())
                     .citizenCountryCode(NO_COUNTRY_CODE)
-                    .issuer(oidcIntegrationService.getIssuer())
+                    .issuer(oidcIntegrationService.getIssuer(idp))
                     .status(getErrorStatus(eidasStatusCode, "An internal error occurred"))
                     .build();
         }

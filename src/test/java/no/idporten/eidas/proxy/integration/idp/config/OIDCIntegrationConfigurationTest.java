@@ -3,7 +3,6 @@ package no.idporten.eidas.proxy.integration.idp.config;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.oauth2.sdk.id.Issuer;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import org.junit.jupiter.api.DisplayName;
@@ -15,13 +14,12 @@ import org.springframework.context.annotation.Configuration;
 import java.net.URI;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Configuration
-@EnableConfigurationProperties(OIDCIntegrationProperties.class)
+@EnableConfigurationProperties(OIDCIntegrationPropertiesMap.class)
 class OIDCIntegrationConfigurationTest {
 
     @Bean
@@ -35,20 +33,16 @@ class OIDCIntegrationConfigurationTest {
         return mock(IDTokenValidator.class);
     }
     @Test
-    @DisplayName("Test OIDCProviderMetadata bean creation")
-    void testOIDCProviderMetadataBeanCreation() throws Exception {
-        final String issuerUri = "https://idporten.dev";
-        OIDCIntegrationProperties properties = new OIDCIntegrationProperties();
-        properties.setIssuer(new URI(issuerUri));
-        properties.setConnectTimeOutMillis(5000);
-        properties.setReadTimeOutMillis(5000);
+    @DisplayName("Test OIDCProviderMap bean creation (no network)")
+    void testOIDCProviderMapBeanCreation() {
+        // Prepare an empty properties map to avoid network calls during metadata resolution
+        OIDCIntegrationPropertiesMap propertiesMap = new OIDCIntegrationPropertiesMap();
+        propertiesMap.setOidcIntegrations(Collections.emptyMap());
 
         OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration();
-        OIDCProviderMetadata oidcProviderMetadata = configuration.oidcProviderMetadata(properties);
+        var providerMap = configuration.oidcProviderMap(propertiesMap);
 
-
-        Issuer issuer = new Issuer(issuerUri);
-        assertEquals(issuer, oidcProviderMetadata.getIssuer());
+        assertNotNull(providerMap);
     }
 
     @Test

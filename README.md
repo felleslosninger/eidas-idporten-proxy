@@ -1,6 +1,8 @@
 # eidas-idporten-proxy
 
-Eidas-idporten-proxy as specific proxy for service for Norway from ID-porten.
+Eidas-idporten-proxy as specific proxy for service for Norway towards ID-porten and Ansattporten.
+Ansattporten is used only if eJusticeNaturalPersonRole is requested.
+
 Cache for LightProtocol requests and responses. Must match names that the eidas-proxy uses.
 
 ## Configuration

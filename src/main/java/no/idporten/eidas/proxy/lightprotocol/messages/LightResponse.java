@@ -11,10 +11,7 @@ import no.idporten.logging.audit.AuditDataProvider;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serial;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @XmlRootElement(name = "lightResponse", namespace = "http://cef.eidas.eu/LightResponse")
@@ -119,6 +116,11 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
         all.values().removeIf(Objects::isNull);
         return Map.copyOf(all); // Immutable map throws NPE if values (or keys) is null
     }
+
+    public Set<String> getRequestedAttributesAsStringSet() {
+        return attributes != null ? attributes.stream().map(Attribute::getDefinition).collect(Collectors.toSet()) : Collections.emptySet();
+    }
+
 
 }
 

@@ -28,7 +28,6 @@ import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
 import javax.annotation.Nonnull;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
-import java.util.Calendar;
 import java.util.UUID;
 
 
@@ -60,7 +59,7 @@ public class BinaryLightTokenHelper {
         try {
             binaryLightToken = LightTokenEncoder.decode(binaryLightTokenString.getBytes(), secret, algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), e, null);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), e, null, null);
         }
 
         return binaryLightToken.getToken().getId();
@@ -101,12 +100,12 @@ public class BinaryLightTokenHelper {
      * @return {@link BinaryLightToken}
      * @throws SpecificProxyException when digest algorithm could not be found.
      */
-    public static BinaryLightToken createBinaryLightToken(String issuerName, String secret, String algorithm) throws SpecificProxyException {
+    public static BinaryLightToken createBinaryLightToken(String idp, String issuerName, String secret, String algorithm) throws SpecificProxyException {
         final LightToken lightToken = BinaryLightTokenHelper.createLightToken(issuerName);
         try {
             return LightTokenEncoder.encode(lightToken, secret, algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), e, null);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), e, null, idp);
         }
     }
 
