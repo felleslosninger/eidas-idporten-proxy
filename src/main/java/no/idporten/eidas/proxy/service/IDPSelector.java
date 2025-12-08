@@ -8,6 +8,9 @@ import static no.idporten.eidas.proxy.service.EIDAS_ATTRIBUTE_NAMES.E_JUSTICE_NA
 
 public class IDPSelector {
 
+    // Prevent instantiation
+    private IDPSelector() {
+    }
     public static final String IDPORTEN = "idporten";
     public static final String ANSATTPORTEN = "ansattporten";
 
