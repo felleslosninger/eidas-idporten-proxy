@@ -24,7 +24,8 @@ public class OIDCIntegrationPropertiesMap {
 
     @PostConstruct
     public void validate() {
-        if (oidcIntegrations.isEmpty()) throw new IllegalArgumentException("No oidc integrations configured");
+        if (oidcIntegrations == null || oidcIntegrations.isEmpty())
+            throw new IllegalArgumentException("No oidc integrations configured");
         if (!oidcIntegrations.containsKey(IDPSelector.IDPORTEN))
             throw new IllegalArgumentException("No oidc integration configured for idporten");
         if (!oidcIntegrations.containsKey(IDPSelector.ANSATTPORTEN))
