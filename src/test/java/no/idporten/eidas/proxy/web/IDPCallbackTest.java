@@ -18,6 +18,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.Specifi
 import no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.logging.AuditService;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import no.idporten.eidas.proxy.service.LevelOfAssuranceHelper;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.AfterEach;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -44,23 +45,23 @@ class IDPCallbackTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private SpecificProxyService specificProxyService;
 
-    @MockBean
+    @MockitoBean
     private OIDCIntegrationService oidcIntegrationService;
 
-    @MockBean
+    @MockitoBean
     private SpecificCommunicationService specificCommunicationService;
-    @MockBean
+    @MockitoBean
     private AuditService auditService;
 
-    @MockBean
+    @MockitoBean
     private LevelOfAssuranceHelper levelOfAssuranceHelper;
     private ILightRequest mockLightRequest;
     private State state;
 
-    private ILevelOfAssurance levelOfAssurance = LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW);
+    private final ILevelOfAssurance levelOfAssurance = LevelOfAssurance.fromString(ILevelOfAssurance.EIDAS_LOA_LOW);
 
     @BeforeEach
     void setup() {
@@ -76,7 +77,7 @@ class IDPCallbackTest {
         AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
         when(authorizationResponse.getState()).thenReturn(state);
         LightResponse lightResponse = mock(LightResponse.class);
-        when(specificProxyService.getErrorLightResponse(any(), any())).thenReturn(lightResponse);
+        when(specificProxyService.getErrorLightResponse(any(), any(), any())).thenReturn(lightResponse);
 
     }
 
@@ -99,21 +100,21 @@ class IDPCallbackTest {
 
 
         when(oidcIntegrationService.getAuthorizationCode(any(AuthorizationResponse.class), any(CorrelatedRequestHolder.class))).thenReturn(authorizationCode);
-        when(oidcIntegrationService.getToken(any(), any(), any())).thenReturn(oidcTokens);
+        when(oidcIntegrationService.getToken(eq(IDPSelector.IDPORTEN), any(), any(), any())).thenReturn(oidcTokens);
         UserInfo userInfo = mock(UserInfo.class);
 
         LightResponse lightResponse = mock(LightResponse.class);
         when(lightResponse.getRelayState()).thenReturn("abc");
-        when(oidcIntegrationService.getUserInfo(any())).thenReturn(userInfo);
+        when(oidcIntegrationService.getUserInfo(eq(IDPSelector.IDPORTEN), any())).thenReturn(userInfo);
 
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().string(containsString("Click to redirect")));
 
-        verify(auditService).auditLightResponse(lightResponse, null);
+        verify(auditService).auditLightResponse(lightResponse, null, IDPSelector.IDPORTEN);
     }
 
     @Test
@@ -132,20 +133,20 @@ class IDPCallbackTest {
 
 
         when(oidcIntegrationService.getAuthorizationCode(any(AuthorizationResponse.class), any(CorrelatedRequestHolder.class))).thenReturn(authorizationCode);
-        when(oidcIntegrationService.getToken(any(), any(), any())).thenReturn(oidcTokens);
+        when(oidcIntegrationService.getToken(eq(IDPSelector.IDPORTEN), any(), any(), any())).thenReturn(oidcTokens);
         UserInfo userInfo = mock(UserInfo.class);
         LightResponse lightResponse = mock(LightResponse.class);
         when(lightResponse.getRelayState()).thenReturn("abc");
-        when(oidcIntegrationService.getUserInfo(any())).thenReturn(userInfo);
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
+        when(oidcIntegrationService.getUserInfo(eq(IDPSelector.IDPORTEN), any())).thenReturn(userInfo);
+        when(specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
 
-        when(specificProxyService.getLightResponse(userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().string(containsString("Click to redirect")));
-        verify(auditService).auditLightResponse(lightResponse, null);
+        verify(auditService).auditLightResponse(lightResponse, null, IDPSelector.IDPORTEN);
 
     }
 
@@ -157,6 +158,6 @@ class IDPCallbackTest {
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(), isNull());
+        verify(auditService).auditLightResponse(any(), isNull(), eq(IDPSelector.IDPORTEN));
     }
 }

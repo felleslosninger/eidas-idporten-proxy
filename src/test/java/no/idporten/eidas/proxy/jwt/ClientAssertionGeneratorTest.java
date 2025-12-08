@@ -3,6 +3,7 @@ package no.idporten.eidas.proxy.jwt;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ class ClientAssertionGeneratorTest {
     @Test
     @DisplayName("the jwt header must contain kid if using kid")
     void testGenerateJwtWithKid() {
-        ClientAuthentication s = clientAssertionGenerator.create();
+        ClientAuthentication s = clientAssertionGenerator.create(IDPSelector.IDPORTEN);
         assertNotNull(s);
         assertInstanceOf(PrivateKeyJWT.class, s);
         assertEquals("okcomputer", ((PrivateKeyJWT) s).getClientAssertion().getHeader().getKeyID());
@@ -33,7 +34,7 @@ class ClientAssertionGeneratorTest {
     @Test
     @DisplayName("the jwt grant must contain a jwt claimset")
     void testGenerateJwt() throws ParseException {
-        SignedJWT s = ((PrivateKeyJWT) clientAssertionGenerator.create()).getClientAssertion();
+        SignedJWT s = ((PrivateKeyJWT) clientAssertionGenerator.create(IDPSelector.IDPORTEN)).getClientAssertion();
         assertNotNull(s);
         assertNotNull(s.getJWTClaimsSet());
     }

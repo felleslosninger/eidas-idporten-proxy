@@ -38,6 +38,7 @@ import no.idporten.eidas.proxy.integration.specificcommunication.service.Specifi
 import no.idporten.eidas.proxy.lightprotocol.IncomingLightRequestValidator;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.proxy.logging.AuditService;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,21 +76,25 @@ public class ProxyServiceRequestController {
         final ILightRequest lightRequest = getIncomingiLightRequest(httpServletRequest, null);
 
         if (!IncomingLightRequestValidator.validateRequest((LightRequest) lightRequest)) {
-            throw new SpecificProxyException(ErrorCodes.INVALID_REQUEST.getValue(), "Incoming Light Request is invalid. Rejecting request.", lightRequest);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Invalid request", lightRequest, null);
         }
-        auditService.auditLightRequest((LightRequest) lightRequest);
+
+        String idp = IDPSelector.chooseIdp(((LightRequest) lightRequest).getRequestedAttributesAsStringSet());
+        auditService.auditLightRequest((LightRequest) lightRequest, idp);
         //skip consent flow for now
-        final AuthenticationRequest authenticationRequest = createSpecificRequest(lightRequest);
+        final AuthenticationRequest authenticationRequest = createSpecificRequest(idp, lightRequest);
         try {
-            URI uri = oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest);
+
+            URI uri = oidcIntegrationService.pushedAuthorizationRequest(idp, authenticationRequest);
             URI authUri = new AuthorizationRequest.Builder(uri, authenticationRequest.getClientID())
-                    .endpointURI(oidcIntegrationService.getAuthorizationEndpoint())
+                    .endpointURI(oidcIntegrationService.getAuthorizationEndpoint(idp))
                     .build()
                     .toURI();
             return "redirect:%s".formatted(authUri.toString());
         } catch (OAuthException e) {
-            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider: %s".formatted(e.getMessage()), lightRequest);
+            throw new SpecificProxyException(ErrorCodes.INTERNAL_ERROR.getValue(), "Error getting tokens from OIDC provider: %s".formatted(e.getMessage()), lightRequest, idp);
         }
+
     }
 
     private ILightRequest getIncomingiLightRequest(@Nonnull HttpServletRequest httpServletRequest, final Collection<AttributeDefinition<?>> registry) throws SpecificProxyException {
@@ -102,8 +107,8 @@ public class ProxyServiceRequestController {
         return BinaryLightTokenHelper.getBinaryLightTokenId(tokenBase64, eidasCacheProperties.getRequestSecret(), eidasCacheProperties.getAlgorithm());
     }
 
-    private AuthenticationRequest createSpecificRequest(ILightRequest originalIlightRequest) {
-        return specificProxyService.translateNodeRequest(originalIlightRequest);
+    private AuthenticationRequest createSpecificRequest(String idp, ILightRequest originalIlightRequest) {
+        return specificProxyService.translateNodeRequest(idp, originalIlightRequest);
     }
 
 }

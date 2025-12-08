@@ -20,6 +20,7 @@ import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.RequestedAttribute;
 import no.idporten.eidas.proxy.logging.AuditService;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import no.idporten.eidas.proxy.service.SpecificProxyService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
@@ -46,19 +47,21 @@ class ProxyServiceRequestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private SpecificCommunicationService specificCommunicationService;
 
-    @MockBean
+    @MockitoBean
     private SpecificProxyService specificProxyService;
 
-    @MockBean
+    @MockitoBean
     private EidasCacheProperties eidasCacheProperties;
 
-    @MockBean
+    @MockitoBean
     private OIDCIntegrationService oidcIntegrationService;
-    @MockBean
+
+    @MockitoBean
     private AuditService auditService;
+
     private final static String lightTokenId = "mockedLightTokenId";
 
     private ILightRequest mockLightRequest;
@@ -85,7 +88,7 @@ class ProxyServiceRequestControllerTest {
         AuthorizationResponse authorizationResponse = mock(AuthorizationResponse.class);
         when(authorizationResponse.getState()).thenReturn(state);
         LightResponse lightResponse = mock(LightResponse.class);
-        when(specificProxyService.getErrorLightResponse(any(), any())).thenReturn(lightResponse);
+        when(specificProxyService.getErrorLightResponse(any(), any(), any())).thenReturn(lightResponse);
     }
 
 
@@ -107,14 +110,14 @@ class ProxyServiceRequestControllerTest {
         when(specificCommunicationService.getAndRemoveRequest(any(String.class), any())).thenReturn(lightRequest);
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest.Builder(new URI("http://example.com"), new ClientID("123")).build();
-        when(oidcIntegrationService.pushedAuthorizationRequest(authenticationRequest)).thenReturn(new URI("http://redirect-url.com"));
-        when(oidcIntegrationService.getAuthorizationEndpoint()).thenReturn(new URI("http://authorization-endpoint.com"));
+        when(oidcIntegrationService.pushedAuthorizationRequest(IDPSelector.IDPORTEN, authenticationRequest)).thenReturn(new URI("http://redirect-url.com"));
+        when(oidcIntegrationService.getAuthorizationEndpoint(IDPSelector.IDPORTEN)).thenReturn(new URI("http://authorization-endpoint.com"));
 
-        when(specificProxyService.translateNodeRequest(lightRequest)).thenReturn(authenticationRequest);
+        when(specificProxyService.translateNodeRequest(IDPSelector.IDPORTEN, lightRequest)).thenReturn(authenticationRequest);
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://authorization-endpoint.com?client_id=123&request_uri=http%3A%2F%2Fredirect-url.com"));
-        verify(auditService).auditLightRequest(lightRequest);
+        verify(auditService).auditLightRequest(lightRequest, IDPSelector.IDPORTEN);
     }
 
     @Test
@@ -136,7 +139,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(LightResponse.class), isNull());
+        verify(auditService).auditLightResponse(any(LightResponse.class), isNull(), eq(IDPSelector.IDPORTEN));
     }
 
     @Test
@@ -147,7 +150,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(LightResponse.class), isNull());
+        verify(auditService).auditLightResponse(any(LightResponse.class), isNull(), isNull());
     }
 
     @Test
@@ -158,7 +161,7 @@ class ProxyServiceRequestControllerTest {
 
         mockMvc.perform(post("/ProxyServiceRequest"))
                 .andExpect(redirectedUrl("http://junit?token=hello"));
-        verify(auditService).auditLightResponse(any(LightResponse.class), isNull());
+        verify(auditService).auditLightResponse(any(LightResponse.class), isNull(), isNull());
     }
 
 }

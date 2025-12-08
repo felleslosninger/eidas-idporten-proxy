@@ -10,10 +10,7 @@ import no.idporten.logging.audit.AuditDataProvider;
 
 import javax.annotation.Nonnull;
 import java.io.Serial;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightRequest")
@@ -86,6 +83,10 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
         return AuditData.builder()
                 .attributes(createMapForAuditLogging())
                 .build();
+    }
+
+    public Set<String> getRequestedAttributesAsStringSet() {
+        return requestedAttributes != null ? requestedAttributes.stream().map(RequestedAttribute::getDefinition).collect(Collectors.toSet()) : Collections.emptySet();
     }
 
     private Map<String, Object> createMapForAuditLogging() {

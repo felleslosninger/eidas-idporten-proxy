@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +48,7 @@ class SpecificProxyServiceTest {
 
     @BeforeEach
     void setup() {
-        when(oidcIntegrationService.getIssuer()).thenReturn("Issuer");
+        when(oidcIntegrationService.getIssuer(any())).thenReturn("Issuer");
         when(mockLightRequest.getRelayState()).thenReturn("relay123");
     }
 
@@ -71,8 +72,8 @@ class SpecificProxyServiceTest {
                 .build();
 
         OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
-        when(mockOidcIntegrationService.getIssuer()).thenReturn("http://myjunit");
-        LightResponse lightResponse = specificProxyService.getLightResponse(userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
+        when(mockOidcIntegrationService.getIssuer(IDPSelector.IDPORTEN)).thenReturn("http://myjunit");
+        LightResponse lightResponse = specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
         assertNotNull(lightResponse);
     }
 
@@ -80,9 +81,9 @@ class SpecificProxyServiceTest {
     @DisplayName("when a specific exception return LightResponse with detailed error for SpecificProxyException")
     void testGetErrorLightResponseWithSpecificProxyException() {
 
-        SpecificProxyException spex = new SpecificProxyException("Error code", "Error message", mockLightRequest);
+        SpecificProxyException spex = new SpecificProxyException("Error code", "Error message", mockLightRequest, IDPSelector.IDPORTEN);
 
-        LightResponse result = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, spex);
+        LightResponse result = specificProxyService.getErrorLightResponse(IDPSelector.IDPORTEN, EIDASStatusCode.REQUESTER_URI, spex);
 
         assertAll("Verifying all properties of the LightResponse for SpecificProxyException",
                 () -> assertNotNull(result.getId(), "ID must not be null"),
@@ -101,7 +102,7 @@ class SpecificProxyServiceTest {
         Exception ex = new Exception("Generic error");
 
 
-        LightResponse result = specificProxyService.getErrorLightResponse(EIDASStatusCode.REQUESTER_URI, ex);
+        LightResponse result = specificProxyService.getErrorLightResponse(IDPSelector.IDPORTEN, EIDASStatusCode.REQUESTER_URI, ex);
 
         assertAll("must properly handle generic exceptions and form correct LightResponse",
                 () -> assertNotNull(result.getId(), "ID must not be null"),
