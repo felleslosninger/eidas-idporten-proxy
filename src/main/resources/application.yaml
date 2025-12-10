@@ -88,7 +88,7 @@ eidas:
       read-timeout-millis: 500
       jwks-cache-lifetime-minutes: 60
       jwks-cache-refresh-minutes: 5
-      #just hardcoded for now. but consider mapping to attribute or something if extended
+      #just hardcoded for now, but consider mapping to attribute or something if extended
       authorization-details:
         - type: 'ansattporten:altinn:resource'
           resource: 'urn:altinn:resource:boris---vip1-tilgang'
