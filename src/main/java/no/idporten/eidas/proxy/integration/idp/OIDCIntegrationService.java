@@ -55,6 +55,7 @@ public class OIDCIntegrationService {
     private final OIDCProviders oidcProviders;
     private final Optional<ClientAssertionGenerator> jwtGrantGenerator;
     private final AuditService auditService;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public AuthenticationRequest createAuthenticationRequest(String idp, CodeVerifier codeVerifier, List<String> acrValues, String serviceProviderCountryCode) {
         OIDCIntegrationProperties oidcIntegrationProperties = this.oidcProviders.get(idp).getProperties();
@@ -75,7 +76,7 @@ public class OIDCIntegrationService {
 
         //send authorization_details if configured on oidcprovider
         if (CollectionUtils.isNotEmpty(this.oidcProviders.get(idp).getProperties().getAuthorizationDetails())) {
-            ObjectMapper mapper = new ObjectMapper();
+
             java.util.List<AuthorizationDetail> rarDetails = new java.util.ArrayList<>();
             for (no.idporten.sdk.oidcserver.protocol.AuthorizationDetail ad : this.oidcProviders.get(idp).getProperties().getAuthorizationDetails()) {
                 // Convert our DTO to a JSON object understood by Nimbus RAR AuthorizationDetail
@@ -174,7 +175,9 @@ public class OIDCIntegrationService {
             List<AuthorizationDetail> authorizationDetailsClaim = getAuthorizationDetailsClaim(oidcTokens.getIDToken().getJWTClaimsSet());
             if (CollectionUtils.isNotEmpty(authorizationDetailsClaim)) {
                 String eJusticeNaturalPersonRoleClaim = getEJusticeRoleClaim(authorizationDetailsClaim);
-                userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, eJusticeNaturalPersonRoleClaim);
+                if (eJusticeNaturalPersonRoleClaim != null) {
+                    userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, eJusticeNaturalPersonRoleClaim);
+                }
             }
         }
         return userInfo;
@@ -188,9 +191,9 @@ public class OIDCIntegrationService {
         }
 
         if (!(authDetailsClaim instanceof List<?> list)) {
-            // Here you'll see ArrayList, LinkedList, etc. if it's not an array-at-all you log + bail
-            log.warn("authorization_details claim is not a List but {}", authDetailsClaim.getClass());
-            return null;
+            // If the claim is not a List (e.g., ArrayList, LinkedList), log a warning and return null.
+            log.warn("authorization_details claim must be a List, but found type: {}", authDetailsClaim.getClass());
+            return List.of();
         }
 
         return list.stream()

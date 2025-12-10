@@ -144,11 +144,6 @@ class OIDCIntegrationServiceTest {
     }
 
     // --- Tests for eJustice role mapping from authorization_details ---
-    private static JWTClaimsSet claimsWithAuthorizationDetails(List<Map<String, Object>> adList) {
-        return new JWTClaimsSet.Builder()
-                .claim(AUTHORIZATION_DETAILS_CLAIM, adList)
-                .build();
-    }
 
     @Test
     @DisplayName("the authorization details claim must be parsed correctly")
@@ -229,6 +224,29 @@ class OIDCIntegrationServiceTest {
         String role = svc.getEJusticeRoleClaim(parsed);
 
         assertNull(role);
+    }
+
+    @Test
+    @DisplayName("should return null when no AuthorizationDetails is present")
+    void returnsNullWhenNoAuthorizationDetails() throws Exception {
+
+        JWTClaimsSet claims = claimsWithAuthorizationDetails(null);
+
+        OIDCIntegrationService svc = new OIDCIntegrationService(null, Optional.empty(), null);
+
+        List<AuthorizationDetail> parsed = svc.getAuthorizationDetailsClaim(claims);
+        String role = svc.getEJusticeRoleClaim(parsed);
+
+        assertNull(role);
+    }
+
+    private static JWTClaimsSet claimsWithAuthorizationDetails(List<Map<String, Object>> adList) {
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
+
+        if (adList != null) {
+            builder.claim(AUTHORIZATION_DETAILS_CLAIM, adList);
+        }
+        return builder.build();
     }
 }
 
