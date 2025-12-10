@@ -8,10 +8,12 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import no.idporten.eidas.proxy.crypto.KeystoreProperties;
+import no.idporten.sdk.oidcserver.protocol.AuthorizationDetail;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -46,6 +48,8 @@ public class OIDCIntegrationProperties {
     private int jwksCacheRefreshMinutes = 5;
     @Min(1)
     private int jwksCacheLifetimeMinutes = 60;
+
+    private List<AuthorizationDetail> authorizationDetails;
 
     private KeystoreProperties keystore;
 

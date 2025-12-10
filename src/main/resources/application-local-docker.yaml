@@ -37,4 +37,4 @@ eidas:
       redirect-uri: http://idporten-proxy:8077/idpcallback?idp=ansattporten
       client-id: eidas-proxy-client-ansattporten-docker
       client-auth-method: client_secret_basic
-      client-secret: b00322a5-4428-4090-9365-dd2587fd67f7
+      client-secret: 44961f11-ba25-414c-82be-fa2e3288ea0d

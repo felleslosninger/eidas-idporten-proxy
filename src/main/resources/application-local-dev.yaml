@@ -27,9 +27,16 @@ eidas:
     redirect-uri: http://eidas-proxy:8082/SpecificProxyServiceResponse
   cache:
     secret: mySecretProxyserviceResponse
-  oidc-integration:
-    issuer: https://idporten.dev
-    client-id: eidas-proxy-client-docker
-    client-auth-method: client_secret_basic
-    client-secret: 40915c2e-df80-4224-89d8-40db4cd56bcd
-    redirect-uri: http://localhost:8077/idpcallback
+  oidc-integrations:
+    idporten:
+      issuer: https://idporten.dev
+      client-id: eidas-proxy-client-docker
+      client-auth-method: client_secret_basic
+      client-secret: 40915c2e-df80-4224-89d8-40db4cd56bcd
+      redirect-uri: http://localhost:8077/idpcallback
+    ansattporten:
+      issuer: https://ansattporten.dev
+      redirect-uri: http://idporten-proxy:8077/idpcallback?idp=ansattporten
+      client-id: eidas-proxy-client-ansattporten-docker
+      client-auth-method: client_secret_basic
+      client-secret: 44961f11-ba25-414c-82be-fa2e3288ea0d

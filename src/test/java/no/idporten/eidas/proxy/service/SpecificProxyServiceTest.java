@@ -20,6 +20,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Set;
+
+import static no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService.E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM;
+import static no.idporten.eidas.proxy.service.EidasAttributeNames.E_JUSTICE_NATURAL_PERSON_ROLE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -112,6 +116,46 @@ class SpecificProxyServiceTest {
                 () -> assertEquals("An internal error occurred", result.getStatus().getStatusMessage(), "Status message must reflect an internal error"),
                 () -> assertEquals(EIDASStatusCode.REQUESTER_URI.getValue(), result.getStatus().getStatusCode(), "Status code must match the expected value")
         );
+    }
+
+    @Test
+    @DisplayName("should include E_JUSTICE_NATURAL_PERSON_ROLE attribute when role VIP1 claim is present")
+    void includesEJusticeAttributeWhenVip1ClaimPresent() {
+        UserInfo userInfo = new UserInfo(new Subject("sub"));
+        userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, "VIP1");
+
+        ILightRequest lightRequest = LightRequest.builder()
+                .id("id1")
+                .relayState("relay")
+                .issuer("issuer")
+                .levelOfAssurance("http://eidas.europa.eu/LoA/low")
+                .citizenCountryCode("NO")
+                .build();
+
+        LightResponse lr = specificProxyService.getLightResponse(IDPSelector.ANSATTPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
+        Set<String> attributeNames = lr.getRequestedAttributesAsStringSet();
+
+        assertTrue(attributeNames.contains(E_JUSTICE_NATURAL_PERSON_ROLE));
+    }
+
+    @Test
+    @DisplayName("should include E_JUSTICE_NATURAL_PERSON_ROLE attribute when role VIP2 claim is present")
+    void includesEJusticeAttributeWhenVip2ClaimPresent() {
+        UserInfo userInfo = new UserInfo(new Subject("sub"));
+        userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, "VIP2");
+
+        ILightRequest lightRequest = LightRequest.builder()
+                .id("id1")
+                .relayState("relay")
+                .issuer("issuer")
+                .levelOfAssurance("http://eidas.europa.eu/LoA/low")
+                .citizenCountryCode("NO")
+                .build();
+
+        LightResponse lr = specificProxyService.getLightResponse(IDPSelector.ANSATTPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
+        Set<String> attributeNames = lr.getRequestedAttributesAsStringSet();
+
+        assertTrue(attributeNames.contains(E_JUSTICE_NATURAL_PERSON_ROLE));
     }
 
 
