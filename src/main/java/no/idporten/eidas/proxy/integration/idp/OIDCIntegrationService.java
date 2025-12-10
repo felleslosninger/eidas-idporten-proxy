@@ -1,13 +1,17 @@
 package no.idporten.eidas.proxy.integration.idp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.proc.BadJOSEException;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.*;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.oauth2.sdk.pkce.CodeChallengeMethod;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
+import com.nimbusds.oauth2.sdk.rar.AuthorizationDetail;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
@@ -15,16 +19,20 @@ import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.token.OIDCTokens;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONObject;
 import no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties;
 import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
 import no.idporten.eidas.proxy.jwt.ClientAssertionGenerator;
 import no.idporten.eidas.proxy.logging.AuditService;
+import no.idporten.eidas.proxy.service.IDPSelector;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -38,9 +46,16 @@ public class OIDCIntegrationService {
     protected static final String ONBEHALFOF_NAME = "onbehalfof_name";
     protected static final String DIGDIR_ORGNO = "991825827";
     protected static final String EIDAS_DISPLAY_NAME = "eIDAS";
+    protected static final String AUTHORIZATION_DETAILS_CLAIM = "authorization_details";
+    public static final String E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM = "eJusticeNaturalPersonRole";
+    public static final String URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG = "urn:altinn:resource:boris---vip1-tilgang";
+    public static final String URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG = "urn:altinn:resource:boris---vip2-tilgang";
+    public static final String RESOURCE = "resource";
+
     private final OIDCProviders oidcProviders;
     private final Optional<ClientAssertionGenerator> jwtGrantGenerator;
     private final AuditService auditService;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public AuthenticationRequest createAuthenticationRequest(String idp, CodeVerifier codeVerifier, List<String> acrValues, String serviceProviderCountryCode) {
         OIDCIntegrationProperties oidcIntegrationProperties = this.oidcProviders.get(idp).getProperties();
@@ -59,6 +74,25 @@ public class OIDCIntegrationService {
                 .customParameter(ONBEHALFOF_NAME, EIDAS_DISPLAY_NAME)
         ;
 
+        //send authorization_details if configured on oidcprovider
+        if (CollectionUtils.isNotEmpty(this.oidcProviders.get(idp).getProperties().getAuthorizationDetails())) {
+
+            java.util.List<AuthorizationDetail> rarDetails = new java.util.ArrayList<>();
+            for (no.idporten.sdk.oidcserver.protocol.AuthorizationDetail ad : this.oidcProviders.get(idp).getProperties().getAuthorizationDetails()) {
+                // Convert our DTO to a JSON object understood by Nimbus RAR AuthorizationDetail
+                @SuppressWarnings("unchecked")
+                Map<String, Object> map = mapper.convertValue(ad, Map.class);
+                net.minidev.json.JSONObject jsonObject = new net.minidev.json.JSONObject();
+                jsonObject.putAll(map);
+                try {
+                    AuthorizationDetail rarAd = AuthorizationDetail.parse(jsonObject);
+                    rarDetails.add(rarAd);
+                } catch (com.nimbusds.oauth2.sdk.ParseException e) {
+                    throw new IllegalArgumentException("Invalid authorization_details element: " + jsonObject, e);
+                }
+            }
+            builder.authorizationDetails(rarDetails);
+        }
         return builder.build();
 
     }
@@ -125,7 +159,7 @@ public class OIDCIntegrationService {
         return successResponse.getOIDCTokens();
     }
 
-    public UserInfo getUserInfo(String idp, OIDCTokens oidcTokens) throws ParseException, IOException {
+    public UserInfo getUserInfo(String idp, OIDCTokens oidcTokens) throws ParseException, IOException, java.text.ParseException {
         OIDCProviderMetadata oidcProviderMetadata = this.oidcProviders.get(idp).getMetadata();
         UserInfoRequest userInfoRequest = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), oidcTokens.getAccessToken());
         UserInfoResponse userInfoResponse = UserInfoResponse.parse(userInfoRequest.toHTTPRequest().send());
@@ -134,7 +168,70 @@ public class OIDCIntegrationService {
             UserInfoErrorResponse errorResponse = userInfoResponse.toErrorResponse();
             throw new OAuthException("UserInfo request failed: " + errorResponse.getErrorObject());
         }
-        return userInfoResponse.toSuccessResponse().getUserInfo();
+        UserInfo userInfo = userInfoResponse.toSuccessResponse().getUserInfo();
+
+        //if ansattporten, check for authorization_details claim
+        if (IDPSelector.ANSATTPORTEN.equals(idp)) {
+            List<AuthorizationDetail> authorizationDetailsClaim = getAuthorizationDetailsClaim(oidcTokens.getIDToken().getJWTClaimsSet());
+            if (CollectionUtils.isNotEmpty(authorizationDetailsClaim)) {
+                String eJusticeNaturalPersonRoleClaim = getEJusticeRoleClaim(authorizationDetailsClaim);
+                if (eJusticeNaturalPersonRoleClaim != null) {
+                    userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, eJusticeNaturalPersonRoleClaim);
+                }
+            }
+        }
+        return userInfo;
+    }
+
+    //todo better validation of authdetails https://digdir.atlassian.net/browse/ID-5900
+    protected List<AuthorizationDetail> getAuthorizationDetailsClaim(JWTClaimsSet claims) {
+        Object authDetailsClaim = claims.getClaim(AUTHORIZATION_DETAILS_CLAIM);
+        if (authDetailsClaim == null) {
+            return List.of();
+        }
+
+        if (!(authDetailsClaim instanceof List<?> list)) {
+            // If the claim is not a List (e.g., ArrayList, LinkedList), log a warning and return null.
+            log.warn("authorization_details claim must be a List, but found type: {}", authDetailsClaim.getClass());
+            return List.of();
+        }
+
+        return list.stream()
+                .map(element -> {
+                    try {
+                        JSONObject json;
+
+                        if (element instanceof JSONObject j) {
+                            json = j;
+                        } else if (element instanceof Map<?, ?> m) {
+                            JSONObject j = new JSONObject();
+                            j.putAll((Map<String, ?>) m); // safe because JSON-smart uses String keys
+                            json = j;
+                        } else {
+                            log.warn("Unexpected element type in authorization_details array: {}",
+                                    element != null ? element.getClass() : "null");
+                            return null;
+                        }
+
+                        return AuthorizationDetail.parse(json);
+                    } catch (ParseException e) {
+                        log.warn("Failed to parse authorization_details element: {}", element, e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+
+    protected String getEJusticeRoleClaim(List<AuthorizationDetail> authorizationDetails) {
+        if (authorizationDetails.stream().anyMatch(a -> URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG.equals(a.getStringField(RESOURCE)))) {
+            return "VIP1";
+        }
+        if (authorizationDetails.stream().anyMatch(a -> URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG.equals(a.getStringField(RESOURCE)))) {
+            return "VIP2";
+        }
+        return null;
     }
 
     protected ClientAuthentication clientAuthentication(String idp) {

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+import static no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService.E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM;
 import static no.idporten.eidas.proxy.service.EidasAttributeNames.*;
 
 /**
@@ -43,6 +44,7 @@ public class SpecificProxyService {
     private static final String PID_CLAIM = "pid";
     private static final String URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_PERSISTENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
     private static final String NO_COUNTRY_CODE = "NO";
+
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
     private final OIDCRequestCache oidcRequestCache;
     private final OIDCIntegrationService oidcIntegrationService;
@@ -109,7 +111,9 @@ public class SpecificProxyService {
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
             lightResponseBuilder.attribute(new Attribute(PID_EIDAS, List.of(userInfo.getStringClaim(PID_CLAIM))));
         }
-
+        if (StringUtils.isNotEmpty(userInfo.getStringClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM))) {
+            lightResponseBuilder.attribute(new Attribute(E_JUSTICE_NATURAL_PERSON_ROLE, List.of(userInfo.getStringClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM))));
+        }
 
         return lightResponseBuilder.build();
     }

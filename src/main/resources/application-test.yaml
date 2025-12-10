@@ -22,9 +22,16 @@ eidas:
     request-secret: ${LIGHT_TOKEN_PROXYSERVICE_REQUEST_SECRET}
   eu-proxy:
     redirect-uri: https://proxy.test.eidasnode.no/SpecificProxyServiceResponse
-  oidc-integration:
-    issuer: https://test.idporten.no
-    client-id: eidas-proxy-client-test
-    client-auth-method: client_secret_basic
-    client-secret: ${EIDAS_CLIENT_SECRET}
-    redirect-uri: https://idporten-proxy.test.eidasnode.no/idpcallback
+  oidc-integrations:
+    idporten:
+      issuer: https://test.idporten.no
+      client-id: eidas-proxy-client-test
+      client-auth-method: client_secret_basic
+      client-secret: ${EIDAS_CLIENT_SECRET}
+      redirect-uri: https://idporten-proxy.test.eidasnode.no/idpcallback
+    ansattporten:
+      issuer: https://test.ansattporten.no
+      client-id: eidas-proxy-client-ansattporten-test
+      client-auth-method: client_secret_basic
+      client-secret: ${EIDAS_ANSATTPORTEN_CLIENT_SECRET}
+      redirect-uri: https://idporten-proxy.test.eidasnode.no/idpcallback
