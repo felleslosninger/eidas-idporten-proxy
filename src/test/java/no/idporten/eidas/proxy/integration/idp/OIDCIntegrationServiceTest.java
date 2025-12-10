@@ -151,7 +151,7 @@ class OIDCIntegrationServiceTest {
     }
 
     @Test
-    @DisplayName("the authorization details claim must be parsed correcty")
+    @DisplayName("the authorization details claim must be parsed correctly")
     void parsesAuthorizationDetailsClaim() throws Exception {
         String claim = """
                 {"sub":"xxx","amr":["BankID"],"iss":"https://ansattporten.dev","pid":"05910298382","locale":"nb","nonce":"KSTNlmgUxOYyUqqgwZyr0lPWGxVDNzUOmsRMTdX5vjs","aud":"eidas-proxy-client-ansattporten-docker","acr":"high","authorization_details":[{"authorized_parties":[{"orgno":{"authority":"iso6523-actorid-upis","ID":"0192:312702495"},"resource":"boris---vip1-tilgang","name":"AKADEMISK STANDHAFTIG TIGER AS","unit_type":"AS"}],"resource":"urn:altinn:resource:boris---vip1-tilgang","type":"ansattporten:altinn:resource","resource_name":"BORIS - VIP1 tilgang"}],"auth_time":1765294441,"name":"STOLT EFFEKTIV PARASOLL","exp":1765294565,"iat":1765294445,"jti":"hTolsTXz-TE"}
