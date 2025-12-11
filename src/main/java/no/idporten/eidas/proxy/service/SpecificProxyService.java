@@ -102,13 +102,13 @@ public class SpecificProxyService {
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
             lightResponseBuilder.attribute(new Attribute(FAMILY_NAME_EIDAS, List.of(userInfo.getFamilyName())));
         }
-        if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
+        if (StringUtils.isNotEmpty(userInfo.getGivenName())) {
             lightResponseBuilder.attribute(new Attribute(FIRST_NAME_EIDAS, List.of(userInfo.getGivenName())));
         }
-        if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
+        if (StringUtils.isNotEmpty(userInfo.getStringClaim(BIRTH_DATE_CLAIM))) {
             lightResponseBuilder.attribute(new Attribute(DATE_OF_BIRTH_EIDAS, List.of(userInfo.getStringClaim(BIRTH_DATE_CLAIM))));
         }
-        if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
+        if (StringUtils.isNotEmpty(userInfo.getStringClaim(PID_CLAIM))) {
             lightResponseBuilder.attribute(new Attribute(PID_EIDAS, List.of(userInfo.getStringClaim(PID_CLAIM))));
         }
         if (StringUtils.isNotEmpty(userInfo.getStringClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM))) {

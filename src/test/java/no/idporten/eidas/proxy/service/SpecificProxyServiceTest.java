@@ -158,5 +158,59 @@ class SpecificProxyServiceTest {
         assertTrue(attributeNames.contains(E_JUSTICE_NATURAL_PERSON_ROLE));
     }
 
+    @Test
+    @DisplayName("getLightResponse should populate core fields and all supported attributes when claims exist")
+    void getLightResponse_populatesAllFieldsAndAttributes() {
+        // Given
+        UserInfo userInfo = new UserInfo(new Subject("subject-123"));
+        userInfo.setGivenName("Ada");
+        userInfo.setFamilyName("Lovelace");
+        userInfo.setClaim("pid", "NOR-12345678901");
+        userInfo.setClaim("birth_date", "1815-12-10");
+        userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, "VIP1");
+
+        ILightRequest lightRequest = LightRequest.builder()
+                .id("req-1")
+                .issuer("issuer")
+                .levelOfAssurance("http://eidas.europa.eu/LoA/substantial")
+                .relayState("relay-xyz")
+                .citizenCountryCode("NO")
+                .build();
+
+        // When
+        LightResponse lr = specificProxyService.getLightResponse(
+                IDPSelector.IDPORTEN,
+                userInfo,
+                lightRequest,
+                no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance.fromString(
+                        no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL)
+        );
+
+        // Then
+        assertNotNull(lr.getId());
+        assertEquals("NO", lr.getCitizenCountryCode());
+        assertEquals("Issuer", lr.getIssuer());
+        assertEquals("relay-xyz", lr.getRelayState());
+        assertEquals("req-1", lr.getInResponseToId());
+        assertEquals("yes", lr.getConsent());
+        assertEquals("subject-123", lr.getSubject());
+        assertEquals("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", lr.getSubjectNameIdFormat());
+        assertEquals("http://eidas.europa.eu/LoA/substantial", lr.getLevelOfAssurance());
+
+        // then: status success
+        assertNotNull(lr.getStatus());
+        assertFalse(lr.getStatus().isFailure());
+        assertEquals(eu.eidas.auth.commons.EIDASStatusCode.SUCCESS_URI.getValue(), lr.getStatus().getStatusCode());
+        assertEquals("ok", lr.getStatus().getStatusMessage());
+
+        // then: attributes
+        Set<String> attrs = lr.getRequestedAttributesAsStringSet();
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.FIRST_NAME_EIDAS));
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.FAMILY_NAME_EIDAS));
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.DATE_OF_BIRTH_EIDAS));
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.PID_EIDAS));
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.E_JUSTICE_NATURAL_PERSON_ROLE));
+    }
+
 
 }
