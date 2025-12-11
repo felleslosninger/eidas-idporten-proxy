@@ -34,4 +34,4 @@ eidas:
       client-id: eidas-proxy-client-ansattporten-prod
       client-auth-method: client_secret_basic
       client-secret: ${EIDAS_ANSATTPORTEN_CLIENT_SECRET}
-      redirect-uri: https://idporten-proxy.eidasnode.no/idpcallback
+      redirect-uri: https://idporten-proxy.eidasnode.no/idpcallback?idp=ansattporten
