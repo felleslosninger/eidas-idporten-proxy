@@ -10,9 +10,9 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.annotate.JsonIgnore;
 import no.idporten.eidas.proxy.crypto.KeystoreProperties;
 import no.idporten.sdk.oidcserver.protocol.AuthorizationDetail;
-import org.springframework.data.annotation.Transient;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -62,9 +62,9 @@ public class OIDCIntegrationProperties {
 
     private KeystoreProperties keystore;
 
-    @Transient
+    @JsonIgnore
     private final ObjectMapper mapper = new ObjectMapper();
-    @Transient
+    @JsonIgnore
     @Getter(AccessLevel.NONE)
     private Set<String> allowedTypeResourceList;
 

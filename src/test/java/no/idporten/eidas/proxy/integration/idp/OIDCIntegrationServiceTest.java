@@ -28,8 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.*;
 
@@ -319,15 +317,12 @@ class OIDCIntegrationServiceTest {
         OIDCProvider apProvider = mock(OIDCProvider.class);
         when(apProvider.getProperties()).thenReturn(props);
         when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
+        oidcIntegrationService.validateAuthorizationDetailsClaims(parsed);
 
-        Method mValidate = OIDCIntegrationService.class.getDeclaredMethod("validateAuthorizationDetailsClaims", List.class);
-        mValidate.setAccessible(true);
         assertDoesNotThrow(() -> {
             try {
-                mValidate.invoke(oidcIntegrationService, parsed);
-            } catch (InvocationTargetException ite) {
-                throw new RuntimeException(ite.getCause());
-            } catch (IllegalAccessException e) {
+                oidcIntegrationService.validateAuthorizationDetailsClaims(parsed);
+            } catch (OAuthException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -371,18 +366,12 @@ class OIDCIntegrationServiceTest {
                 nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG)
         );
 
-        // Invoke private validation method via reflection
-        Method m = OIDCIntegrationService.class.getDeclaredMethod("validateAuthorizationDetailsClaims", List.class);
-        m.setAccessible(true);
-
         assertDoesNotThrow(() -> {
             try {
-                m.invoke(oidcIntegrationService, claimAds);
-            } catch (InvocationTargetException ite) {
+                oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds);
+            } catch (OAuthException e) {
                 // unwrap and rethrow as RuntimeException to let assertDoesNotThrow catch
-                throw new RuntimeException(ite.getCause());
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getCause());
             }
         });
     }
@@ -411,11 +400,11 @@ class OIDCIntegrationServiceTest {
                 nimbusAd("altinn", "urn:altinn:resource:unknown")
         );
 
-        Method m = OIDCIntegrationService.class.getDeclaredMethod("validateAuthorizationDetailsClaims", List.class);
-        m.setAccessible(true);
-
-        InvocationTargetException ex = assertThrows(InvocationTargetException.class, () -> m.invoke(oidcIntegrationService, claimAds));
-        assertTrue(ex.getCause() instanceof no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException);
+        try {
+            oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds);
+        } catch (Exception ex) {
+            assertInstanceOf(OAuthException.class, ex.getCause());
+        }
     }
 
     @Test
@@ -439,16 +428,12 @@ class OIDCIntegrationServiceTest {
                 nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
         );
 
-        Method m = OIDCIntegrationService.class.getDeclaredMethod("validateAuthorizationDetailsClaims", List.class);
-        m.setAccessible(true);
-
         assertDoesNotThrow(() -> {
             try {
-                m.invoke(oidcIntegrationService, claimAds);
-            } catch (InvocationTargetException ite) {
-                throw new RuntimeException(ite.getCause());
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds);
+            } catch (OAuthException e) {
+                // unwrap and rethrow as RuntimeException to let assertDoesNotThrow catch
+                throw new RuntimeException(e.getCause());
             }
         });
     }

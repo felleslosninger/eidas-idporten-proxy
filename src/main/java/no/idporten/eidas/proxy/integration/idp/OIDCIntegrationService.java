@@ -190,7 +190,7 @@ public class OIDCIntegrationService {
         return userInfo;
     }
 
-    private void validateAuthorizationDetailsClaims(List<AuthorizationDetail> authorizationDetailsClaim) {
+    protected void validateAuthorizationDetailsClaims(List<AuthorizationDetail> authorizationDetailsClaim) {
         if (CollectionUtils.isEmpty(authorizationDetailsClaim)) {
             return;
         }
