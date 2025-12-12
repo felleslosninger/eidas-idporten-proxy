@@ -56,6 +56,8 @@ class OIDCIntegrationServiceTest {
     @InjectMocks
     private OIDCIntegrationService oidcIntegrationService;
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     @BeforeEach
     public void setup() {
         when(oidcProviders.get(IDPSelector.IDPORTEN)).thenReturn(oidcProvider);
@@ -447,7 +449,7 @@ class OIDCIntegrationServiceTest {
 
     private static no.idporten.sdk.oidcserver.protocol.AuthorizationDetail cfgAd(String type, String resource) {
         Map<String, Object> map = Map.of(TYPE, type, RESOURCE, resource);
-        return new ObjectMapper().convertValue(map, no.idporten.sdk.oidcserver.protocol.AuthorizationDetail.class);
+        return objectMapper.convertValue(map, no.idporten.sdk.oidcserver.protocol.AuthorizationDetail.class);
     }
 }
 
