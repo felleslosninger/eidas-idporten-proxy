@@ -233,7 +233,7 @@ public class OIDCIntegrationService {
             // Tolerate single object shape by wrapping into a list
             rawList = List.of(m);
         } else {
-            log.warn("authorization_details claim must be a JSON object or list, but was: {}", authDetailsClaim.getClass());
+            log.warn("authorization_details claim must be a List or Map (JSON array or object), but was: {}", authDetailsClaim.getClass());
             return List.of();
         }
 
