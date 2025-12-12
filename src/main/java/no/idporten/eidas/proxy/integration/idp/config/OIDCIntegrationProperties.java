@@ -63,7 +63,7 @@ public class OIDCIntegrationProperties {
     private KeystoreProperties keystore;
 
     @Transient
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
     @Transient
     @Getter(AccessLevel.NONE)
     private Set<String> allowedTypeResourceList;
