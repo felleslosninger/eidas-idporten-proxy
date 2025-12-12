@@ -273,7 +273,7 @@ public class OIDCIntegrationService {
         }
     }
 
-    //hardkodet, men lag gjerne konfig om det blir flere
+    // TODO: This logic is currently hardcoded for two specific resources. If more eJustice roles/resources are added in the future, refactor this to use a configurable mapping.
     protected String getEJusticeRoleClaim(List<AuthorizationDetail> authorizationDetails) {
         if (authorizationDetails.stream().anyMatch(a -> URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG.equals(a.getStringField(RESOURCE)))) {
             return "VIP1";
