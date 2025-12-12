@@ -195,12 +195,6 @@ public class OIDCIntegrationService {
             return;
         }
 
-        var props = oidcProviders.get(IDPSelector.ANSATTPORTEN).getProperties().getAuthorizationDetails();
-        if (CollectionUtils.isEmpty(props)) {
-            log.warn("No configured authorization_details for Ansattporten; skipping validation");
-            return; //should never happen(tm)
-        }
-
         // Get allowed type:resource pairs from configuration
         Set<String> allowedTypeResourceList = oidcProviders.get(IDPSelector.ANSATTPORTEN)
                 .getProperties().getConfiguredAuthDetailTypeResourceList();
