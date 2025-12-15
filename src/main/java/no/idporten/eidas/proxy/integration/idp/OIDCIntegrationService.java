@@ -195,12 +195,6 @@ public class OIDCIntegrationService {
             return;
         }
 
-        var props = oidcProviders.get(IDPSelector.ANSATTPORTEN).getProperties().getAuthorizationDetails();
-        if (CollectionUtils.isEmpty(props)) {
-            log.warn("No configured authorization_details for Ansattporten; skipping validation");
-            return; //should never happen(tm)
-        }
-
         // Get allowed type:resource pairs from configuration
         Set<String> allowedTypeResourceList = oidcProviders.get(IDPSelector.ANSATTPORTEN)
                 .getProperties().getConfiguredAuthDetailTypeResourceList();
@@ -239,12 +233,12 @@ public class OIDCIntegrationService {
             // Tolerate single object shape by wrapping into a list
             rawList = List.of(m);
         } else {
-            log.warn("authorization_details claim must be a JSON object or list, but was: {}", authDetailsClaim.getClass());
-            return List.of();
+            log.warn("authorization_details claim must be a List or Map (JSON array or object), but was: {}", authDetailsClaim.getClass());
+            throw new OAuthException("authorization_details claim must be a List or Map (JSON array or object)");
         }
 
         if (rawList.isEmpty()) {
-            return List.of();
+            throw new OAuthException("authorization_details claim must be an empty list");
         }
 
         java.util.ArrayList<JSONObject> jsonList = new java.util.ArrayList<>(rawList.size());
@@ -261,7 +255,7 @@ public class OIDCIntegrationService {
                 jsonList.add(jo);
             } else {
                 log.warn("authorization_details list contains non-JSONObject element: {}", el == null ? "null" : el.getClass());
-                return List.of();
+                throw new OAuthException("authorization_details claim must be a List or Map (JSON array or object)");
             }
         }
 
@@ -269,11 +263,11 @@ public class OIDCIntegrationService {
             return AuthorizationDetail.parseList(jsonList);
         } catch (ParseException e) {
             log.warn("Failed to parse authorization_details list: {}", jsonList, e);
-            return List.of();
+            throw new OAuthException("authorization_details claim was not formatted correctly: %s".formatted(e.getMessage()));
         }
     }
 
-    //hardkodet, men lag gjerne konfig om det blir flere
+    // This logic is currently hardcoded for two specific resources. If more eJustice roles/resources are added in the future, refactor this to use a configurable mapping.
     protected String getEJusticeRoleClaim(List<AuthorizationDetail> authorizationDetails) {
         if (authorizationDetails.stream().anyMatch(a -> URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG.equals(a.getStringField(RESOURCE)))) {
             return "VIP1";

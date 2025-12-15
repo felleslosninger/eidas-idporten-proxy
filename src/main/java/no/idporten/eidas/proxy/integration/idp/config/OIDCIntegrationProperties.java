@@ -63,7 +63,7 @@ public class OIDCIntegrationProperties {
     private KeystoreProperties keystore;
 
     @JsonIgnore
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
     @JsonIgnore
     @Getter(AccessLevel.NONE)
     private Set<String> allowedTypeResourceList;

@@ -321,13 +321,7 @@ class OIDCIntegrationServiceTest {
         when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
         oidcIntegrationService.validateAuthorizationDetailsClaims(parsed);
 
-        assertDoesNotThrow(() -> {
-            try {
-                oidcIntegrationService.validateAuthorizationDetailsClaims(parsed);
-            } catch (OAuthException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(parsed));
     }
 
     private static JWTClaimsSet claimsWithAuthorizationDetails(List<net.minidev.json.JSONObject> adList) {
@@ -368,14 +362,7 @@ class OIDCIntegrationServiceTest {
                 nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG)
         );
 
-        assertDoesNotThrow(() -> {
-            try {
-                oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds);
-            } catch (OAuthException e) {
-                // unwrap and rethrow as RuntimeException to let assertDoesNotThrow catch
-                throw new RuntimeException(e.getCause());
-            }
-        });
+        assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds));
     }
 
     @Test
@@ -402,11 +389,9 @@ class OIDCIntegrationServiceTest {
                 nimbusAd("altinn", "urn:altinn:resource:unknown")
         );
 
-        try {
-            oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds);
-        } catch (Exception ex) {
-            assertInstanceOf(OAuthException.class, ex.getCause());
-        }
+        assertThrows(OAuthException.class, () ->
+                oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds)
+        );
     }
 
     @Test
@@ -430,14 +415,7 @@ class OIDCIntegrationServiceTest {
                 nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
         );
 
-        assertDoesNotThrow(() -> {
-            try {
-                oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds);
-            } catch (OAuthException e) {
-                // unwrap and rethrow as RuntimeException to let assertDoesNotThrow catch
-                throw new RuntimeException(e.getCause());
-            }
-        });
+        assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds));
     }
 
     private static AuthorizationDetail nimbusAd(String type, String resource) throws com.nimbusds.oauth2.sdk.ParseException {

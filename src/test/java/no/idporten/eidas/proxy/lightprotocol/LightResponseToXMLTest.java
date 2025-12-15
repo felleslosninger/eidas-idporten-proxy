@@ -1,6 +1,5 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
-import jakarta.xml.bind.JAXBException;
 import no.idporten.eidas.proxy.lightprotocol.messages.Attribute;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightResponse;
 import no.idporten.eidas.proxy.lightprotocol.messages.Status;
@@ -8,9 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.assertj.core.api.Fail.fail;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class LightResponseToXMLTest {
 
@@ -29,13 +26,8 @@ class LightResponseToXMLTest {
                 .citizenCountryCode("NO")
                 .relayState("123")
                 .build();
-        try {
-            String xml = LightResponseToXML.toXml(lightResponse);
-            assertNotNull(xml);
-            assertFalse(xml.contains("ns2:"), "should not include any namespace prefix (ns2:)");
-        } catch (JAXBException e) {
-            fail("Failed to serialize to XML %s : %s: %s", e.getErrorCode(), e.getMessage(), e.getCause());
-            ;
-        }
+        String xml = assertDoesNotThrow(() -> LightResponseToXML.toXml(lightResponse));
+        assertNotNull(xml);
+        assertFalse(xml.contains("ns2:"), "should not include any namespace prefix (ns2:)");
     }
 }
