@@ -179,6 +179,7 @@ public class OIDCIntegrationService {
         //if ansattporten, check for authorization_details claim
         if (IDPSelector.ANSATTPORTEN.equals(idp)) {
             List<AuthorizationDetail> authorizationDetailsClaim = getAuthorizationDetailsClaim(oidcTokens.getIDToken().getJWTClaimsSet());
+            // If the claim is present but unparseable, getAuthorizationDetailsClaim will throw
             validateAuthorizationDetailsClaims(authorizationDetailsClaim);
             if (CollectionUtils.isNotEmpty(authorizationDetailsClaim)) {
                 String eJusticeNaturalPersonRoleClaim = getEJusticeRoleClaim(authorizationDetailsClaim);
