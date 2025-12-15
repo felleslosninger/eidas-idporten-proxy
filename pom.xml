@@ -25,6 +25,18 @@
         <nimbus.oauth2-oidc-sdk.version>11.30.1</nimbus.oauth2-oidc-sdk.version>
         <idporten-audit.version>2.5.3</idporten-audit.version>
         <maven.compiler.proc>full</maven.compiler.proc>
+        <eidas.version>2.9.0</eidas.version>
+        <icu4j-charset.version>78.1</icu4j-charset.version>
+        <jaxb-runtime.version>4.0.6</jaxb-runtime.version>
+        <icu4j.version>78.1</icu4j.version>
+        <javax.annotation-api.version>1.3.2
+        </javax.annotation-api.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
+        <jetbrains.annotations.version>13.0
+        </jetbrains.annotations.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
+        <jakarta.activation-api.version>2.1.4</jakarta.activation-api.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+        <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
     </properties>
     <dependencies>
         <dependency>
@@ -94,36 +106,57 @@
         <dependency>
             <groupId>eu.eidas</groupId>
             <artifactId>eidas-commons</artifactId>
-            <version>2.9.0</version>
+            <version>${eidas.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.eidas</groupId>
             <artifactId>eidas-light-commons</artifactId>
-            <version>2.9.0</version>
+            <version>${eidas.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j-charset</artifactId>
-            <version>78.1</version>
+            <version>${icu4j-charset.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>4.0.6</version>
+            <version>${jaxb-runtime.version}</version>
+        </dependency>
+
+        <!-- Explicitly provide javax.annotation API for legacy libraries -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${javax.annotation-api.version}</version>
         </dependency>
 
         <!-- Activation API (required for JAXB) -->
         <dependency>
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
-            <version>2.1.4</version>
+            <version>${jakarta.activation-api.version}</version>
+        </dependency>
+        <!-- Developer annotations without runtime coupling. javax workaround
+            - Purpose: used only for nullability and contract annotations (@NotNull/@Nullable, etc.)
+              in our own source code. Improves IDE assistance and static analysis.
+            - Runtime impact: none. This artifact is a compile-time-only library with no required
+              runtime behavior; it is safe to keep on the classpath, but we do not depend on it at runtime.
+            - Context: We intentionally avoid depending on legacy javax.annotation in our code while
+              still consuming legacy libraries that use javax under the hood. This keeps our codebase
+              neutral and simplifies a future switch to Jakarta-based libraries.
+        -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${jetbrains.annotations.version}</version>
         </dependency>
 
         <!---test-->
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${commons-lang.version}</version>
         </dependency>
 
         <dependency>
@@ -138,8 +171,67 @@
         </dependency>
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Align ICU versions to satisfy enforcer DependencyConvergence -->
+            <dependency>
+                <groupId>com.ibm.icu</groupId>
+                <artifactId>icu4j</artifactId>
+                <version>${icu4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ibm.icu</groupId>
+                <artifactId>icu4j-charset</artifactId>
+                <version>${icu4j-charset.version}</version>
+            </dependency>
+            <!-- Enforce a single Nimbus JOSE version across oauth2-oidc-sdk and oidc-server-sdk paths -->
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>${nimbus-jose-jwt.version}</version>
+            </dependency>
+            <!-- Unify idporten metric constants across direct and transitive usages -->
+            <dependency>
+                <groupId>no.idporten.metrics</groupId>
+                <artifactId>idporten-metric-constants-lib</artifactId>
+                <version>${idporten-metric-constants.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
+            <!--
+                Maven Enforcer Plugin
+                - What it does here:
+                  1) Runs the DependencyConvergence rule so that all transitive paths resolve to a single version
+                     of each dependency (e.g., ensures icu4j and icu4j-charset stay aligned).
+                  2) Fails the build early if multiple conflicting versions are introduced, preventing
+                     javax/jakarta and other classpath conflicts from slipping into runtime.
+                - Why we need it:
+                  This project mixes legacy javax-based libraries (eIDAS) with modern Jakarta-era dependencies.
+                  Enforcer catches accidental drifts as soon as they appear and forces us to pin versions (via
+                  <dependencyManagement>) rather than letting Maven pick arbitrary transitive versions.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>${maven-enforcer-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>enforce-deps</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <DependencyConvergence/>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

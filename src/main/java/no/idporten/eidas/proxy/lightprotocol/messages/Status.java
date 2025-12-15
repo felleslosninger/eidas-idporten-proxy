@@ -6,9 +6,9 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import lombok.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serial;
 
 @XmlRootElement(namespace = "http://cef.eidas.eu/LightResponse")
@@ -31,7 +31,7 @@ public class Status implements IResponseStatus {
 
     private boolean failure;
 
-    @Nonnull
+    @NotNull
     @Override
     public String getStatusCode() {
         return statusCode;

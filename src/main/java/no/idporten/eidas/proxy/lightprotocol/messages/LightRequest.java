@@ -7,8 +7,8 @@ import jakarta.xml.bind.annotation.*;
 import lombok.*;
 import no.idporten.logging.audit.AuditData;
 import no.idporten.logging.audit.AuditDataProvider;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.io.Serial;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,7 +49,7 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
     private List<RequestedAttribute> requestedAttributes;
 
 
-    @Nonnull
+    @NotNull
     public ImmutableAttributeMap getRequestedAttributes() {
         throw new UnsupportedOperationException("Not implemented");
     }
@@ -58,7 +58,7 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
         return requestedAttributes;
     }
 
-    @Nonnull
+    @NotNull
     public String getId() {
         return id;
     }
@@ -73,7 +73,7 @@ public class LightRequest implements ILightRequest, AuditDataProvider {
         return List.of(levelOfAssurance);
     }
 
-    @Nonnull
+    @NotNull
     public String getIssuer() {
         return issuer;
     }

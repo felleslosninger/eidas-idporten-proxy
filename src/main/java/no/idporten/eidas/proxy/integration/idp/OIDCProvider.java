@@ -8,8 +8,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import no.idporten.eidas.proxy.crypto.KeyProvider;
 import no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties;
-
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
