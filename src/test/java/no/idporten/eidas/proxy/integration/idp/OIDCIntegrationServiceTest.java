@@ -304,21 +304,9 @@ class OIDCIntegrationServiceTest {
         assertEquals("VIP1", role);
 
         // Setup properties to allow validation to pass for Ansattporten
-        var props = new OIDCIntegrationProperties();
-        props.setClientAuthMethod("client_secret_basic");
-        props.setClientSecret("secret");
-        props.setClientId("client-id");
-        props.setIssuer(new URI("https://issuer.example"));
-        props.setRedirectUri(new URI("https://client.example/cb"));
-        props.setScopes(Set.of("openid"));
-        props.setAuthorizationDetails(List.of(
+        initializeOIDCProperties(List.of(
                 cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
         ));
-        props.afterPropertiesSet();
-
-        OIDCProvider apProvider = mock(OIDCProvider.class);
-        when(apProvider.getProperties()).thenReturn(props);
-        when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
         oidcIntegrationService.validateAuthorizationDetailsClaims(parsed);
 
         assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(parsed));
@@ -339,22 +327,10 @@ class OIDCIntegrationServiceTest {
     @DisplayName("validateAuthorizationDetailsClaims: passes when all pairs are allowed")
     void validateAuthorizationDetailsClaims_allAllowed() throws Exception {
         // Prepare real properties with allowed pairs for Ansattporten
-        var props = new OIDCIntegrationProperties();
-        props.setClientAuthMethod("client_secret_basic");
-        props.setClientSecret("secret");
-        props.setClientId("client-id");
-        props.setIssuer(new URI("https://issuer.example"));
-        props.setRedirectUri(new URI("https://client.example/cb"));
-        props.setScopes(Set.of("openid"));
-        props.setAuthorizationDetails(List.of(
+        initializeOIDCProperties(List.of(
                 cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG),
                 cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG)
         ));
-        props.afterPropertiesSet();
-
-        OIDCProvider apProvider = mock(OIDCProvider.class);
-        when(apProvider.getProperties()).thenReturn(props);
-        when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
 
         // Build claim list with allowed pairs
         List<AuthorizationDetail> claimAds = List.of(
@@ -368,21 +344,9 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("validateAuthorizationDetailsClaims: throws when any pair is not allowed")
     void validateAuthorizationDetailsClaims_throwsOnUnknownPair() throws Exception {
-        var props = new OIDCIntegrationProperties();
-        props.setClientAuthMethod("client_secret_basic");
-        props.setClientSecret("secret");
-        props.setClientId("client-id");
-        props.setIssuer(new URI("https://issuer.example"));
-        props.setRedirectUri(new URI("https://client.example/cb"));
-        props.setScopes(Set.of("openid"));
-        props.setAuthorizationDetails(List.of(
+        initializeOIDCProperties(List.of(
                 cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
         ));
-        props.afterPropertiesSet();
-
-        OIDCProvider apProvider = mock(OIDCProvider.class);
-        when(apProvider.getProperties()).thenReturn(props);
-        when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
 
         List<AuthorizationDetail> claimAds = List.of(
                 nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG),
@@ -397,19 +361,7 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("validateAuthorizationDetailsClaims: skips validation when config is empty")
     void validateAuthorizationDetailsClaims_skipsWhenConfigEmpty() throws Exception {
-        var props = new OIDCIntegrationProperties();
-        props.setClientAuthMethod("client_secret_basic");
-        props.setClientSecret("secret");
-        props.setClientId("client-id");
-        props.setIssuer(new URI("https://issuer.example"));
-        props.setRedirectUri(new URI("https://client.example/cb"));
-        props.setScopes(Set.of("openid"));
-        props.setAuthorizationDetails(List.of()); // empty
-        props.afterPropertiesSet();
-
-        OIDCProvider apProvider = mock(OIDCProvider.class);
-        when(apProvider.getProperties()).thenReturn(props);
-        when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
+        initializeOIDCProperties(List.of()); // empty
 
         List<AuthorizationDetail> claimAds = List.of(
                 nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
@@ -423,6 +375,22 @@ class OIDCIntegrationServiceTest {
         jo.put(TYPE, type);
         jo.put(RESOURCE, resource);
         return AuthorizationDetail.parse(jo);
+    }
+
+    private void initializeOIDCProperties(List<no.idporten.sdk.oidcserver.protocol.AuthorizationDetail> allowedAds) throws Exception {
+        var props = new OIDCIntegrationProperties();
+        props.setClientAuthMethod("client_secret_basic");
+        props.setClientSecret("secret");
+        props.setClientId("client-id");
+        props.setIssuer(new URI("https://issuer.example"));
+        props.setRedirectUri(new URI("https://client.example/cb"));
+        props.setScopes(Set.of("openid"));
+        props.setAuthorizationDetails(allowedAds);
+        props.afterPropertiesSet();
+
+        OIDCProvider apProvider = mock(OIDCProvider.class);
+        when(apProvider.getProperties()).thenReturn(props);
+        when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
     }
 
     private static no.idporten.sdk.oidcserver.protocol.AuthorizationDetail cfgAd(String type, String resource) {
