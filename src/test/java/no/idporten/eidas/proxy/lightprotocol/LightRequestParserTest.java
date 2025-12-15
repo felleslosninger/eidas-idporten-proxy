@@ -1,10 +1,8 @@
 package no.idporten.eidas.proxy.lightprotocol;
 
-import jakarta.xml.bind.JAXBException;
 import no.idporten.eidas.proxy.lightprotocol.messages.LightRequest;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LightRequestParserTest {
@@ -38,18 +36,11 @@ class LightRequestParserTest {
 
     @Test
     void testParseXml() {
-
-        try {
-            LightRequest lightRequest = LightRequestParser.parseXml(xmlData);
-            assertNotNull(lightRequest);
-            assertDoesNotThrow(lightRequest::toString);
-            assertEquals("NO", lightRequest.getCitizenCountryCode());
-            assertEquals("CA", lightRequest.getSpCountryCode());
-            lightRequest.getRequestedAttributesList().forEach(attribute -> {
-                assertNotNull(attribute.getDefinition());
-            });
-        } catch (JAXBException e) {
-            fail("Exception thrown: " + e.getMessage());
-        }
+        LightRequest lightRequest = assertDoesNotThrow(() -> LightRequestParser.parseXml(xmlData));
+        assertNotNull(lightRequest);
+        assertDoesNotThrow(lightRequest::toString);
+        assertEquals("NO", lightRequest.getCitizenCountryCode());
+        assertEquals("CA", lightRequest.getSpCountryCode());
+        lightRequest.getRequestedAttributesList().forEach(attribute -> assertNotNull(attribute.getDefinition()));
     }
 }

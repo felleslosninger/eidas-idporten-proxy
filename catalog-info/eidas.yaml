@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: eidas-idporten-proxy
+  description: eidas-idporten-proxy
+  annotations:
+    github.com/project-slug: felleslosninger/eidas-idporten-proxy
+spec:
+  type: application
+  owner: team-idporten
+  lifecycle: production
+  system: eidas
+  dependsOn:
+    - resource:default/eidas-redis
+    - resource:default/event-statistikk-kafka
+    - component:idporten-c2id-server
+    - component:idporten-login
+    - component:ansattporten-c2id-server
+    - component:ansattporten-login

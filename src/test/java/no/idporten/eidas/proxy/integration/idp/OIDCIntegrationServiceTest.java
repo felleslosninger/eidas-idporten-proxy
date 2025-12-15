@@ -1,5 +1,7 @@
 package no.idporten.eidas.proxy.integration.idp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
@@ -30,13 +32,14 @@ import java.net.URI;
 import java.util.*;
 
 import static no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService.*;
+import static no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties.RESOURCE;
+import static no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties.TYPE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class OIDCIntegrationServiceTest {
-
     @Mock
     private OIDCProviders oidcProviders;
 
@@ -52,6 +55,8 @@ class OIDCIntegrationServiceTest {
 
     @InjectMocks
     private OIDCIntegrationService oidcIntegrationService;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
@@ -148,10 +153,11 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("the authorization details claim must be parsed correctly")
     void parsesAuthorizationDetailsClaim() throws Exception {
-        String claim = """
-                {"sub":"xxx","amr":["BankID"],"iss":"https://ansattporten.dev","pid":"05910298382","locale":"nb","nonce":"KSTNlmgUxOYyUqqgwZyr0lPWGxVDNzUOmsRMTdX5vjs","aud":"eidas-proxy-client-ansattporten-docker","acr":"high","authorization_details":[{"authorized_parties":[{"orgno":{"authority":"iso6523-actorid-upis","ID":"0192:312702495"},"resource":"boris---vip1-tilgang","name":"AKADEMISK STANDHAFTIG TIGER AS","unit_type":"AS"}],"resource":"urn:altinn:resource:boris---vip1-tilgang","type":"ansattporten:altinn:resource","resource_name":"BORIS - VIP1 tilgang"}],"auth_time":1765294441,"name":"STOLT EFFEKTIV PARASOLL","exp":1765294565,"iat":1765294445,"jti":"hTolsTXz-TE"}
-                """;
-        JWTClaimsSet claims = JWTClaimsSet.parse(claim);
+        net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
+        ad.put(TYPE, "altinn");
+        ad.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
+        JWTClaimsSet claims = claimsWithAuthorizationDetails(List.of(ad));
+
         OIDCIntegrationService svc = new OIDCIntegrationService(null, Optional.empty(), null);
         List<AuthorizationDetail> parsed = svc.getAuthorizationDetailsClaim(claims);
         assertEquals(1, parsed.size());
@@ -160,8 +166,8 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("should set eJustice role to VIP1 when VIP1 resource is present")
     void setsVip1WhenVip1ResourcePresent() throws Exception {
-        Map<String, Object> ad = new HashMap<>();
-        ad.put("type", "ansattporten:altinn:resource");
+        net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
+        ad.put(TYPE, "altinn");
         ad.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
         JWTClaimsSet claims = claimsWithAuthorizationDetails(List.of(ad));
 
@@ -176,8 +182,8 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("should set eJustice role to VIP2 when VIP2 resource is present")
     void setsVip2WhenVip2ResourcePresent() throws Exception {
-        Map<String, Object> ad = new HashMap<>();
-        ad.put("type", "ansattporten:altinn:resource");
+        net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
+        ad.put(TYPE, "altinn");
         ad.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG);
         JWTClaimsSet claims = claimsWithAuthorizationDetails(List.of(ad));
 
@@ -192,12 +198,12 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("should prefer VIP1 when both VIP1 and VIP2 resources are present")
     void prefersVip1WhenBothPresent() throws Exception {
-        Map<String, Object> ad1 = new HashMap<>();
-        ad1.put("type", "ansattporten:altinn:resource");
+        net.minidev.json.JSONObject ad1 = new net.minidev.json.JSONObject();
+        ad1.put(TYPE, "altinn");
         ad1.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG);
 
-        Map<String, Object> ad2 = new HashMap<>();
-        ad2.put("type", "ansattporten:altinn:resource");
+        net.minidev.json.JSONObject ad2 = new net.minidev.json.JSONObject();
+        ad2.put(TYPE, "altinn");
         ad2.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
 
         JWTClaimsSet claims = claimsWithAuthorizationDetails(List.of(ad1, ad2));
@@ -213,8 +219,8 @@ class OIDCIntegrationServiceTest {
     @Test
     @DisplayName("should return null when no relevant Altinn resource is present")
     void returnsNullWhenNoRelevantResource() throws Exception {
-        Map<String, Object> ad = new HashMap<>();
-        ad.put("type", "ansattporten:altinn:resource");
+        net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
+        ad.put(TYPE, "altinn");
         ad.put(RESOURCE, "urn:altinn:resource:unrelated");
         JWTClaimsSet claims = claimsWithAuthorizationDetails(List.of(ad));
 
@@ -240,13 +246,156 @@ class OIDCIntegrationServiceTest {
         assertNull(role);
     }
 
-    private static JWTClaimsSet claimsWithAuthorizationDetails(List<Map<String, Object>> adList) {
+    @Test
+    @DisplayName("parses authorization_details from List<LinkedTreeMap> and extracts VIP1 role")
+    void parsesFromLinkedTreeMapList() throws Exception {
+        List<Map<String, Object>> adList = new ArrayList<>();
+        Map<String, Object> m = new LinkedTreeMap<>();
+        m.put(TYPE, "altinn");
+        m.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
+        adList.add(m);
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .claim(AUTHORIZATION_DETAILS_CLAIM, adList)
+                .build();
+
+        OIDCIntegrationService svc = new OIDCIntegrationService(null, Optional.empty(), null);
+        List<AuthorizationDetail> parsed = svc.getAuthorizationDetailsClaim(claims);
+        assertEquals(1, parsed.size());
+        String role = svc.getEJusticeRoleClaim(parsed);
+        assertEquals("VIP1", role);
+    }
+
+    @Test
+    @DisplayName("parses authorization_details from List<LinkedHashMap> and extracts VIP1 role")
+    void parsesFromLinkedHashMapList() throws Exception {
+        List<Map<String, Object>> adList = new ArrayList<>();
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put(TYPE, "altinn");
+        m.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
+        adList.add(m);
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .claim(AUTHORIZATION_DETAILS_CLAIM, adList)
+                .build();
+
+        OIDCIntegrationService svc = new OIDCIntegrationService(null, Optional.empty(), null);
+        List<AuthorizationDetail> parsed = svc.getAuthorizationDetailsClaim(claims);
+        assertEquals(1, parsed.size());
+        String role = svc.getEJusticeRoleClaim(parsed);
+        assertEquals("VIP1", role);
+    }
+
+    @Test
+    @DisplayName("parses authorization_details from single Map object and extracts VIP1 role; validation passes when allowed")
+    void parsesFromSingleMapObjectAndValidates() throws Exception {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put(TYPE, "altinn");
+        m.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .claim(AUTHORIZATION_DETAILS_CLAIM, m)
+                .build();
+
+        OIDCIntegrationService svc = new OIDCIntegrationService(null, Optional.empty(), null);
+        List<AuthorizationDetail> parsed = svc.getAuthorizationDetailsClaim(claims);
+        assertEquals(1, parsed.size());
+        String role = svc.getEJusticeRoleClaim(parsed);
+        assertEquals("VIP1", role);
+
+        // Setup properties to allow validation to pass for Ansattporten
+        initializeOIDCProperties(List.of(
+                cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
+        ));
+        oidcIntegrationService.validateAuthorizationDetailsClaims(parsed);
+
+        assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(parsed));
+    }
+
+    private static JWTClaimsSet claimsWithAuthorizationDetails(List<net.minidev.json.JSONObject> adList) {
         JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
 
         if (adList != null) {
             builder.claim(AUTHORIZATION_DETAILS_CLAIM, adList);
         }
         return builder.build();
+    }
+
+    // --- Validation tests for type:resource pairs ---
+
+    @Test
+    @DisplayName("validateAuthorizationDetailsClaims: passes when all pairs are allowed")
+    void validateAuthorizationDetailsClaims_allAllowed() throws Exception {
+        // Prepare real properties with allowed pairs for Ansattporten
+        initializeOIDCProperties(List.of(
+                cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG),
+                cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG)
+        ));
+
+        // Build claim list with allowed pairs
+        List<AuthorizationDetail> claimAds = List.of(
+                nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG),
+                nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG)
+        );
+
+        assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds));
+    }
+
+    @Test
+    @DisplayName("validateAuthorizationDetailsClaims: throws when any pair is not allowed")
+    void validateAuthorizationDetailsClaims_throwsOnUnknownPair() throws Exception {
+        initializeOIDCProperties(List.of(
+                cfgAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
+        ));
+
+        List<AuthorizationDetail> claimAds = List.of(
+                nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG),
+                nimbusAd("altinn", "urn:altinn:resource:unknown")
+        );
+
+        assertThrows(OAuthException.class, () ->
+                oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds)
+        );
+    }
+
+    @Test
+    @DisplayName("validateAuthorizationDetailsClaims: skips validation when config is empty")
+    void validateAuthorizationDetailsClaims_skipsWhenConfigEmpty() throws Exception {
+        initializeOIDCProperties(List.of()); // empty
+
+        List<AuthorizationDetail> claimAds = List.of(
+                nimbusAd("altinn", URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG)
+        );
+
+        assertDoesNotThrow(() -> oidcIntegrationService.validateAuthorizationDetailsClaims(claimAds));
+    }
+
+    private static AuthorizationDetail nimbusAd(String type, String resource) throws com.nimbusds.oauth2.sdk.ParseException {
+        net.minidev.json.JSONObject jo = new net.minidev.json.JSONObject();
+        jo.put(TYPE, type);
+        jo.put(RESOURCE, resource);
+        return AuthorizationDetail.parse(jo);
+    }
+
+    private void initializeOIDCProperties(List<no.idporten.sdk.oidcserver.protocol.AuthorizationDetail> allowedAds) throws Exception {
+        var props = new OIDCIntegrationProperties();
+        props.setClientAuthMethod("client_secret_basic");
+        props.setClientSecret("secret");
+        props.setClientId("client-id");
+        props.setIssuer(new URI("https://issuer.example"));
+        props.setRedirectUri(new URI("https://client.example/cb"));
+        props.setScopes(Set.of("openid"));
+        props.setAuthorizationDetails(allowedAds);
+        props.afterPropertiesSet();
+
+        OIDCProvider apProvider = mock(OIDCProvider.class);
+        when(apProvider.getProperties()).thenReturn(props);
+        when(oidcProviders.get(IDPSelector.ANSATTPORTEN)).thenReturn(apProvider);
+    }
+
+    private static no.idporten.sdk.oidcserver.protocol.AuthorizationDetail cfgAd(String type, String resource) {
+        Map<String, Object> map = Map.of(TYPE, type, RESOURCE, resource);
+        return objectMapper.convertValue(map, no.idporten.sdk.oidcserver.protocol.AuthorizationDetail.class);
     }
 }
 
