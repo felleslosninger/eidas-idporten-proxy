@@ -24,8 +24,8 @@ import eu.eidas.auth.commons.tx.LightTokenEncoder;
 import jakarta.servlet.http.HttpServletRequest;
 import no.idporten.eidas.proxy.exceptions.ErrorCodes;
 import no.idporten.eidas.proxy.exceptions.SpecificProxyException;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -52,7 +52,7 @@ public class BinaryLightTokenHelper {
      * @return the {@link BinaryLightToken} id
      * @throws SpecificProxyException if the {@code algorithm} is an invalid one
      */
-    public static String getBinaryLightTokenId(final @Nonnull String binaryLightTokenBase64, final String secret, final String algorithm) throws SpecificProxyException {
+    public static String getBinaryLightTokenId(final @NotNull String binaryLightTokenBase64, final String secret, final String algorithm) throws SpecificProxyException {
         final String binaryLightTokenString = EidasStringUtil.decodeStringFromBase64(binaryLightTokenBase64);
 
         final BinaryLightToken binaryLightToken;
@@ -72,7 +72,7 @@ public class BinaryLightTokenHelper {
      * @param parameterKey       the parameter key of the {@link BinaryLightToken} Base64 encoded
      * @return the {@link BinaryLightToken} Base64 encoded
      */
-    public static String getBinaryToken(final @Nonnull HttpServletRequest httpServletRequest, String parameterKey) {
+    public static String getBinaryToken(final @NotNull HttpServletRequest httpServletRequest, String parameterKey) {
         String binaryLightTokenBase64 = httpServletRequest.getParameter(parameterKey);
         if (null == binaryLightTokenBase64) {
             binaryLightTokenBase64 = (String) httpServletRequest.getAttribute(parameterKey);

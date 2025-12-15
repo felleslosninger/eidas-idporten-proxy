@@ -6,8 +6,8 @@
 package eu.eidas.auth.commons;
 
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,33 +18,33 @@ import java.util.regex.Pattern;
 public final class EidasStringUtil {
     private static final Pattern STRING_SPLITTER = Pattern.compile("[,;]");
 
-    @Nonnull
-    public static byte[] decodeBytesFromBase64(@Nonnull String base64String) {
+    @NotNull
+    public static byte[] decodeBytesFromBase64(@NotNull String base64String) {
         return Base64.getDecoder().decode(base64String);
     }
 
-    @Nonnull
-    public static String decodeStringFromBase64(@Nonnull String base64String) {
+    @NotNull
+    public static String decodeStringFromBase64(@NotNull String base64String) {
         return toString(decodeBytesFromBase64(base64String));
     }
 
-    @Nonnull
-    public static String encodeToBase64(@Nonnull byte[] bytes) {
+    @NotNull
+    public static String encodeToBase64(@NotNull byte[] bytes) {
         return bytes.length == 0 ? "" : Base64.getEncoder().encodeToString(bytes);
     }
 
-    @Nonnull
-    public static String encodeToBase64(@Nonnull String value) {
+    @NotNull
+    public static String encodeToBase64(@NotNull String value) {
         return encodeToBase64(getBytes(value));
     }
 
-    @Nonnull
-    public static byte[] getBytes(@Nonnull String value) {
+    @NotNull
+    public static byte[] getBytes(@NotNull String value) {
         return value.getBytes(StandardCharsets.UTF_8);
     }
 
-    @Nonnull
-    public static String toString(@Nonnull byte[] bytes) {
+    @NotNull
+    public static String toString(@NotNull byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);
     }
 

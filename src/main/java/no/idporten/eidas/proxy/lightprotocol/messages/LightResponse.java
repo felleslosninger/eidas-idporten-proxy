@@ -7,9 +7,9 @@ import jakarta.xml.bind.annotation.*;
 import lombok.*;
 import no.idporten.logging.audit.AuditData;
 import no.idporten.logging.audit.AuditDataProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serial;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -59,7 +59,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
     @Singular
     private List<Attribute> attributes;
 
-    @Nonnull
+    @NotNull
     @Override
     public ImmutableAttributeMap getAttributes() {
         return ImmutableAttributeMap.builder().build();
@@ -71,7 +71,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
         return ipAddress;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public IResponseStatus getStatus() {
         return status;
@@ -81,7 +81,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
         return List.of(new LevelOfAssurance("notified", levelOfAssurance));
     }
 
-    @Nonnull
+    @NotNull
     public String getId() {
         return id;
     }
@@ -90,7 +90,7 @@ public class LightResponse implements ILightResponse, AuditDataProvider {
         return levelOfAssurance;
     }
 
-    @Nonnull
+    @NotNull
     public String getIssuer() {
         return issuer;
     }

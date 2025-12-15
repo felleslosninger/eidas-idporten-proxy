@@ -18,8 +18,8 @@
 package no.idporten.eidas.proxy.integration.specificcommunication.service;
 
 import eu.eidas.auth.commons.tx.CorrelationMap;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 
@@ -35,29 +35,29 @@ import java.time.Duration;
 public abstract class AbstractCorrelationMap<T> implements CorrelationMap<T> {
     private final long lifetimeInSeconds;
 
-    @javax.annotation.Nonnull
+    @NotNull
     protected RedisCache<String, T> redisCache;
 
-    protected AbstractCorrelationMap(RedisCache<String, T> redisCache, long lifetimeInSeconds) {
+    protected AbstractCorrelationMap(@NotNull RedisCache<String, T> redisCache, long lifetimeInSeconds) {
         this.redisCache = redisCache;
         this.lifetimeInSeconds = lifetimeInSeconds;
     }
 
-    @javax.annotation.Nullable
+    @Nullable
     @Override
-    public final T get(@javax.annotation.Nonnull String id) {
+    public final T get(@NotNull String id) {
         return redisCache.get(id);
     }
 
-    @javax.annotation.Nullable
+    @Nullable
     @Override
-    public final T put(@javax.annotation.Nonnull String id, @javax.annotation.Nonnull T value) {
+    public final T put(@NotNull String id, @NotNull T value) {
         return redisCache.set(id, value, Duration.ofSeconds(lifetimeInSeconds));
     }
 
     @Nullable
     @Override
-    public final T remove(@Nonnull String id) {
+    public final T remove(@NotNull String id) {
         return redisCache.delete(id);
     }
 

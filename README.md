@@ -5,6 +5,13 @@ Ansattporten is used only if eJusticeNaturalPersonRole is requested.
 
 Cache for LightProtocol requests and responses. Must match names that the eidas-proxy uses.
 
+## Requirements
+
+To build and run the application you need:
+
+* Java 25
+* Maven
+
 ## Configuration
 
 Eidas-idporten-proxy is configured with the following environment variables:
