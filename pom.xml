@@ -31,8 +31,7 @@
         <icu4j.version>78.1</icu4j.version>
         <javax.annotation-api.version>1.3.2
         </javax.annotation-api.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
-        <jetbrains.annotations.version>13.0
-        </jetbrains.annotations.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
+        <jetbrains.annotations.version>26.0.2-1</jetbrains.annotations.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
         <jakarta.activation-api.version>2.1.4</jakarta.activation-api.version>
         <commons-lang.version>2.6</commons-lang.version>
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
