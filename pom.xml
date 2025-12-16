@@ -34,7 +34,7 @@
         <jetbrains.annotations.version>26.0.2-1</jetbrains.annotations.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
         <jakarta.activation-api.version>2.1.4</jakarta.activation-api.version>
         <commons-lang.version>2.6</commons-lang.version>
-        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
         <nimbus-jose-jwt.version>10.6</nimbus-jose-jwt.version>
     </properties>
     <dependencies>
