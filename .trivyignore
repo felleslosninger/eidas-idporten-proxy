@@ -1,2 +1,3 @@
 # trivyignore
-CVE-2025-61729 #stdlib go
+CVE-2025-61726 # stdlib net/url
+CVE-2025-61728 # stdlib archive/zip
