@@ -194,7 +194,7 @@ class SpecificProxyServiceTest {
         assertEquals("req-1", lr.getInResponseToId());
         assertEquals("yes", lr.getConsent());
         assertEquals("subject-123", lr.getSubject());
-        assertEquals("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", lr.getSubjectNameIdFormat());
+        assertEquals("urn:oasis:names:tc:SAML:2.0:nameid-format:transient", lr.getSubjectNameIdFormat());
         assertEquals("http://eidas.europa.eu/LoA/substantial", lr.getLevelOfAssurance());
 
         // then: status success
