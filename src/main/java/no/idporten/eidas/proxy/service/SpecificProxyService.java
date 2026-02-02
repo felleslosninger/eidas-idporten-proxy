@@ -42,7 +42,7 @@ public class SpecificProxyService {
 
     private static final String BIRTH_DATE_CLAIM = "birth_date";
     private static final String PID_CLAIM = "pid";
-    private static final String URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_PERSISTENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
+    private static final String URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_TRANSIENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
     private static final String NO_COUNTRY_CODE = "NO";
 
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
@@ -95,7 +95,7 @@ public class SpecificProxyService {
                 .levelOfAssurance(acr.getValue())
                 .issuer(oidcIntegrationService.getIssuer(idp))
                 .subject(userInfo.getSubject().getValue())
-                .subjectNameIdFormat(URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_PERSISTENT)
+                .subjectNameIdFormat(URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_TRANSIENT)
                 .status(Status.builder().statusCode(EIDASStatusCode.SUCCESS_URI.getValue()).failure(false).statusMessage("ok").build())
                 .inResponseToId(lightRequest.getId())
                 .relayState(lightRequest.getRelayState());
