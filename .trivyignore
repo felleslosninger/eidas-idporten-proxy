@@ -1,3 +1,4 @@
 # trivyignore
 CVE-2025-61726 # stdlib net/url
 CVE-2025-61728 # stdlib archive/zip
+CVE-2025-68121 #stdlib cryptp/tls
