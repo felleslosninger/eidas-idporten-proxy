@@ -1,11 +1,11 @@
 package no.idporten.eidas.proxy.integration.idp.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.idporten.sdk.oidcserver.protocol.AuthorizationDetail;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.util.List;

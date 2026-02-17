@@ -1,9 +1,11 @@
 package no.idporten.eidas.proxy.integration.idp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.shaded.gson.internal.LinkedTreeMap;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationResponse;
+import com.nimbusds.oauth2.sdk.AuthorizationSuccessResponse;
+import com.nimbusds.oauth2.sdk.ResponseType;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.PrivateKeyJWT;
 import com.nimbusds.oauth2.sdk.id.ClientID;
@@ -13,11 +15,9 @@ import com.nimbusds.oauth2.sdk.rar.AuthorizationDetail;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.ACR;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
-import eu.eidas.auth.commons.light.ILightRequest;
 import no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties;
 import no.idporten.eidas.proxy.integration.idp.exceptions.OAuthException;
 import no.idporten.eidas.proxy.integration.specificcommunication.caches.CorrelatedRequestHolder;
-import no.idporten.eidas.proxy.integration.specificcommunication.service.OIDCRequestStateParams;
 import no.idporten.eidas.proxy.jwt.ClientAssertionGenerator;
 import no.idporten.eidas.proxy.service.IDPSelector;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.util.*;
@@ -35,10 +36,9 @@ import static no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService.*;
 import static no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties.RESOURCE;
 import static no.idporten.eidas.proxy.integration.idp.config.OIDCIntegrationProperties.TYPE;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class OIDCIntegrationServiceTest {
     @Mock
     private OIDCProviders oidcProviders;
@@ -60,9 +60,9 @@ class OIDCIntegrationServiceTest {
 
     @BeforeEach
     public void setup() {
-        when(oidcProviders.get(IDPSelector.IDPORTEN)).thenReturn(oidcProvider);
-        when(oidcProvider.getMetadata()).thenReturn(oidcProviderMetadata);
-        when(oidcProvider.getProperties()).thenReturn(oidcIntegrationProperties);
+        lenient().when(oidcProviders.get(IDPSelector.IDPORTEN)).thenReturn(oidcProvider);
+        lenient().when(oidcProvider.getMetadata()).thenReturn(oidcProviderMetadata);
+        lenient().when(oidcProvider.getProperties()).thenReturn(oidcIntegrationProperties);
     }
 
 
@@ -70,10 +70,7 @@ class OIDCIntegrationServiceTest {
     @DisplayName("Test client authentication with private key JWT")
     void testClientAuthenticationPrivateKeyJWT() throws Exception {
         ClientAssertionGenerator mockClientAssertionGenerator = mock(ClientAssertionGenerator.class);
-        when(clientAssertionGenerator.isPresent()).thenReturn(true);
         when(clientAssertionGenerator.get()).thenReturn(mockClientAssertionGenerator);
-        when(oidcIntegrationProperties.getClientId()).thenReturn("testClientId");
-        when(oidcIntegrationProperties.getIssuer()).thenReturn(new URI("https://example.com"));
         when(oidcIntegrationProperties.getClientAuthMethod()).thenReturn("private_key_jwt");
         when(mockClientAssertionGenerator.create(IDPSelector.IDPORTEN)).thenReturn(mock(PrivateKeyJWT.class));
 
@@ -92,9 +89,6 @@ class OIDCIntegrationServiceTest {
         when(authorizationResponse.toSuccessResponse()).thenReturn(successResponse);
 
         CorrelatedRequestHolder cachedRequest = mock(CorrelatedRequestHolder.class);
-        when(cachedRequest.getiLightRequest()).thenReturn(mock(ILightRequest.class));
-        when(cachedRequest.getAuthenticationRequest()).thenReturn(mock(OIDCRequestStateParams.class));
-
         assertDoesNotThrow(() -> oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest));
 
     }
@@ -107,12 +101,6 @@ class OIDCIntegrationServiceTest {
         when(authorizationResponse.indicatesSuccess()).thenReturn(false);
 
         CorrelatedRequestHolder cachedRequest = mock(CorrelatedRequestHolder.class);
-        when(cachedRequest.getiLightRequest()).thenReturn(mock(ILightRequest.class));
-        when(cachedRequest.getAuthenticationRequest()).thenReturn(mock(OIDCRequestStateParams.class));
-
-        AuthorizationErrorResponse errorResponse = mock(AuthorizationErrorResponse.class);
-        when(errorResponse.getErrorObject()).thenReturn(new com.nimbusds.oauth2.sdk.ErrorObject("error"));
-        when(authorizationResponse.indicatesSuccess()).thenReturn(false);
 
         assertThrows(OAuthException.class, () -> oidcIntegrationService.getAuthorizationCode(authorizationResponse, cachedRequest));
     }
@@ -152,7 +140,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("the authorization details claim must be parsed correctly")
-    void parsesAuthorizationDetailsClaim() throws Exception {
+    void parsesAuthorizationDetailsClaim() {
         net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
         ad.put(TYPE, "altinn");
         ad.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
@@ -165,7 +153,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("should set eJustice role to VIP1 when VIP1 resource is present")
-    void setsVip1WhenVip1ResourcePresent() throws Exception {
+    void setsVip1WhenVip1ResourcePresent() {
         net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
         ad.put(TYPE, "altinn");
         ad.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_1_TILGANG);
@@ -181,7 +169,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("should set eJustice role to VIP2 when VIP2 resource is present")
-    void setsVip2WhenVip2ResourcePresent() throws Exception {
+    void setsVip2WhenVip2ResourcePresent()  {
         net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
         ad.put(TYPE, "altinn");
         ad.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG);
@@ -197,7 +185,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("should prefer VIP1 when both VIP1 and VIP2 resources are present")
-    void prefersVip1WhenBothPresent() throws Exception {
+    void prefersVip1WhenBothPresent()  {
         net.minidev.json.JSONObject ad1 = new net.minidev.json.JSONObject();
         ad1.put(TYPE, "altinn");
         ad1.put(RESOURCE, URN_ALTINN_RESOURCE_BORIS_VIP_2_TILGANG);
@@ -218,7 +206,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("should return null when no relevant Altinn resource is present")
-    void returnsNullWhenNoRelevantResource() throws Exception {
+    void returnsNullWhenNoRelevantResource()  {
         net.minidev.json.JSONObject ad = new net.minidev.json.JSONObject();
         ad.put(TYPE, "altinn");
         ad.put(RESOURCE, "urn:altinn:resource:unrelated");
@@ -234,7 +222,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("should return null when no AuthorizationDetails is present")
-    void returnsNullWhenNoAuthorizationDetails() throws Exception {
+    void returnsNullWhenNoAuthorizationDetails()  {
 
         JWTClaimsSet claims = claimsWithAuthorizationDetails(null);
 
@@ -248,7 +236,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("parses authorization_details from List<LinkedTreeMap> and extracts VIP1 role")
-    void parsesFromLinkedTreeMapList() throws Exception {
+    void parsesFromLinkedTreeMapList()  {
         List<Map<String, Object>> adList = new ArrayList<>();
         Map<String, Object> m = new LinkedTreeMap<>();
         m.put(TYPE, "altinn");
@@ -268,7 +256,7 @@ class OIDCIntegrationServiceTest {
 
     @Test
     @DisplayName("parses authorization_details from List<LinkedHashMap> and extracts VIP1 role")
-    void parsesFromLinkedHashMapList() throws Exception {
+    void parsesFromLinkedHashMapList()  {
         List<Map<String, Object>> adList = new ArrayList<>();
         Map<String, Object> m = new LinkedHashMap<>();
         m.put(TYPE, "altinn");

@@ -1,6 +1,5 @@
 package no.idporten.eidas.proxy.integration.idp.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,6 +14,7 @@ import no.idporten.eidas.proxy.crypto.KeystoreProperties;
 import no.idporten.sdk.oidcserver.protocol.AuthorizationDetail;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.util.Collections;
