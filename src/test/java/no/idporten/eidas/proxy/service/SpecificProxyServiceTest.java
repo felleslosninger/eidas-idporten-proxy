@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
@@ -26,10 +26,9 @@ import static no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService.E_J
 import static no.idporten.eidas.proxy.service.EidasAttributeNames.E_JUSTICE_NATURAL_PERSON_ROLE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class SpecificProxyServiceTest {
 
     @Mock
@@ -52,8 +51,8 @@ class SpecificProxyServiceTest {
 
     @BeforeEach
     void setup() {
-        when(oidcIntegrationService.getIssuer(any())).thenReturn("Issuer");
-        when(mockLightRequest.getRelayState()).thenReturn("relay123");
+        lenient().when(oidcIntegrationService.getIssuer(any())).thenReturn("Issuer");
+        lenient().when(mockLightRequest.getRelayState()).thenReturn("relay123");
     }
 
     @Test
@@ -76,7 +75,7 @@ class SpecificProxyServiceTest {
                 .build();
 
         OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
-        when(mockOidcIntegrationService.getIssuer(IDPSelector.IDPORTEN)).thenReturn("http://myjunit");
+
         LightResponse lightResponse = specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
         assertNotNull(lightResponse);
     }

@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -64,9 +64,6 @@ class ProxyServiceRequestControllerTest {
 
     private final static String lightTokenId = "mockedLightTokenId";
 
-    private ILightRequest mockLightRequest;
-    private State state;
-
     @BeforeAll
     static void setup() throws SpecificProxyException {
         String tokenBase64 = "mockedTokenBase64";
@@ -79,8 +76,8 @@ class ProxyServiceRequestControllerTest {
     @BeforeEach
     void setupEach() {
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
-        mockLightRequest = mock(ILightRequest.class);
-        state = new State("123q");
+        ILightRequest mockLightRequest = mock(ILightRequest.class);
+        State state = new State("123q");
         when(mockLightRequest.getRelayState()).thenReturn("relayState");
         CorrelatedRequestHolder correlatedRequestHolder = new CorrelatedRequestHolder(mockLightRequest, mock(OIDCRequestStateParams.class));
         when(specificProxyService.getCachedRequest(state)).thenReturn(correlatedRequestHolder);
