@@ -22,7 +22,7 @@
         <idporten-metric-constants.version>1.4.5</idporten-metric-constants.version>
         <oidc-server.version>2.7.5</oidc-server.version>
         <idporten-actuator-starter.version>3.0.0</idporten-actuator-starter.version>
-        <nimbus.oauth2-oidc-sdk.version>11.32</nimbus.oauth2-oidc-sdk.version>
+        <nimbus.oauth2-oidc-sdk.version>11.34</nimbus.oauth2-oidc-sdk.version>
         <idporten-audit.version>3.0.0</idporten-audit.version>
         <maven.compiler.proc>full</maven.compiler.proc>
         <eidas.version>2.9.0</eidas.version>
