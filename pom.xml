@@ -22,8 +22,8 @@
         <idporten-metric-constants.version>1.4.5</idporten-metric-constants.version>
         <oidc-server.version>2.7.5</oidc-server.version>
         <idporten-actuator-starter.version>3.0.0</idporten-actuator-starter.version>
-        <nimbus.oauth2-oidc-sdk.version>11.32</nimbus.oauth2-oidc-sdk.version>
-        <idporten-audit.version>3.0.0</idporten-audit.version>
+        <nimbus.oauth2-oidc-sdk.version>11.34</nimbus.oauth2-oidc-sdk.version>
+        <idporten-audit.version>4.0.0</idporten-audit.version>
         <maven.compiler.proc>full</maven.compiler.proc>
         <eidas.version>2.9.0</eidas.version>
         <icu4j-charset.version>78.2</icu4j-charset.version>
@@ -31,11 +31,12 @@
         <icu4j.version>78.2</icu4j.version>
         <javax.annotation-api.version>1.3.2
         </javax.annotation-api.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
-        <jetbrains.annotations.version>26.0.2-1</jetbrains.annotations.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
+        <jetbrains.annotations.version>26.1.0
+        </jetbrains.annotations.version> <!-- when eidas libs use jakarta, remove all javax workarounds-->
         <jakarta.activation-api.version>2.1.4</jakarta.activation-api.version>
         <commons-lang.version>2.6</commons-lang.version>
         <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
-        <nimbus-jose-jwt.version>10.7</nimbus-jose-jwt.version>
+        <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
         <maven.compiler.proc>full</maven.compiler.proc>
     </properties>
     <dependencies>
