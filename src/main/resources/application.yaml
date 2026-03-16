@@ -75,6 +75,7 @@ eidas:
     idporten:
       scopes:
         - openid
+        - profile
         - eidas:mds
       connect-timeout-millis: 500
       read-timeout-millis: 500
@@ -83,6 +84,7 @@ eidas:
     ansattporten:
       scopes:
         - openid
+        - profile
         - eidas:mds
       connect-timeout-millis: 500
       read-timeout-millis: 500
