@@ -78,7 +78,7 @@ public class IDPCallback {
             UserInfo userInfo = oidcIntegrationService.getUserInfo(idp, tokens);
 
             ILevelOfAssurance acrClaim = getAcrClaim(idp, tokens.getIDToken().getJWTClaimsSet(), cachedRequest);
-            LightResponse lightResponse = specificProxyService.getLightResponse(idp, userInfo, cachedRequest.getiLightRequest(), acrClaim);
+            LightResponse lightResponse = specificProxyService.getLightResponse(idp, userInfo, tokens.getIDToken().getJWTClaimsSet(), cachedRequest.getiLightRequest(), acrClaim);
             auditService.auditLightResponse(lightResponse, cachedRequest.getAuthenticationRequest().getRequestTraceId(), idp);
             String storeBinaryLightTokenResponseBase64 = specificProxyService.createStoreBinaryLightTokenResponseBase64(lightResponse);
             FormPostResponse formPostResponse = new FormPostResponse(specificProxyService.getEuProxyRedirectUri(),

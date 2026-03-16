@@ -1,5 +1,6 @@
 package no.idporten.eidas.proxy.service;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.id.State;
 import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
@@ -26,6 +27,7 @@ import no.idporten.eidas.proxy.logging.MDCFilter;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +46,8 @@ public class SpecificProxyService {
     private static final String PID_CLAIM = "pid";
     private static final String URN_OASIS_NAMES_TC_SAML_2_0_NAMEID_FORMAT_TRANSIENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient";
     private static final String NO_COUNTRY_CODE = "NO";
+    private static final String FAMILY_NAME = "family_name";
+    private static final String GIVEN_NAME = "given_name";
 
     private final SpecificCommunicationServiceImpl specificCommunicationServiceImpl;
     private final OIDCRequestCache oidcRequestCache;
@@ -86,7 +90,7 @@ public class SpecificProxyService {
         return correlatedRequestHolder;
     }
 
-    public LightResponse getLightResponse(String idp, UserInfo userInfo, ILightRequest lightRequest, ILevelOfAssurance acr) {
+    public LightResponse getLightResponse(String idp, UserInfo userInfo, JWTClaimsSet jwtClaimsSet, ILightRequest lightRequest, ILevelOfAssurance acr) throws ParseException {
 
         LightResponse.LightResponseBuilder lightResponseBuilder = LightResponse.builder()
                 .id(UUID.randomUUID().toString())
@@ -101,9 +105,13 @@ public class SpecificProxyService {
                 .relayState(lightRequest.getRelayState());
         if (StringUtils.isNotEmpty(userInfo.getFamilyName())) {
             lightResponseBuilder.attribute(new Attribute(FAMILY_NAME_EIDAS, List.of(userInfo.getFamilyName())));
+        } else if (StringUtils.isNotEmpty(jwtClaimsSet.getClaimAsString(FAMILY_NAME))) {
+            lightResponseBuilder.attribute(new Attribute(FAMILY_NAME_EIDAS, List.of(jwtClaimsSet.getClaimAsString(FAMILY_NAME))));
         }
         if (StringUtils.isNotEmpty(userInfo.getGivenName())) {
             lightResponseBuilder.attribute(new Attribute(FIRST_NAME_EIDAS, List.of(userInfo.getGivenName())));
+        } else if (StringUtils.isNotEmpty(jwtClaimsSet.getClaimAsString(GIVEN_NAME))) {
+            lightResponseBuilder.attribute(new Attribute(FIRST_NAME_EIDAS, List.of(jwtClaimsSet.getClaimAsString(GIVEN_NAME))));
         }
         if (StringUtils.isNotEmpty(userInfo.getStringClaim(BIRTH_DATE_CLAIM))) {
             lightResponseBuilder.attribute(new Attribute(DATE_OF_BIRTH_EIDAS, List.of(userInfo.getStringClaim(BIRTH_DATE_CLAIM))));

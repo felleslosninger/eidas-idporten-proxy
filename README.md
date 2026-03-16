@@ -19,6 +19,20 @@ eidas.acr.supported-acr-values - Eidas ACR values supported by the eIDAS proxy. 
 in subsequent order
 eidas.acr.acr-value-map - maps ipdorten acr level to eidas acr levels.
 
+## Claim Population
+
+The proxy maps OIDC claims to eIDAS attributes in the LightProtocol response.
+
+### Name Claims (Family and Given Name)
+
+The proxy attempts to populate `family_name` and `given_name` from the following sources, in order of priority:
+
+1. `UserInfo` endpoint response.
+2. `ID Token` (JWT claims) if the claims are missing from the `UserInfo` response.
+
+This ensures that the user's name is included in the eIDAS response even if it's only present in one of these OIDC
+sources.
+
 NB! The client_id for the proxy must be added in all the environments as a trusted-onbehalfof-clients of for
 client-sync.
 
