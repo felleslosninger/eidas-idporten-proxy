@@ -107,7 +107,7 @@ class IDPCallbackTest {
         when(lightResponse.getRelayState()).thenReturn("abc");
         when(oidcIntegrationService.getUserInfo(eq(IDPSelector.IDPORTEN), any())).thenReturn(userInfo);
 
-        when(specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(eq(IDPSelector.IDPORTEN), eq(userInfo), any(), eq(mockLightRequest), eq(levelOfAssurance))).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
@@ -138,10 +138,10 @@ class IDPCallbackTest {
         LightResponse lightResponse = mock(LightResponse.class);
         when(lightResponse.getRelayState()).thenReturn("abc");
         when(oidcIntegrationService.getUserInfo(eq(IDPSelector.IDPORTEN), any())).thenReturn(userInfo);
-        when(specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(eq(IDPSelector.IDPORTEN), eq(userInfo), any(), eq(mockLightRequest), eq(levelOfAssurance))).thenReturn(lightResponse);
         when(specificProxyService.getEuProxyRedirectUri()).thenReturn("http://junit");
 
-        when(specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, mockLightRequest, levelOfAssurance)).thenReturn(lightResponse);
+        when(specificProxyService.getLightResponse(eq(IDPSelector.IDPORTEN), eq(userInfo), any(), eq(mockLightRequest), eq(levelOfAssurance))).thenReturn(lightResponse);
 
         mockMvc.perform(get("http://junit.no/idpcallback?code=123456&state=123q"))
                 .andExpect(status().is2xxSuccessful())

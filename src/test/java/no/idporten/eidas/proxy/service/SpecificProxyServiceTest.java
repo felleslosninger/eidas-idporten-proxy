@@ -1,5 +1,6 @@
 package no.idporten.eidas.proxy.service;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.oauth2.sdk.id.Subject;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import eu.eidas.auth.commons.EIDASStatusCode;
@@ -26,7 +27,7 @@ import static no.idporten.eidas.proxy.integration.idp.OIDCIntegrationService.E_J
 import static no.idporten.eidas.proxy.service.EidasAttributeNames.E_JUSTICE_NATURAL_PERSON_ROLE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class SpecificProxyServiceTest {
@@ -57,7 +58,7 @@ class SpecificProxyServiceTest {
 
     @Test
     @DisplayName("when buildLightResponse then return LightResponse without validation errors")
-    void buildLightResponse() throws SpecificProxyException {
+    void buildLightResponse() throws Exception {
         UserInfo userInfo = new UserInfo(new Subject("123456789"));
 
         // Populate standard claims
@@ -74,9 +75,7 @@ class SpecificProxyServiceTest {
                 .citizenCountryCode("NO")
                 .build();
 
-        OIDCIntegrationService mockOidcIntegrationService = mock(OIDCIntegrationService.class);
-
-        LightResponse lightResponse = specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
+        LightResponse lightResponse = specificProxyService.getLightResponse(IDPSelector.IDPORTEN, userInfo, new JWTClaimsSet.Builder().build(), lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
         assertNotNull(lightResponse);
     }
 
@@ -119,7 +118,7 @@ class SpecificProxyServiceTest {
 
     @Test
     @DisplayName("should include E_JUSTICE_NATURAL_PERSON_ROLE attribute when role VIP1 claim is present")
-    void includesEJusticeAttributeWhenVip1ClaimPresent() {
+    void includesEJusticeAttributeWhenVip1ClaimPresent() throws Exception {
         UserInfo userInfo = new UserInfo(new Subject("sub"));
         userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, "VIP1");
 
@@ -131,7 +130,7 @@ class SpecificProxyServiceTest {
                 .citizenCountryCode("NO")
                 .build();
 
-        LightResponse lr = specificProxyService.getLightResponse(IDPSelector.ANSATTPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
+        LightResponse lr = specificProxyService.getLightResponse(IDPSelector.ANSATTPORTEN, userInfo, new JWTClaimsSet.Builder().build(), lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
         Set<String> attributeNames = lr.getRequestedAttributesAsStringSet();
 
         assertTrue(attributeNames.contains(E_JUSTICE_NATURAL_PERSON_ROLE));
@@ -139,7 +138,7 @@ class SpecificProxyServiceTest {
 
     @Test
     @DisplayName("should include E_JUSTICE_NATURAL_PERSON_ROLE attribute when role VIP2 claim is present")
-    void includesEJusticeAttributeWhenVip2ClaimPresent() {
+    void includesEJusticeAttributeWhenVip2ClaimPresent() throws Exception {
         UserInfo userInfo = new UserInfo(new Subject("sub"));
         userInfo.setClaim(E_JUSTICE_NATURAL_PERSON_ROLE_CLAIM, "VIP2");
 
@@ -151,7 +150,7 @@ class SpecificProxyServiceTest {
                 .citizenCountryCode("NO")
                 .build();
 
-        LightResponse lr = specificProxyService.getLightResponse(IDPSelector.ANSATTPORTEN, userInfo, lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
+        LightResponse lr = specificProxyService.getLightResponse(IDPSelector.ANSATTPORTEN, userInfo, new JWTClaimsSet.Builder().build(), lightRequest, LevelOfAssurance.fromString(LevelOfAssurance.EIDAS_LOA_LOW));
         Set<String> attributeNames = lr.getRequestedAttributesAsStringSet();
 
         assertTrue(attributeNames.contains(E_JUSTICE_NATURAL_PERSON_ROLE));
@@ -159,7 +158,7 @@ class SpecificProxyServiceTest {
 
     @Test
     @DisplayName("getLightResponse should populate core fields and all supported attributes when claims exist")
-    void getLightResponse_populatesAllFieldsAndAttributes() {
+    void getLightResponse_populatesAllFieldsAndAttributes() throws Exception {
         // Given
         UserInfo userInfo = new UserInfo(new Subject("subject-123"));
         userInfo.setGivenName("Ada");
@@ -180,7 +179,7 @@ class SpecificProxyServiceTest {
         LightResponse lr = specificProxyService.getLightResponse(
                 IDPSelector.IDPORTEN,
                 userInfo,
-                lightRequest,
+                new JWTClaimsSet.Builder().build(), lightRequest,
                 no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance.fromString(
                         no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL)
         );
@@ -209,6 +208,42 @@ class SpecificProxyServiceTest {
         assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.DATE_OF_BIRTH_EIDAS));
         assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.PID_EIDAS));
         assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.E_JUSTICE_NATURAL_PERSON_ROLE));
+    }
+
+    @Test
+    @DisplayName("getLightResponse should use name claims from idtoken when not present in userinfo")
+    void getLightResponse_usesNamesFromIdToken() throws Exception {
+        // Given
+        UserInfo userInfo = new UserInfo(new Subject("subject-123"));
+        // names are NOT in UserInfo
+
+        JWTClaimsSet idToken = new JWTClaimsSet.Builder()
+                .claim("given_name", "John")
+                .claim("family_name", "Doe")
+                .build();
+
+        ILightRequest lightRequest = LightRequest.builder()
+                .id("req-1")
+                .issuer("issuer")
+                .levelOfAssurance("http://eidas.europa.eu/LoA/substantial")
+                .relayState("relay-xyz")
+                .citizenCountryCode("NO")
+                .build();
+
+        // When
+        LightResponse lr = specificProxyService.getLightResponse(
+                IDPSelector.IDPORTEN,
+                userInfo,
+                idToken,
+                lightRequest,
+                no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance.fromString(
+                        no.idporten.eidas.proxy.lightprotocol.messages.LevelOfAssurance.EIDAS_LOA_SUBSTANTIAL)
+        );
+
+        // Then
+        Set<String> attrs = lr.getRequestedAttributesAsStringSet();
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.FIRST_NAME_EIDAS));
+        assertTrue(attrs.contains(no.idporten.eidas.proxy.service.EidasAttributeNames.FAMILY_NAME_EIDAS));
     }
 
 
