@@ -26,7 +26,7 @@
         <idporten-audit.version>4.0.0</idporten-audit.version>
         <maven.compiler.proc>full</maven.compiler.proc>
         <eidas.version>2.9.0</eidas.version>
-        <icu4j-charset.version>78.2</icu4j-charset.version>
+        <icu4j-charset.version>78.3</icu4j-charset.version>
         <jaxb-runtime.version>4.0.6</jaxb-runtime.version>
         <icu4j.version>78.2</icu4j.version>
         <javax.annotation-api.version>1.3.2
