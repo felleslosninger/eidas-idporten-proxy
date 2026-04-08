@@ -71,7 +71,6 @@ eidas:
       low: 'http://eidas.europa.eu/LoA/low'
       substantial: 'http://eidas.europa.eu/LoA/substantial'
       high: 'http://eidas.europa.eu/LoA/high'
-    error-message-no-rights: 'The required permissions to access this service is missing for the current user (eID).'
   oidc-integrations:
     idporten:
       scopes:
