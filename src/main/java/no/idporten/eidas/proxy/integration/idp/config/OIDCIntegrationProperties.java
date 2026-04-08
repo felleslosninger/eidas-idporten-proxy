@@ -59,7 +59,7 @@ public class OIDCIntegrationProperties {
     private int jwksCacheLifetimeMinutes = 60;
 
     private List<AuthorizationDetail> authorizationDetails;
-    private URI metadataUri;
+
     private KeystoreProperties keystore;
 
     @JsonIgnore
@@ -68,6 +68,8 @@ public class OIDCIntegrationProperties {
     @Getter(AccessLevel.NONE)
     private Set<String> allowedTypeResourceList;
 
+    //only for testing, to support loading dummy metadata from a file instead of resolving from issuer
+    private URI metadataUri;
 
     /**
      * Returns an immutable set of allowed type:resource pairs derived from configuration.

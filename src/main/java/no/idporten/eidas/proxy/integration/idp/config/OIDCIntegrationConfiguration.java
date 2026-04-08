@@ -25,7 +25,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,11 +53,13 @@ public class OIDCIntegrationConfiguration {
             try {
                 // Resolve metadata per provider
                 OIDCProviderMetadata metadata;
-                if (props.getMetadataUri() != null) {
+                if (props.getMetadataUri() != null) {//to support testing
                     Resource metadataResource = resourceLoader.getResource(props.getMetadataUri().toString());
-                    log.info("Reading OpenID Connect metadata from {}", metadataResource);
-                    metadata = OIDCProviderMetadata.parse(new String(metadataResource.getInputStream().readAllBytes()));
-                } else { //to support testing
+                    log.info("Reading dummy OpenID Connect metadata from {}", metadataResource);
+                    try (InputStream is = metadataResource.getInputStream()) {
+                        metadata = OIDCProviderMetadata.parse(new String(is.readAllBytes(), StandardCharsets.UTF_8));
+                    }
+                } else {
                     metadata = OIDCProviderMetadata.resolve(
                             issuer,
                             props.getConnectTimeoutMillis(),
