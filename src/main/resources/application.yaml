@@ -71,6 +71,7 @@ eidas:
       low: 'http://eidas.europa.eu/LoA/low'
       substantial: 'http://eidas.europa.eu/LoA/substantial'
       high: 'http://eidas.europa.eu/LoA/high'
+    error-message-no-rights: 'The required permissions to access this service is missing for the current user (eID).'
   oidc-integrations:
     idporten:
       scopes:
@@ -94,10 +95,10 @@ eidas:
       authorization-details:
         - type: 'ansattporten:altinn:resource'
           resource: 'urn:altinn:resource:boris---vip1-tilgang'
-          representation_is_required: true
+          representation_is_required: false
         - type: 'ansattporten:altinn:resource'
           resource: 'urn:altinn:resource:boris---vip2-tilgang'
-          representation_is_required: true
+          representation_is_required: false
 digdir:
   audit:
     application-name: ${spring.application.name}
