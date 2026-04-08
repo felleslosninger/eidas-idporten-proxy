@@ -111,7 +111,6 @@
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j-charset</artifactId>
-            <version>${icu4j-charset.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
