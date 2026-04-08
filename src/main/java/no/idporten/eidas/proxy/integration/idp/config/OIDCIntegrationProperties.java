@@ -59,7 +59,7 @@ public class OIDCIntegrationProperties {
     private int jwksCacheLifetimeMinutes = 60;
 
     private List<AuthorizationDetail> authorizationDetails;
-
+    private URI metadataUri;
     private KeystoreProperties keystore;
 
     @JsonIgnore

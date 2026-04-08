@@ -39,7 +39,7 @@ class OIDCIntegrationConfigurationTest {
         OIDCIntegrationPropertiesMap propertiesMap = new OIDCIntegrationPropertiesMap();
         propertiesMap.setOidcIntegrations(Collections.emptyMap());
 
-        OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration();
+        OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration(null);
         var providerMap = configuration.oidcProviderMap(propertiesMap);
 
         assertNotNull(providerMap);
@@ -52,7 +52,7 @@ class OIDCIntegrationConfigurationTest {
         OIDCProviderMetadata oidcProviderMetadata = mock(OIDCProviderMetadata.class);
         when(oidcProviderMetadata.getJWKSetURI()).thenReturn(new URI("https://example.com/jwks"));
 
-        OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration();
+        OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration(null);
         JWKSource<SecurityContext> remoteJWKSet = configuration.remoteJWKSet(properties, oidcProviderMetadata);
 
         assertNotNull(remoteJWKSet);
@@ -67,7 +67,7 @@ class OIDCIntegrationConfigurationTest {
         OIDCProviderMetadata oidcProviderMetadata = mock(OIDCProviderMetadata.class);
         when(oidcProviderMetadata.getIDTokenJWSAlgs()).thenReturn(Collections.singletonList(JWSAlgorithm.RS256));
         when(oidcProviderMetadata.getJWKSetURI()).thenReturn(URI.create("https://idporten.dev/jwks"));
-        OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration();
+        OIDCIntegrationConfiguration configuration = new OIDCIntegrationConfiguration(null);
         JWKSource<SecurityContext> remoteJWKSet = mock(JWKSource.class);
 
         IDTokenValidator idTokenValidator = configuration.idTokenValidator(properties, oidcProviderMetadata, remoteJWKSet);
