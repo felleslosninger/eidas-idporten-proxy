@@ -1,3 +1,1 @@
 # trivyignore
-CVE-2026-29062 # jackson-core
-GHSA-72hv-8253-57qq # jackson core

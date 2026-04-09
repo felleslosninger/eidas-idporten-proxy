@@ -21,9 +21,13 @@ import no.idporten.eidas.proxy.integration.idp.OIDCProviders;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +38,12 @@ import java.util.Map;
 @EnableConfigurationProperties(OIDCIntegrationPropertiesMap.class)
 public class OIDCIntegrationConfiguration {
 
+    private final ResourceLoader resourceLoader;
+
+    public OIDCIntegrationConfiguration(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
 
     @Bean
     public OIDCProviders oidcProviderMap(OIDCIntegrationPropertiesMap propertiesMap) {
@@ -42,10 +52,19 @@ public class OIDCIntegrationConfiguration {
             Issuer issuer = new Issuer(props.getIssuer());
             try {
                 // Resolve metadata per provider
-                OIDCProviderMetadata metadata = OIDCProviderMetadata.resolve(
-                        issuer,
-                        props.getConnectTimeoutMillis(),
-                        props.getReadTimeoutMillis());
+                OIDCProviderMetadata metadata;
+                if (props.getMetadataUri() != null) {//to support testing
+                    Resource metadataResource = resourceLoader.getResource(props.getMetadataUri().toString());
+                    log.info("Reading dummy OpenID Connect metadata from {}", metadataResource);
+                    try (InputStream is = metadataResource.getInputStream()) {
+                        metadata = OIDCProviderMetadata.parse(new String(is.readAllBytes(), StandardCharsets.UTF_8));
+                    }
+                } else {
+                    metadata = OIDCProviderMetadata.resolve(
+                            issuer,
+                            props.getConnectTimeoutMillis(),
+                            props.getReadTimeoutMillis());
+                }
 
                 log.info("Read OpenID Connect metadata with configuration from issuer {}", issuer);
 

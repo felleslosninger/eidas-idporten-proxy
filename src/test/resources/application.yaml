@@ -75,7 +75,8 @@ eidas:
       read-timeout-millis: 5000
       jwks-cache-lifetime-minutes: 60
       jwks-cache-refresh-minutes: 5
-      issuer: https://idporten.dev
+      issuer: http://localhost:8080
+      metadata-uri: classpath:idporten-metadata.json
       redirect-uri: http://localhost:8080/idpcallback
       client-id: eidas-proxy-client-junit
       client-auth-method: client_secret_basic
@@ -88,7 +89,8 @@ eidas:
       read-timeout-millis: 5000
       jwks-cache-lifetime-minutes: 60
       jwks-cache-refresh-minutes: 5
-      issuer: https://idporten.dev
+      issuer: http://localhost:8080
+      metadata-uri: classpath:idporten-metadata.json
       redirect-uri: http://localhost:8080/idpcallback?idp=ansattporten
       client-id: eidas-proxy-ansattporten-client-junit
       client-auth-method: client_secret_basic
