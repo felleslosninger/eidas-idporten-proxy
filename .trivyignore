@@ -1,9 +1,2 @@
 # trivyignore
 GHSA-2m67-wjpj-xhg9 #jackson-core igjen. fixed i 3.1.1. sjekk ved idporten-log-audit-spring-boot-4-starter oppdatering
-# tomcat-embed-core issues fixed 11.0.21. ta med sb oppdatering
-CVE-2026-29145
-CVE-2026-24880
-CVE-2026-29129
-CVE-2026-29146
-CVE-2026-34483
-CVE-2026-34487
