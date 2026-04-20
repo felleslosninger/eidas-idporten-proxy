@@ -21,7 +21,7 @@
         <idporten-access-log.version>4.0.0</idporten-access-log.version>
         <idporten-metric-constants.version>1.4.5</idporten-metric-constants.version>
         <oidc-server.version>2.7.5</oidc-server.version>
-        <idporten-actuator-starter.version>3.0.0</idporten-actuator-starter.version>
+        <idporten-actuator-starter.version>3.1.0</idporten-actuator-starter.version>
         <nimbus.oauth2-oidc-sdk.version>11.37</nimbus.oauth2-oidc-sdk.version>
         <idporten-audit.version>4.0.0</idporten-audit.version>
         <maven.compiler.proc>full</maven.compiler.proc>
